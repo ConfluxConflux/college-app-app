@@ -1,0 +1,249 @@
+<!-- UC Activities & Awards -->
+<div x-show="tab === 'uc'">
+  <div class="level mb-3">
+    <div class="level-left">
+      <h2 class="title is-4 mb-0">UC Activities & Awards</h2>
+    </div>
+    <div class="level-right">
+      <a href="{% url 'activities:uc_add' %}" class="button is-primary is-small">+ Add UC Entry</a>
+    </div>
+  </div>
+  <div class="table-container">
+    <table class="table is-bordered is-hoverable is-fullwidth is-narrow">
+      <thead>
+        <tr>
+          <th style="width:30px">#</th>
+          <th>Name</th>
+          <th>Category</th>
+          <th>Background</th>
+          <th>Description</th>
+          <th>Grades</th>
+          <th>Hrs/wk</th>
+          <th>Wks/yr</th>
+          <th>Hub</th>
+          <th style="width:90px">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in uc_entries %}
+        <tr id="uc-{{ entry.pk }}">
+          <td class="has-text-grey">{{ forloop.counter }}</td>
+          <td><strong><a href="{% url 'activities:uc_edit' entry.pk %}" class="has-text-dark">{{ entry.name }}</a></strong></td>
+          <td><span class="tag is-info is-light">{{ entry.get_category_display }}</span></td>
+          <td class="is-size-7">{{ entry.background|truncatewords:12 }}</td>
+          <td class="is-size-7">{{ entry.description|truncatewords:15 }}</td>
+          <td class="is-size-7">
+            {% if entry.grade_9 %}9 {% endif %}{% if entry.grade_10 %}10 {% endif %}{% if entry.grade_11 %}11 {% endif %}{% if entry.grade_12 %}12{% endif %}
+          </td>
+          <td>{{ entry.hours_per_week }}</td>
+          <td>{{ entry.weeks_per_year }}</td>
+          <td class="is-size-7">
+            {% if entry.core_activity %}
+            <span class="tag is-light is-small" title="{{ entry.core_activity.name }}">{{ entry.core_activity.name|truncatewords:3 }}</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="buttons are-small">
+              <a href="{% url 'activities:uc_edit' entry.pk %}" class="button is-small is-info is-outlined">Edit</a>
+              <button class="button is-small is-danger is-outlined"
+                      hx-post="{% url 'activities:uc_delete' entry.pk %}"
+                      hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML"
+                      hx-confirm="Delete this UC entry?">&times;</button>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="10" class="has-text-centered has-text-grey py-4">No UC entries yet. Click "+ Add UC Entry" to get started.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Common App Activities -->
+<div x-show="tab === 'common_app'">
+  <div class="level mb-3">
+    <div class="level-left">
+      <h2 class="title is-4 mb-0">Common App Activities</h2>
+    </div>
+    <div class="level-right">
+      <a href="{% url 'activities:ca_add' %}" class="button is-primary is-small">+ Add Activity</a>
+    </div>
+  </div>
+  <div class="table-container">
+    <table class="table is-bordered is-hoverable is-fullwidth is-narrow">
+      <thead>
+        <tr>
+          <th style="width:30px">#</th>
+          <th>Type</th>
+          <th>Position <span class="has-text-grey is-size-7">(50ch)</span></th>
+          <th>Organization <span class="has-text-grey is-size-7">(100ch)</span></th>
+          <th>Description <span class="has-text-grey is-size-7">(150ch)</span></th>
+          <th>Grades</th>
+          <th>Timing</th>
+          <th>Hrs/wk</th>
+          <th>Hub</th>
+          <th style="width:90px">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for activity in common_app_activities %}
+        <tr id="ca-{{ activity.pk }}">
+          <td class="has-text-grey">{{ forloop.counter }}</td>
+          <td><span class="tag is-link is-light is-small">{{ activity.get_activity_type_display }}</span></td>
+          <td>{{ activity.position }}</td>
+          <td><strong><a href="{% url 'activities:ca_edit' activity.pk %}" class="has-text-dark">{{ activity.organization }}</a></strong></td>
+          <td class="is-size-7">{{ activity.description|truncatewords:12 }}</td>
+          <td class="is-size-7">
+            {% if activity.grade_9 %}9 {% endif %}{% if activity.grade_10 %}10 {% endif %}{% if activity.grade_11 %}11 {% endif %}{% if activity.grade_12 %}12{% endif %}
+          </td>
+          <td class="is-size-7">
+            {% if activity.timing_school %}School {% endif %}{% if activity.timing_breaks %}Breaks {% endif %}{% if activity.timing_all_year %}All year{% endif %}
+          </td>
+          <td>{{ activity.hours_per_week|default:"" }}</td>
+          <td class="is-size-7">
+            {% if activity.core_activity %}
+            <span class="tag is-light is-small">{{ activity.core_activity.name|truncatewords:3 }}</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="buttons are-small">
+              <a href="{% url 'activities:ca_edit' activity.pk %}" class="button is-small is-info is-outlined">Edit</a>
+              <button class="button is-small is-danger is-outlined"
+                      hx-post="{% url 'activities:ca_delete' activity.pk %}"
+                      hx-target="#ca-{{ activity.pk }}" hx-swap="outerHTML"
+                      hx-confirm="Delete this activity?">&times;</button>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="10" class="has-text-centered has-text-grey py-4">No Common App activities yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Common App Honors -->
+<div x-show="tab === 'honors'">
+  <div class="level mb-3">
+    <div class="level-left">
+      <h2 class="title is-4 mb-0">Common App Honors</h2>
+    </div>
+    <div class="level-right">
+      <a href="{% url 'activities:honor_add' %}" class="button is-primary is-small">+ Add Honor</a>
+    </div>
+  </div>
+  <div class="table-container">
+    <table class="table is-bordered is-hoverable is-fullwidth is-narrow">
+      <thead>
+        <tr>
+          <th style="width:30px">#</th>
+          <th>Title</th>
+          <th>Grades</th>
+          <th>Recognition Level</th>
+          <th>Hub</th>
+          <th style="width:90px">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for honor in common_app_honors %}
+        <tr id="honor-{{ honor.pk }}">
+          <td class="has-text-grey">{{ forloop.counter }}</td>
+          <td><strong><a href="{% url 'activities:honor_edit' honor.pk %}" class="has-text-dark">{{ honor.title }}</a></strong></td>
+          <td>
+            {% if honor.grade_9 %}9 {% endif %}{% if honor.grade_10 %}10 {% endif %}{% if honor.grade_11 %}11 {% endif %}{% if honor.grade_12 %}12{% endif %}
+          </td>
+          <td>
+            {% if honor.level_school %}<span class="tag is-small">School</span> {% endif %}
+            {% if honor.level_state_regional %}<span class="tag is-small is-info is-light">State/Regional</span> {% endif %}
+            {% if honor.level_national %}<span class="tag is-small is-warning">National</span> {% endif %}
+            {% if honor.level_international %}<span class="tag is-small is-success">International</span>{% endif %}
+          </td>
+          <td class="is-size-7">
+            {% if honor.core_activity %}
+            <span class="tag is-light is-small">{{ honor.core_activity.name|truncatewords:3 }}</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="buttons are-small">
+              <a href="{% url 'activities:honor_edit' honor.pk %}" class="button is-small is-info is-outlined">Edit</a>
+              <button class="button is-small is-danger is-outlined"
+                      hx-post="{% url 'activities:honor_delete' honor.pk %}"
+                      hx-target="#honor-{{ honor.pk }}" hx-swap="outerHTML"
+                      hx-confirm="Delete this honor?">&times;</button>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="has-text-centered has-text-grey py-4">No honors yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MIT Entries -->
+<div x-show="tab === 'mit'">
+  <div class="level mb-3">
+    <div class="level-left">
+      <h2 class="title is-4 mb-0">MIT Jobs, Activities & Distinctions</h2>
+    </div>
+    <div class="level-right">
+      <a href="{% url 'activities:mit_add' %}" class="button is-primary is-small">+ Add MIT Entry</a>
+    </div>
+  </div>
+  <div class="table-container">
+    <table class="table is-bordered is-hoverable is-fullwidth is-narrow">
+      <thead>
+        <tr>
+          <th style="width:30px">#</th>
+          <th>Category</th>
+          <th>Organization</th>
+          <th>Role / Award</th>
+          <th>Period</th>
+          <th>Hrs/wk</th>
+          <th>Description <span class="has-text-grey is-size-7">(40 words)</span></th>
+          <th>Hub</th>
+          <th style="width:90px">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in mit_entries %}
+        <tr id="mit-{{ entry.pk }}">
+          <td class="has-text-grey">{{ forloop.counter }}</td>
+          <td>
+            <span class="tag is-small {% if entry.category == 'job' %}is-dark{% elif entry.category == 'activity' %}is-info is-light{% elif entry.category == 'summer' %}is-warning is-light{% elif entry.category == 'scholastic' %}is-success is-light{% else %}is-light{% endif %}">
+              {{ entry.get_category_display }}
+            </span>
+          </td>
+          <td><strong><a href="{% url 'activities:mit_edit' entry.pk %}" class="has-text-dark">{{ entry.org_name }}</a></strong></td>
+          <td>{{ entry.role_award }}</td>
+          <td class="is-size-7">{{ entry.participation_period }}</td>
+          <td>{{ entry.hours_per_week|default:"" }}</td>
+          <td class="is-size-7">{{ entry.description|truncatewords:12 }}</td>
+          <td class="is-size-7">
+            {% if entry.core_activity %}
+            <span class="tag is-light is-small">{{ entry.core_activity.name|truncatewords:3 }}</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="buttons are-small">
+              <a href="{% url 'activities:mit_edit' entry.pk %}" class="button is-small is-info is-outlined">Edit</a>
+              <button class="button is-small is-danger is-outlined"
+                      hx-post="{% url 'activities:mit_delete' entry.pk %}"
+                      hx-target="#mit-{{ entry.pk }}" hx-swap="outerHTML"
+                      hx-confirm="Delete this MIT entry?">&times;</button>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" class="has-text-centered has-text-grey py-4">No MIT entries yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="content is-small has-text-grey mt-2">
+    <p>Slot limits: Jobs (5), Activities (4), Summer activities (6), Scholastic distinctions (5), Non-scholastic distinctions (5)</p>
+  </div>
+</div>

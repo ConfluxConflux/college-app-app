@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}{{ college.name }} - College App App{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="{% url 'colleges:list' %}">Colleges</a></li>
+    <li class="is-active"><a href="#">{{ college.name }}</a></li>
+  </ul>
+</nav>
+
+<h1 class="title">{{ college.name }}</h1>
+{% if college.apply_status %}
+<span class="tag is-medium {{ college.status_color }} is-light mb-4">{{ college.get_apply_status_display }}</span>
+{% endif %}
+
+<form method="post">
+  {% csrf_token %}
+
+  <div class="columns is-multiline">
+    <!-- Basic Info -->
+    <div class="column is-6">
+      <div class="box">
+        <h2 class="title is-5">Basic Info</h2>
+        {% for field in form %}
+          {% if field.name in 'name,apply_status,tier,acceptance_rate,collegevine_chance,location,app_platform,terms' %}
+          <div class="field">
+            <label class="label is-small">{{ field.label }}</label>
+            <div class="control">{{ field }}</div>
+            {% if field.errors %}<p class="help is-danger">{{ field.errors.0 }}</p>{% endif %}
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Deadlines -->
+    <div class="column is-6">
+      <div class="box">
+        <h2 class="title is-5">Deadlines</h2>
+        {% for field in form %}
+          {% if field.name in 'restrictive_ea,ea_deadline,ed1_deadline,ed2_deadline,rd_deadline,other_deadline' %}
+          <div class="field">
+            <label class="label is-small">{{ field.label }}</label>
+            <div class="control">{{ field }}</div>
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Financial -->
+    <div class="column is-6">
+      <div class="box">
+        <h2 class="title is-5">Financial</h2>
+        {% for field in form %}
+          {% if field.name in 'cost_of_attendance,estimated_financial_aid,estimated_net_cost,financial_aid_deadline,fafsa_required,css_profile_required' %}
+          <div class="field">
+            <label class="label is-small">{{ field.label }}</label>
+            <div class="control">
+              {% if field.name in 'fafsa_required,css_profile_required' %}
+                <label class="checkbox">{{ field }} {{ field.label }}</label>
+              {% else %}
+                {{ field }}
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Academics -->
+    <div class="column is-6">
+      <div class="box">
+        <h2 class="title is-5">Academics</h2>
+        {% for field in form %}
+          {% if field.name in 'requirements_style,intended_major,second_choice_major,third_choice_major' %}
+          <div class="field">
+            <label class="label is-small">{{ field.label }}</label>
+            <div class="control">{{ field }}</div>
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Application Details -->
+    <div class="column is-6">
+      <div class="box">
+        <h2 class="title is-5">Application Details</h2>
+        {% for field in form %}
+          {% if field.name in 'self_report_sat,interview,toured,portal_info' %}
+          <div class="field">
+            <label class="label is-small">{{ field.label }}</label>
+            <div class="control">{{ field }}</div>
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- People -->
+    <div class="column is-6">
+      <div class="box">
+        <h2 class="title is-5">People</h2>
+        {% for field in form %}
+          {% if field.name in 'known_students,known_faculty' %}
+          <div class="field">
+            <label class="label is-small">{{ field.label }}</label>
+            <div class="control">{{ field }}</div>
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="column is-12">
+      <div class="box">
+        <h2 class="title is-5">Notes</h2>
+        <div class="columns">
+          {% for field in form %}
+            {% if field.name in 'applicant_notes,parent_notes,random_notes' %}
+            <div class="column is-4">
+              <div class="field">
+                <label class="label is-small">{{ field.label }}</label>
+                <div class="control">{{ field }}</div>
+              </div>
+            </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="field is-grouped">
+    <div class="control">
+      <button type="submit" class="button is-primary">Save Changes</button>
+    </div>
+    <div class="control">
+      <a href="{% url 'colleges:list' %}" class="button is-light">Cancel</a>
+    </div>
+    <div class="control">
+      <button type="button" class="button is-danger is-outlined"
+              hx-post="{% url 'colleges:delete' college.pk %}"
+              hx-confirm="Delete {{ college.name }}? This cannot be undone."
+              hx-redirect="{% url 'colleges:list' %}">
+        Delete College
+      </button>
+    </div>
+  </div>
+</form>
+{% endblock %}

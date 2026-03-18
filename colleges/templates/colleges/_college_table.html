@@ -1,0 +1,34 @@
+<div class="table-container">
+  <table class="table is-bordered is-hoverable is-fullwidth is-narrow">
+    <thead>
+      <tr>
+        {% for field_name, field_label in table_fields %}
+        <th>
+          <a hx-get="{% url 'colleges:list' %}?sort={{ field_name }}&dir={% if sort == field_name and sort_dir == 'asc' %}desc{% else %}asc{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if platform_filter %}&platform={{ platform_filter }}{% endif %}{% if search %}&q={{ search }}{% endif %}"
+             hx-target="#college-table-wrapper"
+             hx-push-url="true"
+             class="has-text-dark"
+             style="text-decoration: none; white-space: nowrap;">
+            {{ field_label }}
+            {% if sort == field_name %}
+              {% if sort_dir == 'asc' %}&#9650;{% else %}&#9660;{% endif %}
+            {% endif %}
+          </a>
+        </th>
+        {% endfor %}
+        <th style="width: 80px;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for college in colleges %}
+        {% include "colleges/_college_row.html" %}
+      {% empty %}
+      <tr>
+        <td colspan="{{ table_fields|length|add:1 }}" class="has-text-centered has-text-grey py-5">
+          No colleges match your filters.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Supplements - College App App{% endblock %}
+
+{% block content %}
+<h1 class="title">Supplemental Essays</h1>
+<p class="subtitle">{{ essays.count }} essays tracked</p>
+
+<div class="table-container">
+  <table class="table is-bordered is-striped is-hoverable is-fullwidth">
+    <thead>
+      <tr>
+        <th>College</th>
+        <th>Category</th>
+        <th>Prompt</th>
+        <th>Status</th>
+        <th>Words</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for essay in essays %}
+      <tr>
+        <td>{{ essay.college.name }}</td>
+        <td>{{ essay.category.name|default:"—" }}</td>
+        <td>{{ essay.prompt|truncatewords:20 }}</td>
+        <td>
+          {% if essay.status %}
+          <span class="tag {{ essay.status_color }}">{{ essay.get_status_display }}</span>
+          {% else %}
+          —
+          {% endif %}
+        </td>
+        <td>
+          {{ essay.word_count }}{% if essay.word_limit %}/{{ essay.word_limit }}{% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5" class="has-text-centered has-text-grey">
+          No essays yet. Add colleges and their supplement prompts!
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

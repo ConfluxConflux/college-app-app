@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load activity_tags %}
+
+{% block title %}{{ title }} - College App App{% endblock %}
+
+{% block content %}
+<nav class="breadcrumb" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="{% url back_url %}{% if back_tab %}?tab={{ back_tab }}{% endif %}">Activities</a></li>
+    <li class="is-active"><a href="#">{{ title }}</a></li>
+  </ul>
+</nav>
+
+<div class="columns">
+  <div class="column {% if linked %}is-8{% else %}is-12{% endif %}">
+    <h1 class="title">{{ title }}</h1>
+
+    <form method="post" x-data="{
+      {% for field_name, limit in char_fields.items %}
+        {{ field_name }}: '{{ form.initial|default_if_none:"" }}',
+      {% endfor %}
+      {% for field_name, limit in word_fields.items %}
+        {{ field_name }}: '',
+      {% endfor %}
+    }">
+      {% csrf_token %}
+      <div class="box">
+        {% for field in form %}
+        <div class="field {% if field.name in 'grade_9,grade_10,grade_11,grade_12,timing_school,timing_breaks,timing_all_year,level_school,level_state_regional,level_national,level_international,is_academic,still_working,similar_in_college,fafsa_required,css_profile_required' %}is-inline{% endif %}">
+          {% if field.name in 'grade_9,grade_10,grade_11,grade_12,timing_school,timing_breaks,timing_all_year,level_school,level_state_regional,level_national,level_international,is_academic,still_working,similar_in_college' %}
+            <label class="checkbox">
+              {{ field }} {{ field.label }}
+            </label>
+          {% else %}
+            <label class="label is-small">
+              {{ field.label }}
+              {% if field.name in char_fields %}
+                <span class="char-counter"
+                      :class="{
+                        'is-over': $refs.{{ field.name }} && $refs.{{ field.name }}.value.length > {{ char_fields|get_limit:field.name }},
+                        'is-near': $refs.{{ field.name }} && $refs.{{ field.name }}.value.length > {{ char_fields|get_limit:field.name }} * 0.9
+                      }">
+                  (<span x-text="$refs.{{ field.name }} ? $refs.{{ field.name }}.value.length : 0">0</span>/{{ char_fields|get_limit:field.name }} chars)
+                </span>
+              {% endif %}
+              {% if field.name in word_fields %}
+                <span class="char-counter"
+                      :class="{
+                        'is-over': $refs.{{ field.name }} && $refs.{{ field.name }}.value.trim().split(/\s+/).filter(w => w).length > {{ word_fields|get_limit:field.name }}
+                      }">
+                  (<span x-text="$refs.{{ field.name }} && $refs.{{ field.name }}.value.trim() ? $refs.{{ field.name }}.value.trim().split(/\s+/).filter(w => w).length : 0">0</span>/{{ word_fields|get_limit:field.name }} words)
+                </span>
+              {% endif %}
+            </label>
+            <div class="control">
+              {% if field.name in char_fields or field.name in word_fields %}
+                {{ field|add_ref:field.name }}
+              {% else %}
+                {{ field }}
+              {% endif %}
+            </div>
+          {% endif %}
+          {% if field.errors %}<p class="help is-danger">{{ field.errors.0 }}</p>{% endif %}
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="field is-grouped">
+        <div class="control">
+          <button type="submit" class="button is-primary">Save</button>
+        </div>
+        <div class="control">
+          <a href="{% url back_url %}{% if back_tab %}?tab={{ back_tab }}{% endif %}" class="button is-light">Cancel</a>
+        </div>
+        {% if entry %}
+        <div class="control">
+          <button type="button" class="button is-danger is-outlined"
+                  onclick="if(confirm('Delete this entry?')) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '{% if back_tab == 'uc' %}{% url 'activities:uc_delete' entry.pk %}{% elif back_tab == 'common_app' %}{% url 'activities:ca_delete' entry.pk %}{% elif back_tab == 'honors' %}{% url 'activities:honor_delete' entry.pk %}{% elif back_tab == 'mit' %}{% url 'activities:mit_delete' entry.pk %}{% endif %}';
+                    const csrf = document.createElement('input'); csrf.type='hidden'; csrf.name='csrfmiddlewaretoken'; csrf.value='{{ csrf_token }}';
+                    form.appendChild(csrf); document.body.appendChild(form); form.submit();
+                  }">
+            Delete
+          </button>
+        </div>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  {% if linked %}
+  <div class="column is-4">
+    <div class="box">
+      <h2 class="title is-5">Also appears in</h2>
+      <p class="is-size-7 has-text-grey mb-3">This activity is linked across formats via the Activity Hub.</p>
+      {% for format_name, entry_name, url in linked %}
+      <div class="mb-2">
+        <span class="tag is-light">{{ format_name }}</span>
+        <a href="{{ url }}">{{ entry_name }}</a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

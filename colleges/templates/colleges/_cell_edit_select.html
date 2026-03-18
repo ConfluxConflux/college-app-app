@@ -1,0 +1,37 @@
+{% load college_tags %}
+<tr id="college-row-{{ college.pk }}" class="status-{{ college.apply_status }} has-background-white-ter">
+  {% for field_name, field_label in table_fields %}
+  <td>
+    {% if field_name == field %}
+    <form hx-post="{% url 'colleges:edit_cell' college.pk field %}"
+          hx-target="#college-row-{{ college.pk }}"
+          hx-swap="outerHTML">
+      {% csrf_token %}
+      <div class="select is-small">
+        <select name="value" autofocus
+                onchange="this.form.requestSubmit()"
+                onkeydown="if(event.key==='Escape'){htmx.ajax('GET','{% url 'colleges:list' %}','#college-table-wrapper')}">
+          <option value="">—</option>
+          {% for val, label in choices %}
+          <option value="{{ val }}" {% if val == current_value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </form>
+    {% elif field_name == 'name' %}
+      <strong>{{ college.name }}</strong>
+    {% elif field_name == 'apply_status' %}
+      <span class="tag {{ college.status_color }} is-light">{{ college.get_apply_status_display|default:"—" }}</span>
+    {% elif field_name == 'applicant_notes' %}
+      {{ college.applicant_notes|truncatewords:12 }}
+    {% else %}
+      {% with val=college|getfield:field_name %}{{ val|default:"" }}{% endwith %}
+    {% endif %}
+  </td>
+  {% endfor %}
+  <td>
+    <button class="button is-small is-light"
+            hx-get="{% url 'colleges:list' %}"
+            hx-target="#college-table-wrapper">Cancel</button>
+  </td>
+</tr>

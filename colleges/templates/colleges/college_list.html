@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Colleges - College App App{% endblock %}
+
+{% block content %}
+<div class="level">
+  <div class="level-left">
+    <div class="level-item">
+      <h1 class="title">College List</h1>
+    </div>
+    <div class="level-item">
+      <span class="tag is-medium is-info">{{ colleges.count }} colleges</span>
+    </div>
+  </div>
+  <div class="level-right">
+    <div class="level-item">
+      <a href="{% url 'colleges:add' %}" class="button is-primary">+ Add College</a>
+    </div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="box" id="filters">
+  <div class="columns">
+    <div class="column is-4">
+      <div class="field">
+        <label class="label is-small">Search</label>
+        <div class="control">
+          <input class="input" type="text" name="q" value="{{ search }}"
+                 placeholder="Search colleges..."
+                 hx-get="{% url 'colleges:list' %}"
+                 hx-trigger="keyup changed delay:300ms"
+                 hx-target="#college-table-wrapper"
+                 hx-include="#filters"
+                 hx-push-url="true">
+        </div>
+      </div>
+    </div>
+    <div class="column is-3">
+      <div class="field">
+        <label class="label is-small">Status</label>
+        <div class="control">
+          <div class="select is-fullwidth">
+            <select name="status"
+                    hx-get="{% url 'colleges:list' %}"
+                    hx-trigger="change"
+                    hx-target="#college-table-wrapper"
+                    hx-include="#filters"
+                    hx-push-url="true">
+              <option value="">All statuses</option>
+              {% for value, label in status_choices %}
+              <option value="{{ value }}" {% if value == status_filter %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="column is-3">
+      <div class="field">
+        <label class="label is-small">Platform</label>
+        <div class="control">
+          <input class="input" type="text" name="platform" value="{{ platform_filter }}"
+                 placeholder="Common, UC, MIT..."
+                 hx-get="{% url 'colleges:list' %}"
+                 hx-trigger="keyup changed delay:300ms"
+                 hx-target="#college-table-wrapper"
+                 hx-include="#filters"
+                 hx-push-url="true">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="college-table-wrapper">
+  {% include "colleges/_college_table.html" %}
+</div>
+{% endblock %}

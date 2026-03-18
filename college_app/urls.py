@@ -1,0 +1,10 @@
+from django.contrib import admin
+from django.urls import include, path
+
+urlpatterns = [
+    path('', include('core.urls')),
+    path('colleges/', include('colleges.urls')),
+    path('activities/', include('activities.urls')),
+    path('supplements/', include('supplements.urls')),
+    path('admin/', admin.site.urls),
+]
