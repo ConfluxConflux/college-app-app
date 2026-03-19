@@ -382,6 +382,7 @@ def export_uc(request):
             '',
         ]
     content = '\n'.join(lines)
+    content += '\n\nJacob thinks this could be formatted better but hasn\'t put effort into reformatting them. It would take like 2 minutes with claude so please email him at chromaticconflux@gmail.com if it should be reformatted for easier copy-pasting'
     response = HttpResponse(content, content_type='text/plain; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename="uc_activities.txt"'
     return response
@@ -431,6 +432,7 @@ def export_common_app(request):
         ]
 
     content = '\n'.join(lines)
+    content += '\n\nJacob thinks this could be formatted better but hasn\'t put effort into reformatting them. It would take like 2 minutes with claude so please email him at chromaticconflux@gmail.com if it should be reformatted for easier copy-pasting'
     response = HttpResponse(content, content_type='text/plain; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename="common_app_activities.txt"'
     return response
@@ -464,6 +466,7 @@ def export_mit(request):
         lines += ['-' * 40, '']
 
     content = '\n'.join(lines)
+    content += '\n\nJacob thinks this could be formatted better but hasn\'t put effort into reformatting them. It would take like 2 minutes with claude so please email him at chromaticconflux@gmail.com if it should be reformatted for easier copy-pasting'
     response = HttpResponse(content, content_type='text/plain; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename="mit_entries.txt"'
     return response
