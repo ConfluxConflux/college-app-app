@@ -20,6 +20,10 @@ urlpatterns = [
     path('honors/<int:pk>/', views.honor_edit, name='honor_edit'),
     path('honors/<int:pk>/cell/<str:field>/', views.honor_cell, name='honor_cell'),
     path('honors/<int:pk>/delete/', views.honor_delete, name='honor_delete'),
+    # Exports
+    path('export/uc/', views.export_uc, name='export_uc'),
+    path('export/common-app/', views.export_common_app, name='export_common_app'),
+    path('export/mit/', views.export_mit, name='export_mit'),
     # MIT
     path('mit/add/', views.mit_add, name='mit_add'),
     path('mit/<int:pk>/', views.mit_edit, name='mit_edit'),

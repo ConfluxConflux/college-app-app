@@ -69,6 +69,7 @@
       <h2 class="title is-4 mb-0">UC Activities & Awards</h2>
     </div>
     <div class="level-right">
+      <a href="{% url 'activities:export_uc' %}" class="button is-light is-small mr-2">Export .txt</a>
       <a href="{% url 'activities:uc_add' %}" class="button is-primary is-small">+ Add UC Entry</a>
     </div>
   </div>
@@ -106,6 +107,7 @@
       <h2 class="title is-4 mb-0">Common App Activities</h2>
     </div>
     <div class="level-right">
+      <a href="{% url 'activities:export_common_app' %}" class="button is-light is-small mr-2">Export .txt</a>
       <a href="{% url 'activities:ca_add' %}" class="button is-primary is-small">+ Add Activity</a>
     </div>
   </div>
@@ -173,6 +175,7 @@
       <h2 class="title is-4 mb-0">MIT Jobs, Activities & Distinctions</h2>
     </div>
     <div class="level-right">
+      <a href="{% url 'activities:export_mit' %}" class="button is-light is-small mr-2">Export .txt</a>
       <a href="{% url 'activities:mit_add' %}" class="button is-primary is-small">+ Add MIT Entry</a>
     </div>
   </div>

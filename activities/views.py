@@ -350,3 +350,120 @@ def mit_delete(request, pk):
     if request.headers.get('HX-Request'):
         return HttpResponse('')
     return redirect('/activities/?tab=mit')
+
+
+# ── Exports ──
+
+def _grades(obj):
+    grades = []
+    if obj.grade_9: grades.append('9th')
+    if obj.grade_10: grades.append('10th')
+    if obj.grade_11: grades.append('11th')
+    if obj.grade_12: grades.append('12th')
+    return ', '.join(grades) if grades else '—'
+
+
+def export_uc(request):
+    applicant = Applicant.objects.get(pk=1)
+    entries = UCEntry.objects.filter(applicant=applicant)
+    lines = ['UC ACTIVITIES & AWARDS EXPORT', '=' * 40, '']
+    for i, e in enumerate(entries, 1):
+        lines += [
+            f'Entry {i} of {entries.count()}: {e.name}',
+            f'Category: {e.get_category_display()}',
+            f'Grades: {_grades(e)}',
+            f'Hours/week: {e.hours_per_week or "—"}    Weeks/year: {e.weeks_per_year or "—"}',
+            f'Background ({len(e.background)}/250 chars):',
+            f'  {e.background or "(empty)"}',
+            f'Description ({len(e.description)}/350 chars):',
+            f'  {e.description or "(empty)"}',
+            '',
+            '-' * 40,
+            '',
+        ]
+    content = '\n'.join(lines)
+    response = HttpResponse(content, content_type='text/plain; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="uc_activities.txt"'
+    return response
+
+
+def export_common_app(request):
+    applicant = Applicant.objects.get(pk=1)
+    activities = CommonAppActivity.objects.filter(applicant=applicant)
+    honors = CommonAppHonor.objects.filter(applicant=applicant)
+    lines = ['COMMON APP ACTIVITIES & HONORS EXPORT', '=' * 40, '']
+
+    lines += [f'ACTIVITIES ({activities.count()}/10)', '']
+    for i, a in enumerate(activities, 1):
+        timing = []
+        if a.timing_school: timing.append('During school year')
+        if a.timing_breaks: timing.append('School breaks')
+        if a.timing_all_year: timing.append('All year')
+        lines += [
+            f'Activity {i}: {a.organization or "(no org)"}',
+            f'Type: {a.get_activity_type_display()}',
+            f'Position/Leadership ({len(a.position)}/50 chars): {a.position or "—"}',
+            f'Organization ({len(a.organization)}/100 chars): {a.organization or "—"}',
+            f'Grades: {_grades(a)}',
+            f'Timing: {", ".join(timing) or "—"}',
+            f'Hours/week: {a.hours_per_week or "—"}    Weeks/year: {a.weeks_per_year or "—"}',
+            f'Description ({len(a.description)}/150 chars):',
+            f'  {a.description or "(empty)"}',
+            '',
+            '-' * 40,
+            '',
+        ]
+
+    lines += [f'HONORS ({honors.count()}/5)', '']
+    for i, h in enumerate(honors, 1):
+        levels = []
+        if h.level_school: levels.append('School')
+        if h.level_state_regional: levels.append('State/Regional')
+        if h.level_national: levels.append('National')
+        if h.level_international: levels.append('International')
+        lines += [
+            f'Honor {i}: {h.title}',
+            f'Grades: {_grades(h)}',
+            f'Recognition Level: {", ".join(levels) or "—"}',
+            '',
+            '-' * 40,
+            '',
+        ]
+
+    content = '\n'.join(lines)
+    response = HttpResponse(content, content_type='text/plain; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="common_app_activities.txt"'
+    return response
+
+
+def export_mit(request):
+    applicant = Applicant.objects.get(pk=1)
+    entries = MITEntry.objects.filter(applicant=applicant)
+    lines = ['MIT ENTRIES EXPORT', '=' * 40, '']
+    category_order = ['job', 'activity', 'summer', 'scholastic', 'non_scholastic']
+    category_labels = dict(MITEntry.CATEGORY_CHOICES)
+    category_limits = MITEntry.CATEGORY_LIMITS
+    for cat in category_order:
+        cat_entries = [e for e in entries if e.category == cat]
+        label = category_labels.get(cat, cat).upper() + 'S'
+        limit = category_limits.get(cat, '?')
+        lines += [f'{label} ({len(cat_entries)}/{limit})', '']
+        if cat_entries:
+            for i, e in enumerate(cat_entries, 1):
+                lines += [
+                    f'  Entry {i}: {e.org_name or "(no org)"}',
+                    f'  Role/Award: {e.role_award or "—"}',
+                    f'  Period: {e.participation_period or "—"}',
+                    f'  Hours/week: {e.hours_per_week or "—"}    Weeks/year: {e.weeks_per_year or "—"}',
+                    f'  Description (40 word limit):',
+                    f'    {e.description or "(empty)"}',
+                    '',
+                ]
+        else:
+            lines += ['  (none)', '']
+        lines += ['-' * 40, '']
+
+    content = '\n'.join(lines)
+    response = HttpResponse(content, content_type='text/plain; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="mit_entries.txt"'
+    return response
