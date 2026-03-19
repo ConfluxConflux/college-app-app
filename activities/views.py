@@ -1,4 +1,6 @@
-from django.http import HttpResponse
+import json
+
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
@@ -46,16 +48,22 @@ def _prefetch_core_activities(applicant):
 
 
 def activities_home(request):
-    tab = request.GET.get('tab', 'centralized')
+    tab = request.GET.get('tab', 'uc')
     if tab == 'honors':
         tab = 'common_app'
     applicant = Applicant.objects.get(pk=1)
+    uc_entries_list = list(UCEntry.objects.filter(applicant=applicant).order_by('order').select_related('core_activity'))
+    uc_slots = uc_entries_list[:20]
+    while len(uc_slots) < 20:
+        uc_slots.append(None)
+    uc_overflow = uc_entries_list[20:]
     context = {
         'tab': tab,
         'core_activities': _prefetch_core_activities(applicant),
         'core_activity_count': CoreActivity.objects.filter(applicant=applicant).count(),
-        'uc_entries': UCEntry.objects.filter(applicant=applicant).select_related('core_activity'),
-        'uc_count': UCEntry.objects.filter(applicant=applicant).count(),
+        'uc_slots': uc_slots,
+        'uc_overflow': uc_overflow,
+        'uc_count': len(uc_entries_list),
         'uc_category_choices': UCEntry.CATEGORY_CHOICES,
         'common_app_activities': CommonAppActivity.objects.filter(applicant=applicant).select_related('core_activity'),
         'ca_count': CommonAppActivity.objects.filter(applicant=applicant).count(),
@@ -115,7 +123,7 @@ def uc_cell(request, pk, field):
     entry = get_object_or_404(UCEntry, pk=pk)
     ctx = {'entry': entry, 'uc_category_choices': UCEntry.CATEGORY_CHOICES}
     if request.method == 'POST':
-        if field in ('name', 'background', 'description', 'hours_per_week', 'weeks_per_year'):
+        if field in ('name', 'background', 'description', 'hours_per_week', 'weeks_per_year', 'personal_notes'):
             setattr(entry, field, request.POST.get('value', ''))
             entry.save()
         elif field == 'category':
@@ -137,6 +145,15 @@ def uc_delete(request, pk):
     if request.headers.get('HX-Request'):
         return HttpResponse('')
     return redirect('activities:home')
+
+
+@require_POST
+def uc_reorder(request):
+    applicant = Applicant.objects.get(pk=1)
+    data = json.loads(request.body)
+    for i, pk in enumerate(data.get('order', []), start=1):
+        UCEntry.objects.filter(pk=pk, applicant=applicant).update(order=i)
+    return HttpResponse(status=204)
 
 
 # ── Common App Activity CRUD ──

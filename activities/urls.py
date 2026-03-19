@@ -6,6 +6,7 @@ app_name = 'activities'
 urlpatterns = [
     path('', views.activities_home, name='home'),
     # UC
+    path('uc/reorder/', views.uc_reorder, name='uc_reorder'),
     path('uc/add/', views.uc_add, name='uc_add'),
     path('uc/<int:pk>/', views.uc_edit, name='uc_edit'),
     path('uc/<int:pk>/cell/<str:field>/', views.uc_cell, name='uc_cell'),

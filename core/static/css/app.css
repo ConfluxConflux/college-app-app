@@ -97,3 +97,54 @@ body {
 .char-counter.is-near {
   color: #ffe08a;
 }
+
+/* UC category row colors */
+.uc-cat-award           { background-color: #fefce8 !important; }
+.uc-cat-extracurricular { background-color: #eff6ff !important; }
+.uc-cat-volunteer       { background-color: #f0fdf4 !important; }
+.uc-cat-work            { background-color: #fff7ed !important; }
+.uc-cat-coursework      { background-color: #faf5ff !important; }
+
+/* UC placeholder (empty slot) rows */
+.uc-placeholder td { color: #bbb !important; font-style: italic; }
+.uc-placeholder { background-color: rgba(245,245,245,0.4) !important; }
+
+/* Drag handle */
+.drag-handle {
+  cursor: grab;
+  color: #ccc;
+  user-select: none;
+  text-align: center;
+}
+.drag-handle:active { cursor: grabbing; }
+
+/* Column header tooltip */
+.th-tooltip {
+  position: relative;
+  cursor: help;
+  border-bottom: 1px dashed #aaa;
+  display: inline-block;
+}
+.th-tooltip::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: normal;
+  padding: 6px 10px;
+  border-radius: 4px;
+  white-space: normal;
+  width: 280px;
+  text-align: left;
+  z-index: 200;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+  line-height: 1.4;
+}
+.th-tooltip:hover::after { opacity: 1; }

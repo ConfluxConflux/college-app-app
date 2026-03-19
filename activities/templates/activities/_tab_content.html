@@ -77,27 +77,54 @@
     <table class="table is-bordered is-hoverable is-fullwidth is-narrow">
       <thead>
         <tr>
-          <th style="width:30px">#</th>
+          <th style="width:18px"></th>
+          <th style="width:28px">#</th>
           <th>Name</th>
           <th>Category</th>
-          <th>Background <span class="has-text-grey is-size-7">(250ch)</span></th>
+          <th>
+            <span class="th-tooltip" data-tip="UC prompt: &quot;Briefly describe the background of this activity or award, including eligibility requirements or fees.&quot; (0–250 chars)">
+              Background <span class="has-text-grey is-size-7">(250ch)</span>
+            </span>
+          </th>
           <th>Description <span class="has-text-grey is-size-7">(350ch)</span></th>
           <th>Grades</th>
           <th>Hrs/wk</th>
           <th>Wks/yr</th>
+          <th>Notes</th>
           <th>Hub</th>
           <th style="width:40px"></th>
         </tr>
       </thead>
-      <tbody>
-        {% for entry in uc_entries %}
-          {% include "activities/_uc_row.html" %}
-        {% empty %}
-        <tr><td colspan="10" class="has-text-centered has-text-grey py-4">No UC entries yet. Click "+ Add UC Entry" to get started.</td></tr>
+      <tbody id="uc-entries-tbody">
+        {% for slot in uc_slots %}
+          {% if slot %}
+            {% include "activities/_uc_row.html" with entry=slot slot_num=forloop.counter uc_category_choices=uc_category_choices %}
+          {% else %}
+            <tr class="uc-placeholder">
+              <td style="width:18px"></td>
+              <td class="is-size-7" style="width:28px">{{ forloop.counter }}</td>
+              <td colspan="10" class="is-size-7">— empty —</td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+        {% for entry in uc_overflow %}
+          <tr id="uc-{{ entry.pk }}" data-pk="{{ entry.pk }}" style="opacity:0.45" title="Beyond UC limit of 20 — not submitted">
+            <td style="width:18px"></td>
+            <td class="has-text-grey is-size-7">{{ forloop.counter|add:"20" }}</td>
+            <td class="is-size-7"><strong>{{ entry.name }}</strong> <span class="tag is-warning is-light is-small ml-1">over limit</span></td>
+            <td colspan="9" class="has-text-grey is-size-7">Not considered by UC (entries 21+)</td>
+          </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
+  <p class="is-size-7 has-text-grey mt-2">
+    <span style="display:inline-block;width:12px;height:12px;background:#fefce8;border:1px solid #ddd;vertical-align:middle"></span> Award/honor &nbsp;
+    <span style="display:inline-block;width:12px;height:12px;background:#eff6ff;border:1px solid #ddd;vertical-align:middle"></span> Extracurricular &nbsp;
+    <span style="display:inline-block;width:12px;height:12px;background:#f0fdf4;border:1px solid #ddd;vertical-align:middle"></span> Volunteer &nbsp;
+    <span style="display:inline-block;width:12px;height:12px;background:#fff7ed;border:1px solid #ddd;vertical-align:middle"></span> Work &nbsp;
+    <span style="display:inline-block;width:12px;height:12px;background:#faf5ff;border:1px solid #ddd;vertical-align:middle"></span> Coursework
+  </p>
 </div>
 
 <!-- Common App Activities & Honors -->

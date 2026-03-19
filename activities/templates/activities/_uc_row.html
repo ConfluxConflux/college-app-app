@@ -1,5 +1,6 @@
-<tr id="uc-{{ entry.pk }}">
-  <td class="has-text-grey is-size-7" style="width:30px">{{ entry.order }}</td>
+<tr id="uc-{{ entry.pk }}" data-pk="{{ entry.pk }}" class="uc-cat-{{ entry.category }}">
+  <td class="drag-handle" style="width:18px">⠿</td>
+  <td class="has-text-grey is-size-7" style="width:28px">{{ slot_num|default:entry.order }}</td>
 
   {# Name #}
   {% if editing == 'name' %}
@@ -72,6 +73,15 @@
   </form></td>
   {% else %}
   <td style="width:70px; cursor:pointer" hx-get="{% url 'activities:uc_cell' entry.pk 'weeks_per_year' %}" hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML">{{ entry.weeks_per_year|default:"—" }}</td>
+  {% endif %}
+
+  {# Notes #}
+  {% if editing == 'personal_notes' %}
+  <td style="min-width:140px"><form hx-post="{% url 'activities:uc_cell' entry.pk 'personal_notes' %}" hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML">{% csrf_token %}
+    <div class="field has-addons"><div class="control is-expanded"><input class="input is-small" type="text" name="value" value="{{ entry.personal_notes }}" autofocus></div><div class="control"><button type="submit" class="button is-small is-success">&#10003;</button></div></div>
+  </form></td>
+  {% else %}
+  <td class="is-size-7" style="cursor:pointer; min-width:140px" hx-get="{% url 'activities:uc_cell' entry.pk 'personal_notes' %}" hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML">{{ entry.personal_notes|default:"—" }}</td>
   {% endif %}
 
   {# Hub (read-only) #}
