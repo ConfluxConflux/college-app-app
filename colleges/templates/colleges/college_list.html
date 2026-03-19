@@ -82,14 +82,14 @@
 
 <!-- Column toggle -->
 <div class="mb-3">
-  <div class="dropdown" id="col-toggle-dropdown" x-data="{ open: false }" @click.outside="open = false">
+  <div class="dropdown" id="col-toggle-dropdown" x-data="{ open: false }" @click.outside="open = false" :class="{ 'is-active': open }">
     <div class="dropdown-trigger">
       <button class="button is-small" @click="open = !open" aria-haspopup="true">
         <span>Columns</span>
         <span class="icon is-small"><i>&#9660;</i></span>
       </button>
     </div>
-    <div class="dropdown-menu" x-show="open" style="min-width: 200px;">
+    <div class="dropdown-menu" style="min-width: 200px; z-index: 100;">
       <div class="dropdown-content" id="col-toggle-list">
         <!-- Populated by JS -->
       </div>
