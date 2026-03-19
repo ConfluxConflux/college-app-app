@@ -245,12 +245,13 @@
       a.addEventListener('click', function(e) {
         e.stopPropagation();
         var freshCol = table.getColumn(field);
+        console.log('[col-toggle] field:', field, '| found:', freshCol, '| visible:', freshCol && freshCol.isVisible());
         if (!freshCol) return;
         if (freshCol.isVisible()) {
-          freshCol.hide();
+          table.hideColumn(field);
           check.textContent = '';
         } else {
-          freshCol.show();
+          table.showColumn(field);
           check.textContent = '✓';
         }
       });
