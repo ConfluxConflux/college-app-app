@@ -18,15 +18,19 @@
       const popupId = icon.id.replace('-anchor', '-popup');
       const popup = document.getElementById(popupId);
       if (!popup) return;
-      icon.addEventListener('mouseenter', function() {
-        popup.style.display = 'block';
-        const rect = icon.getBoundingClientRect();
-        const pw = popup.offsetWidth;
-        const ph = popup.offsetHeight;
-        popup.style.left = Math.max(4, rect.left + rect.width / 2 - pw / 2) + 'px';
-        popup.style.top = (rect.top - ph - 8) + 'px';
+      icon.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const isOpen = popup.style.display === 'block';
+        popup.style.display = isOpen ? 'none' : 'block';
+        if (!isOpen) {
+          const rect = icon.getBoundingClientRect();
+          const pw = popup.offsetWidth;
+          const ph = popup.offsetHeight;
+          popup.style.left = Math.max(4, rect.left + rect.width / 2 - pw / 2) + 'px';
+          popup.style.top = (rect.top - ph - 8) + 'px';
+        }
       });
-      icon.addEventListener('mouseleave', function() {
+      document.addEventListener('click', function() {
         popup.style.display = 'none';
       });
     });
