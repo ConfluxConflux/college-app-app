@@ -84,7 +84,7 @@
 <div class="mb-3">
   <div class="dropdown" id="col-toggle-dropdown" x-data="{ open: false }" @click.outside="open = false" :class="{ 'is-active': open }">
     <div class="dropdown-trigger">
-      <button class="button is-small" @click="open = !open" aria-haspopup="true">
+      <button class="button is-small" @click="open = !open; if (open && window._buildColToggle) window._buildColToggle()" aria-haspopup="true">
         <span>Columns</span>
         <span class="icon is-small"><i>&#9660;</i></span>
       </button>
@@ -208,10 +208,12 @@
     },
   });
 
-  // Restore column visibility from persistence before building toggle list
   table.on('tableBuilt', function() {
     buildColToggle();
   });
+
+  // Expose so Alpine can call it when opening the dropdown
+  window._buildColToggle = buildColToggle;
 
   function buildColToggle() {
     var list = document.getElementById('col-toggle-list');
@@ -242,11 +244,13 @@
 
       a.addEventListener('click', function(e) {
         e.stopPropagation();
-        if (col.isVisible()) {
-          col.hide();
+        var freshCol = table.getColumn(field);
+        if (!freshCol) return;
+        if (freshCol.isVisible()) {
+          freshCol.hide();
           check.textContent = '';
         } else {
-          col.show();
+          freshCol.show();
           check.textContent = '✓';
         }
       });
