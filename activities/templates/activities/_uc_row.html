@@ -85,9 +85,6 @@
   <td class="is-size-7" style="cursor:pointer; min-width:140px" hx-get="{% url 'activities:uc_cell' entry.pk 'personal_notes' %}" hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML">{{ entry.personal_notes|default:"—" }}</td>
   {% endif %}
 
-  {# Hub (read-only) #}
-  <td class="is-size-7">{% if entry.core_activity %}<span class="tag is-light is-small" title="{{ entry.core_activity.name }}">{{ entry.core_activity.name|truncatewords:3 }}</span>{% else %}—{% endif %}</td>
-
   {# Delete #}
   <td style="width:40px">
     <button class="button is-small is-danger is-outlined" hx-post="{% url 'activities:uc_delete' entry.pk %}" hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML" hx-confirm="Delete this UC entry?">&times;</button>
