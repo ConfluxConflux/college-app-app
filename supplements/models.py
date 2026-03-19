@@ -23,6 +23,10 @@ class SupplementEssay(models.Model):
         ('maybe', 'Maybe'),
     ]
 
+    applicant = models.ForeignKey(
+        'core.Applicant', null=True, blank=True,
+        on_delete=models.CASCADE, related_name='essays'
+    )
     college = models.ForeignKey(
         'colleges.College', on_delete=models.CASCADE,
         related_name='essays'

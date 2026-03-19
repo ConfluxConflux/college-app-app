@@ -1,0 +1,78 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Not Yet - The College App App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --periwinkle-light: #e4f4f2;
+      --periwinkle-dark: #2a9d8f;
+    }
+
+    body {
+      font-family: 'Libre Baskerville', Georgia, serif;
+      background: radial-gradient(ellipse at 35% 25%, #bde4df 0%, var(--periwinkle-light) 65%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    p {
+      font-size: 1.75rem;
+      font-style: italic;
+      color: #444;
+    }
+
+    a {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--periwinkle-dark);
+      text-decoration: none;
+      padding: 0.6rem 1.75rem;
+      border-radius: 9999px;
+      border: 3px solid var(--periwinkle-dark);
+      transition: background 0.15s, color 0.15s;
+    }
+
+    a:hover {
+      background: #228879;
+      border-color: #228879;
+    }
+
+    a.secondary {
+      background: transparent;
+      color: #1a1a1a;
+      border-color: #1a1a1a;
+    }
+
+    a.secondary:hover {
+      background: #1a1a1a;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="center">
+    <p>Sorry, this feature doesn't exist yet!</p>
+    <a href="{% url 'core:home' %}">View as test user</a>
+    <a href="{% url 'core:landing' %}" class="secondary">Go home</a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<tr id="mit-{{ entry.pk }}">
+  <td class="has-text-grey is-size-7" style="width:30px">{{ entry.order }}</td>
+
+  {# Category #}
+  {% if editing == 'category' %}
+  <td><form hx-post="{% url 'activities:mit_cell' entry.pk 'category' %}" hx-target="#mit-{{ entry.pk }}" hx-swap="outerHTML">{% csrf_token %}
+    <div class="field has-addons"><div class="control"><div class="select is-small"><select name="value">{% for val, label in mit_category_choices %}<option value="{{ val }}" {% if entry.category == val %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div></div><div class="control"><button type="submit" class="button is-small is-success">&#10003;</button></div></div>
+  </form></td>
+  {% else %}
+  <td style="cursor:pointer" hx-get="{% url 'activities:mit_cell' entry.pk 'category' %}" hx-target="#mit-{{ entry.pk }}" hx-swap="outerHTML"><span class="tag is-small {% if entry.category == 'job' %}is-dark{% elif entry.category == 'activity' %}is-info is-light{% elif entry.category == 'summer' %}is-warning is-light{% elif entry.category == 'scholastic' %}is-success is-light{% else %}is-light{% endif %}">{{ entry.get_category_display }}</span></td>
+  {% endif %}
+
+  {# Organization #}
+  {% if editing == 'org_name' %}
+  <td><form hx-post="{% url 'activities:mit_cell' entry.pk 'org_name' %}" hx-target="#mit-{{ entry.pk }}" hx-swap="outerHTML">{% csrf_token %}
+    <div class="field has-addons"><div class="control is-expanded"><input class="input is-small" type="text" name="value" value="{{ entry.org_name }}" autofocus maxlength="200"></div><div class="control"><button type="submit" class="button is-small is-success">&#10003;</button></div></div>
+  </form></td>
+  {% else %}
+  <td style="cursor:pointer; min-width:140px" hx-get="{% url 'activities:mit_cell' entry.pk 'org_name' %}" hx-target="#mit-{{ entry.pk }}" hx-swap="outerHTML"><strong>{{ entry.org_name|default:"—" }}</strong></td>
+  {% endif %}
+
+  {# Role / Award #}
+  {% if editing == 'role_award' %}
+  <td><form hx-post="{% url 'activities:mit_cell' entry.pk 'role_award' %}" hx-target="#mit-{{ entry.pk }}" hx-swap="outerHTML">{% csrf_token %}
+    <div class="field has-addons"><div class="control is-expanded"><input class="input is-small" type="text" name="value" value="{{ entry.role_award }}" autofocus maxlength="200"></div><div class="control"><button type="submit" class="button is-small is-success">&#10003;</button></div></div>
+  </form></td>
+  {% else %}
+  <td style="cursor:pointer; min-width:120px" hx-get="{% url 'activities:mit_cell' entry.pk 'role_award' %}" hx-target="#mit-{{ entry.pk }}" hx-swap="outerHTML">{{ entry.role_award|default:"—" }}</td>
+  {% endif %}
+
+  {# Period #}
+  {% if editing == 'participation_period' %}
+  <td><form hx-post="{% url 'activities:mit_cell' entry.pk 'participation_period' %}" hx-target="#mit-{{ entry.pk }}" hx-swap="outerHTML">{% csrf_token %}
+    <div class="field has-addons"><div class="control is-expanded"><input class="input is-small" type="text" name="value" value="{{ entry.participation_period }}" autofocus maxlength="100"></div><div class="control"><button type="submit" class="button is-small is-success">&#10003;</button></div></div>
+  </form></td>
+  {% else %}
+  <td class="is-size-7" style="cursor:pointer; min-width:90px" hx-get="{% url 'activities:mit_cell' entry.pk 'participation_period' %}" hx-target="#mit-{{ entry.pk }}" hx-swap="outerHTML">{{ entry.participation_period|default:"—" }}</td>
+  {% endif %}
+
+  {# Hrs/wk #}
+  {% if editing == 'hours_per_week' %}
+  <td style="width:70px"><form hx-post="{% url 'activities:mit_cell' entry.pk 'hours_per_week' %}" hx-target="#mit-{{ entry.pk }}" hx-swap="outerHTML">{% csrf_token %}
+    <input class="input is-small" type="number" name="value" value="{{ entry.hours_per_week|default:'' }}" autofocus style="width:55px">
+    <button type="submit" class="button is-small is-success">&#10003;</button>
+  </form></td>
+  {% else %}
+  <td style="width:70px; cursor:pointer" hx-get="{% url 'activities:mit_cell' entry.pk 'hours_per_week' %}" hx-target="#mit-{{ entry.pk }}" hx-swap="outerHTML">{{ entry.hours_per_week|default:"—" }}</td>
+  {% endif %}
+
+  {# Description (40 words) #}
+  {% if editing == 'description' %}
+  <td style="min-width:200px"><form hx-post="{% url 'activities:mit_cell' entry.pk 'description' %}" hx-target="#mit-{{ entry.pk }}" hx-swap="outerHTML">{% csrf_token %}
+    {% include "core/_textbox.html" with name="value" value=entry.description rows=3 word_limit=40 autofocus=True extra_class="is-small" %}
+    <button type="submit" class="button is-small is-success mt-1">&#10003;</button>
+  </form></td>
+  {% else %}
+  <td class="is-size-7" style="cursor:pointer; min-width:200px; white-space:pre-wrap" hx-get="{% url 'activities:mit_cell' entry.pk 'description' %}" hx-target="#mit-{{ entry.pk }}" hx-swap="outerHTML">{{ entry.description|default:"—" }}</td>
+  {% endif %}
+
+  {# Hub (read-only) #}
+  <td class="is-size-7">{% if entry.core_activity %}<span class="tag is-light is-small" title="{{ entry.core_activity.name }}">{{ entry.core_activity.name|truncatewords:3 }}</span>{% else %}—{% endif %}</td>
+
+  {# Delete #}
+  <td style="width:40px">
+    <button class="button is-small is-danger is-outlined" hx-post="{% url 'activities:mit_delete' entry.pk %}" hx-target="#mit-{{ entry.pk }}" hx-swap="outerHTML" hx-confirm="Delete this MIT entry?">&times;</button>
+  </td>
+</tr>

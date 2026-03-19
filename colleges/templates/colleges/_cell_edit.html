@@ -1,7 +1,7 @@
 {% load college_tags %}
 <tr id="college-row-{{ college.pk }}" class="status-{{ college.apply_status }} has-background-white-ter">
   {% for field_name, field_label in table_fields %}
-  <td>
+  <td class="col-{{ field_name }}">
     {% if field_name == field %}
     <form hx-post="{% url 'colleges:edit_cell' college.pk field %}"
           hx-target="#college-row-{{ college.pk }}"
@@ -16,6 +16,11 @@
         <div class="control">
           <button type="submit" class="button is-small is-success">&#10003;</button>
         </div>
+        <div class="control">
+          <button type="button" class="button is-small is-light"
+                  hx-get="{% url 'colleges:list' %}"
+                  hx-target="#college-table-wrapper">&#10005;</button>
+        </div>
       </div>
     </form>
     {% elif field_name == 'name' %}
@@ -29,9 +34,4 @@
     {% endif %}
   </td>
   {% endfor %}
-  <td>
-    <button class="button is-small is-light"
-            hx-get="{% url 'colleges:list' %}"
-            hx-target="#college-table-wrapper">Cancel</button>
-  </td>
 </tr>

@@ -8,7 +8,7 @@ class College(models.Model):
         ('considering', 'Considering'),
         ('unlikely', 'Unlikely'),
         ('not_applying', 'Not Applying'),
-        ('applied', 'Applied'),
+        ('applied', 'Submitted'),
         ('accepted', 'Accepted'),
         ('deferred', 'Deferred'),
         ('waitlisted', 'Waitlisted'),
@@ -28,8 +28,12 @@ class College(models.Model):
         ('other', 'Other'),
     ]
 
+    applicant = models.ForeignKey(
+        'core.Applicant', null=True, blank=True,
+        on_delete=models.CASCADE, related_name='colleges'
+    )
     name = models.CharField(max_length=200)
-    apply_status = models.CharField(max_length=20, choices=APPLY_STATUS_CHOICES, blank=True)
+    apply_status = models.CharField(max_length=20, choices=APPLY_STATUS_CHOICES, default='not_applying')
     tier = models.CharField(max_length=10, blank=True)
     acceptance_rate = models.CharField(max_length=10, blank=True)
     collegevine_chance = models.CharField(max_length=10, blank=True)
@@ -60,6 +64,10 @@ class College(models.Model):
     ed2_deadline = models.CharField(max_length=20, blank=True)
     rd_deadline = models.CharField(max_length=20, blank=True)
     other_deadline = models.CharField(max_length=20, blank=True)
+
+    # Scorecard enrichment (populated by import_scorecard management command)
+    sat_avg = models.IntegerField(null=True, blank=True)
+    undergrad_enrollment = models.IntegerField(null=True, blank=True)
 
     # Application details
     self_report_sat = models.CharField(max_length=20, blank=True)

@@ -1,7 +1,8 @@
 {% load college_tags %}
 <tr id="college-row-{{ college.pk }}" class="status-{{ college.apply_status }}">
   {% for field_name, field_label in table_fields %}
-  <td hx-get="{% url 'colleges:edit_cell' college.pk field_name %}"
+  <td class="col-{{ field_name }}"
+      hx-get="{% url 'colleges:edit_cell' college.pk field_name %}"
       hx-target="#college-row-{{ college.pk }}"
       hx-swap="outerHTML"
       style="cursor: pointer;"
@@ -18,18 +19,4 @@
     {% endif %}
   </td>
   {% endfor %}
-  <td>
-    <div class="buttons are-small">
-      <a href="{% url 'colleges:detail' college.pk %}" class="button is-small is-info is-outlined" title="Edit all fields">
-        Edit
-      </a>
-      <button class="button is-small is-danger is-outlined" title="Delete"
-              hx-post="{% url 'colleges:delete' college.pk %}"
-              hx-target="#college-row-{{ college.pk }}"
-              hx-swap="outerHTML"
-              hx-confirm="Delete {{ college.name }}?">
-        &times;
-      </button>
-    </div>
-  </td>
 </tr>

@@ -12,6 +12,10 @@ class UCEntry(models.Model):
         ('coursework', 'Other coursework'),
     ]
 
+    applicant = models.ForeignKey(
+        'core.Applicant', null=True, blank=True,
+        on_delete=models.CASCADE, related_name='uc_entries'
+    )
     core_activity = models.ForeignKey(
         'core.CoreActivity', null=True, blank=True,
         on_delete=models.SET_NULL, related_name='uc_entries'
@@ -85,6 +89,10 @@ class CommonAppActivity(models.Model):
         ('other', 'Other Club/Activity'),
     ]
 
+    applicant = models.ForeignKey(
+        'core.Applicant', null=True, blank=True,
+        on_delete=models.CASCADE, related_name='common_app_activities'
+    )
     core_activity = models.ForeignKey(
         'core.CoreActivity', null=True, blank=True,
         on_delete=models.SET_NULL, related_name='common_app_activities'
@@ -124,6 +132,10 @@ class CommonAppActivity(models.Model):
 
 class CommonAppHonor(models.Model):
     """Common App honor (up to 5)."""
+    applicant = models.ForeignKey(
+        'core.Applicant', null=True, blank=True,
+        on_delete=models.CASCADE, related_name='common_app_honors'
+    )
     core_activity = models.ForeignKey(
         'core.CoreActivity', null=True, blank=True,
         on_delete=models.SET_NULL, related_name='common_app_honors'
@@ -169,6 +181,10 @@ class MITEntry(models.Model):
         'non_scholastic': 5,
     }
 
+    applicant = models.ForeignKey(
+        'core.Applicant', null=True, blank=True,
+        on_delete=models.CASCADE, related_name='mit_entries'
+    )
     core_activity = models.ForeignKey(
         'core.CoreActivity', null=True, blank=True,
         on_delete=models.SET_NULL, related_name='mit_entries'

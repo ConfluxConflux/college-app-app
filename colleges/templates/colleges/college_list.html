@@ -1,15 +1,57 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Colleges - College App App{% endblock %}
+
+{% block extra_head %}
+<link href="https://unpkg.com/tabulator-tables@6.2.1/dist/css/tabulator_bulma.min.css" rel="stylesheet">
+<style>
+  .tabulator {
+    font-size: 15px;
+    font-family: 'Open Sans', sans-serif;
+  }
+  .tabulator .tabulator-cell {
+    padding: 8px 10px;
+  }
+  .tabulator .tabulator-col-title {
+    font-weight: 600;
+  }
+  .tabulator-row.tabulator-row-even {
+    background-color: #fafafa;
+  }
+  .tabulator .tabulator-cell.tabulator-editing input,
+  .tabulator .tabulator-cell.tabulator-editing select {
+    font-size: 15px;
+    padding: 2px 6px;
+  }
+  /* Status badge colors */
+  .status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .status-applying    { background: #d4edda; color: #155724; }
+  .status-likely      { background: #cce5ff; color: #004085; }
+  .status-considering { background: #fff3cd; color: #856404; }
+  .status-unlikely    { background: #f8d7da; color: #721c24; }
+  .status-not_applying{ background: #e2e3e5; color: #383d41; }
+  .status-applied     { background: #cce5ff; color: #004085; }
+  .status-accepted    { background: #d4edda; color: #155724; }
+  .status-deferred    { background: #fff3cd; color: #856404; }
+  .status-waitlisted  { background: #fff3cd; color: #856404; }
+  .status-rejected    { background: #f8d7da; color: #721c24; }
+  .status-enrolled    { background: #d4edda; color: #155724; }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="level">
   <div class="level-left">
     <div class="level-item">
       <h1 class="title">College List</h1>
-    </div>
-    <div class="level-item">
-      <span class="tag is-medium is-info">{{ colleges.count }} colleges</span>
     </div>
   </div>
   <div class="level-right">
@@ -19,61 +61,232 @@
   </div>
 </div>
 
-<!-- Filters -->
-<div class="box" id="filters">
-  <div class="columns">
-    <div class="column is-4">
-      <div class="field">
-        <label class="label is-small">Search</label>
-        <div class="control">
-          <input class="input" type="text" name="q" value="{{ search }}"
-                 placeholder="Search colleges..."
-                 hx-get="{% url 'colleges:list' %}"
-                 hx-trigger="keyup changed delay:300ms"
-                 hx-target="#college-table-wrapper"
-                 hx-include="#filters"
-                 hx-push-url="true">
-        </div>
-      </div>
+<!-- View tabs -->
+<div class="buttons has-addons mb-3" id="view-tabs">
+  <button class="button {% if current_view == 'applications' %}is-dark is-selected{% endif %}"
+          data-view="applications">Your Applications</button>
+  <button class="button {% if current_view == 'all' %}is-dark is-selected{% endif %}"
+          data-view="all">All Colleges</button>
+  <button class="button {% if current_view == 'submitted' %}is-dark is-selected{% endif %}"
+          data-view="submitted">Submitted</button>
+</div>
+
+<!-- Search (shown only for All Colleges) -->
+<div id="search-bar" class="mb-3" style="{% if current_view != 'all' %}display:none{% endif %}">
+  <div class="field" style="max-width: 320px;">
+    <div class="control">
+      <input class="input" type="text" id="college-search" placeholder="Search colleges...">
     </div>
-    <div class="column is-3">
-      <div class="field">
-        <label class="label is-small">Status</label>
-        <div class="control">
-          <div class="select is-fullwidth">
-            <select name="status"
-                    hx-get="{% url 'colleges:list' %}"
-                    hx-trigger="change"
-                    hx-target="#college-table-wrapper"
-                    hx-include="#filters"
-                    hx-push-url="true">
-              <option value="">All statuses</option>
-              {% for value, label in status_choices %}
-              <option value="{{ value }}" {% if value == status_filter %}selected{% endif %}>{{ label }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-      </div>
+  </div>
+</div>
+
+<!-- Column toggle -->
+<div class="mb-3">
+  <div class="dropdown" id="col-toggle-dropdown" x-data="{ open: false }" @click.outside="open = false">
+    <div class="dropdown-trigger">
+      <button class="button is-small" @click="open = !open" aria-haspopup="true">
+        <span>Columns</span>
+        <span class="icon is-small"><i>&#9660;</i></span>
+      </button>
     </div>
-    <div class="column is-3">
-      <div class="field">
-        <label class="label is-small">Platform</label>
-        <div class="control">
-          <input class="input" type="text" name="platform" value="{{ platform_filter }}"
-                 placeholder="Common, UC, MIT..."
-                 hx-get="{% url 'colleges:list' %}"
-                 hx-trigger="keyup changed delay:300ms"
-                 hx-target="#college-table-wrapper"
-                 hx-include="#filters"
-                 hx-push-url="true">
-        </div>
+    <div class="dropdown-menu" x-show="open" style="min-width: 200px;">
+      <div class="dropdown-content" id="col-toggle-list">
+        <!-- Populated by JS -->
       </div>
     </div>
   </div>
 </div>
 
-<div id="college-table-wrapper">
-  {% include "colleges/_college_table.html" %}
-</div>
+<div id="college-grid"></div>
+
+<script src="https://unpkg.com/tabulator-tables@6.2.1/dist/js/tabulator.min.js"></script>
+<script>
+(function() {
+  var STATUS_LABELS = {
+    'applying':    'Applying',
+    'likely':      'Likely',
+    'considering': 'Considering',
+    'unlikely':    'Unlikely',
+    'not_applying':'Not Applying',
+    'applied':     'Submitted',
+    'accepted':    'Accepted',
+    'deferred':    'Deferred',
+    'waitlisted':  'Waitlisted',
+    'rejected':    'Rejected',
+    'enrolled':    'Enrolled',
+  };
+
+  var STATUS_OPTIONS = Object.entries(STATUS_LABELS).map(function(e) {
+    return { label: e[1], value: e[0] };
+  });
+
+  var OPTIONAL_FIELDS = [
+    'tier', 'acceptance_rate', 'collegevine_chance', 'sat_avg',
+    'undergrad_enrollment', 'location', 'app_platform', 'terms',
+    'ea_deadline', 'ed1_deadline', 'ed2_deadline', 'rd_deadline',
+    'intended_major', 'parent_notes'
+  ];
+
+  var COLUMN_DEFS = [
+    {
+      title: 'College', field: 'name', frozen: true, minWidth: 180, widthGrow: 2,
+      editor: 'input',
+      formatter: function(cell) {
+        var val = cell.getValue();
+        var id = cell.getRow().getData().id;
+        return '<a href="/colleges/' + id + '/" style="color:inherit;text-decoration:none;font-weight:600;">' + (val || '') + '</a>';
+      },
+      formatterParams: { target: '_blank' },
+    },
+    {
+      title: 'Status', field: 'apply_status', minWidth: 130,
+      editor: 'list',
+      editorParams: { values: STATUS_OPTIONS },
+      formatter: function(cell) {
+        var val = cell.getValue();
+        var label = STATUS_LABELS[val] || val;
+        return '<span class="status-badge status-' + val + '">' + label + '</span>';
+      },
+    },
+    {
+      title: 'Notes', field: 'applicant_notes', minWidth: 200, widthGrow: 3,
+      editor: 'textarea',
+      formatter: 'textarea',
+    },
+    // Optional columns (hidden by default)
+    { title: 'Tier',        field: 'tier',                 minWidth: 80,  editor: 'input', visible: false },
+    { title: 'Acc. Rate',   field: 'acceptance_rate',      minWidth: 100, editor: 'input', visible: false },
+    { title: 'CV Chance',   field: 'collegevine_chance',   minWidth: 100, editor: 'input', visible: false },
+    { title: 'SAT Avg',     field: 'sat_avg',              minWidth: 90,  editor: 'input', visible: false },
+    { title: 'Enrollment',  field: 'undergrad_enrollment', minWidth: 110, editor: 'input', visible: false },
+    { title: 'Location',    field: 'location',             minWidth: 150, editor: 'input', visible: false },
+    { title: 'Platform',    field: 'app_platform',         minWidth: 120, editor: 'input', visible: false },
+    { title: 'Terms',       field: 'terms',                minWidth: 90,  editor: 'input', visible: false },
+    { title: 'EA',          field: 'ea_deadline',          minWidth: 100, editor: 'input', visible: false },
+    { title: 'ED I',        field: 'ed1_deadline',         minWidth: 100, editor: 'input', visible: false },
+    { title: 'ED II',       field: 'ed2_deadline',         minWidth: 100, editor: 'input', visible: false },
+    { title: 'RD',          field: 'rd_deadline',          minWidth: 100, editor: 'input', visible: false },
+    { title: 'Major',       field: 'intended_major',       minWidth: 130, editor: 'input', visible: false },
+    { title: 'Parent Notes',field: 'parent_notes',         minWidth: 180, widthGrow: 2, editor: 'textarea', formatter: 'textarea', visible: false },
+  ];
+
+  var currentView = '{{ current_view }}';
+  var searchTimeout = null;
+  var searchVal = '';
+
+  function jsonUrl() {
+    return '/colleges/json/?view=' + currentView + (searchVal ? '&q=' + encodeURIComponent(searchVal) : '');
+  }
+
+  var table = new Tabulator('#college-grid', {
+    ajaxURL: jsonUrl(),
+    layout: 'fitDataStretch',
+    columns: COLUMN_DEFS,
+    persistenceID: 'college-' + currentView,
+    persistence: { columns: ['visible', 'width'] },
+    movableColumns: true,
+    resizableColumns: true,
+    height: 'calc(100vh - 340px)',
+    placeholder: 'No colleges match your filters.',
+    cellEdited: function(cell) {
+      var row = cell.getRow().getData();
+      var field = cell.getField();
+      var value = cell.getValue();
+      fetch('/colleges/' + row.id + '/update/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token }}',
+        },
+        body: JSON.stringify({ field: field, value: value }),
+      }).then(function(r) {
+        if (!r.ok) {
+          alert('Save failed. Please reload.');
+          cell.restoreOldValue();
+        }
+      });
+    },
+  });
+
+  // Restore column visibility from persistence before building toggle list
+  table.on('tableBuilt', function() {
+    buildColToggle();
+  });
+
+  function buildColToggle() {
+    var list = document.getElementById('col-toggle-list');
+    list.innerHTML = '';
+    OPTIONAL_FIELDS.forEach(function(field) {
+      var col = table.getColumn(field);
+      if (!col) return;
+      var visible = col.isVisible();
+      var label = col.getDefinition().title;
+
+      var a = document.createElement('a');
+      a.className = 'dropdown-item';
+      a.style.display = 'flex';
+      a.style.alignItems = 'center';
+      a.style.gap = '8px';
+      a.style.cursor = 'pointer';
+
+      var check = document.createElement('span');
+      check.style.width = '14px';
+      check.style.display = 'inline-block';
+      check.textContent = visible ? '✓' : '';
+
+      var lbl = document.createElement('span');
+      lbl.textContent = label;
+
+      a.appendChild(check);
+      a.appendChild(lbl);
+
+      a.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (col.isVisible()) {
+          col.hide();
+          check.textContent = '';
+        } else {
+          col.show();
+          check.textContent = '✓';
+        }
+      });
+
+      list.appendChild(a);
+    });
+  }
+
+  // View tab switching
+  document.getElementById('view-tabs').addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-view]');
+    if (!btn) return;
+    currentView = btn.dataset.view;
+
+    document.querySelectorAll('#view-tabs button').forEach(function(b) {
+      b.classList.remove('is-dark', 'is-selected');
+    });
+    btn.classList.add('is-dark', 'is-selected');
+
+    // Show/hide search
+    document.getElementById('search-bar').style.display = currentView === 'all' ? '' : 'none';
+    if (currentView !== 'all') {
+      searchVal = '';
+      document.getElementById('college-search').value = '';
+    }
+
+    // Rebuild table with new persistence ID and data
+    table.options.persistenceID = 'college-' + currentView;
+    table.setData(jsonUrl());
+  });
+
+  // Search
+  document.getElementById('college-search').addEventListener('input', function(e) {
+    clearTimeout(searchTimeout);
+    var val = e.target.value;
+    searchTimeout = setTimeout(function() {
+      searchVal = val;
+      table.setData(jsonUrl());
+    }, 300);
+  });
+})();
+</script>
 {% endblock %}

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Profile - College App App{% endblock %}
+
+{% block content %}
+<h1 class="title">Profile</h1>
+
+<div style="display: flex; align-items: center; gap: 2rem; margin-top: 1.5rem;">
+  <img src="{% static applicant.profile_picture %}"
+       alt="Profile picture"
+       style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
+  <div>
+    <p class="title is-4" style="margin-bottom: 0.25rem;">{{ applicant.first_name }} {{ applicant.last_name }}</p>
+    <p class="subtitle is-6 has-text-grey">{{ applicant.email }}</p>
+  </div>
+</div>
+
+<div style="margin-top: 2.5rem; max-width: 720px;">
+  <p class="has-text-grey subtitle" style="margin-bottom: 0.75rem;">
+    A space to brainstorm info about yourself that you want to ensure comes through in your application
+  </p>
+  <div x-data="{
+    text: '',
+    get words() { return this.text.trim() === '' ? 0 : this.text.trim().split(' ').length; },
+    get chars() { return this.text.length; }
+  }" x-init="text = $refs.brainstorm.value">
+    <form method="post">
+      {% csrf_token %}
+      <textarea
+        name="brainstorm"
+        class="textarea"
+        rows="14"
+        hx-post="{% url 'core:profile' %}"
+        hx-trigger="keyup changed delay:600ms"
+        hx-swap="none"
+        hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+        x-model="text"
+        x-ref="brainstorm"
+      >{{ applicant.brainstorm }}</textarea>
+    </form>
+  </div>
+</div>
+{% endblock %}

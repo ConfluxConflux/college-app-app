@@ -1,0 +1,84 @@
+<tr id="uc-{{ entry.pk }}">
+  <td class="has-text-grey is-size-7" style="width:30px">{{ entry.order }}</td>
+
+  {# Name #}
+  {% if editing == 'name' %}
+  <td><form hx-post="{% url 'activities:uc_cell' entry.pk 'name' %}" hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML">{% csrf_token %}
+    <div class="field has-addons"><div class="control is-expanded"><input class="input is-small" type="text" name="value" value="{{ entry.name }}" autofocus maxlength="100"></div><div class="control"><button type="submit" class="button is-small is-success">&#10003;</button></div></div>
+  </form></td>
+  {% else %}
+  <td style="cursor:pointer; min-width:140px" hx-get="{% url 'activities:uc_cell' entry.pk 'name' %}" hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML"><strong>{{ entry.name|default:"—" }}</strong></td>
+  {% endif %}
+
+  {# Category #}
+  {% if editing == 'category' %}
+  <td><form hx-post="{% url 'activities:uc_cell' entry.pk 'category' %}" hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML">{% csrf_token %}
+    <div class="field has-addons"><div class="control"><div class="select is-small"><select name="value">{% for val, label in uc_category_choices %}<option value="{{ val }}" {% if entry.category == val %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div></div><div class="control"><button type="submit" class="button is-small is-success">&#10003;</button></div></div>
+  </form></td>
+  {% else %}
+  <td style="cursor:pointer" hx-get="{% url 'activities:uc_cell' entry.pk 'category' %}" hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML"><span class="tag is-info is-light is-small">{{ entry.get_category_display }}</span></td>
+  {% endif %}
+
+  {# Background (250ch) #}
+  {% if editing == 'background' %}
+  <td style="min-width:200px"><form hx-post="{% url 'activities:uc_cell' entry.pk 'background' %}" hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML">{% csrf_token %}
+    {% include "core/_textbox.html" with name="value" value=entry.background rows=3 char_limit=250 autofocus=True extra_class="is-small" %}
+    <button type="submit" class="button is-small is-success mt-1">&#10003;</button>
+  </form></td>
+  {% else %}
+  <td class="is-size-7" style="cursor:pointer; min-width:200px; white-space:pre-wrap" hx-get="{% url 'activities:uc_cell' entry.pk 'background' %}" hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML">{{ entry.background|default:"—" }}</td>
+  {% endif %}
+
+  {# Description (350ch) #}
+  {% if editing == 'description' %}
+  <td style="min-width:220px"><form hx-post="{% url 'activities:uc_cell' entry.pk 'description' %}" hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML">{% csrf_token %}
+    {% include "core/_textbox.html" with name="value" value=entry.description rows=3 char_limit=350 autofocus=True extra_class="is-small" %}
+    <button type="submit" class="button is-small is-success mt-1">&#10003;</button>
+  </form></td>
+  {% else %}
+  <td class="is-size-7" style="cursor:pointer; min-width:220px; white-space:pre-wrap" hx-get="{% url 'activities:uc_cell' entry.pk 'description' %}" hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML">{{ entry.description|default:"—" }}</td>
+  {% endif %}
+
+  {# Grades #}
+  {% if editing == 'grades' %}
+  <td><form hx-post="{% url 'activities:uc_cell' entry.pk 'grades' %}" hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML">{% csrf_token %}
+    <div class="is-size-7" style="white-space:nowrap">
+      <label><input type="checkbox" name="grade_9" {% if entry.grade_9 %}checked{% endif %}> 9</label>&nbsp;
+      <label><input type="checkbox" name="grade_10" {% if entry.grade_10 %}checked{% endif %}> 10</label>&nbsp;
+      <label><input type="checkbox" name="grade_11" {% if entry.grade_11 %}checked{% endif %}> 11</label>&nbsp;
+      <label><input type="checkbox" name="grade_12" {% if entry.grade_12 %}checked{% endif %}> 12</label>
+      <button type="submit" class="button is-small is-success ml-1">&#10003;</button>
+    </div>
+  </form></td>
+  {% else %}
+  <td class="is-size-7" style="cursor:pointer; white-space:nowrap" hx-get="{% url 'activities:uc_cell' entry.pk 'grades' %}" hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML">{% if entry.grade_9 %}9 {% endif %}{% if entry.grade_10 %}10 {% endif %}{% if entry.grade_11 %}11 {% endif %}{% if entry.grade_12 %}12{% endif %}{% if not entry.grade_9 and not entry.grade_10 and not entry.grade_11 and not entry.grade_12 %}—{% endif %}</td>
+  {% endif %}
+
+  {# Hrs/wk #}
+  {% if editing == 'hours_per_week' %}
+  <td style="width:70px"><form hx-post="{% url 'activities:uc_cell' entry.pk 'hours_per_week' %}" hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML">{% csrf_token %}
+    <input class="input is-small" type="text" name="value" value="{{ entry.hours_per_week }}" autofocus style="width:45px">
+    <button type="submit" class="button is-small is-success">&#10003;</button>
+  </form></td>
+  {% else %}
+  <td style="width:70px; cursor:pointer" hx-get="{% url 'activities:uc_cell' entry.pk 'hours_per_week' %}" hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML">{{ entry.hours_per_week|default:"—" }}</td>
+  {% endif %}
+
+  {# Wks/yr #}
+  {% if editing == 'weeks_per_year' %}
+  <td style="width:70px"><form hx-post="{% url 'activities:uc_cell' entry.pk 'weeks_per_year' %}" hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML">{% csrf_token %}
+    <input class="input is-small" type="text" name="value" value="{{ entry.weeks_per_year }}" autofocus style="width:45px">
+    <button type="submit" class="button is-small is-success">&#10003;</button>
+  </form></td>
+  {% else %}
+  <td style="width:70px; cursor:pointer" hx-get="{% url 'activities:uc_cell' entry.pk 'weeks_per_year' %}" hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML">{{ entry.weeks_per_year|default:"—" }}</td>
+  {% endif %}
+
+  {# Hub (read-only) #}
+  <td class="is-size-7">{% if entry.core_activity %}<span class="tag is-light is-small" title="{{ entry.core_activity.name }}">{{ entry.core_activity.name|truncatewords:3 }}</span>{% else %}—{% endif %}</td>
+
+  {# Delete #}
+  <td style="width:40px">
+    <button class="button is-small is-danger is-outlined" hx-post="{% url 'activities:uc_delete' entry.pk %}" hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML" hx-confirm="Delete this UC entry?">&times;</button>
+  </td>
+</tr>

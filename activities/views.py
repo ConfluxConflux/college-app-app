@@ -5,6 +5,7 @@ from django.views.decorators.http import require_POST
 
 from .forms import UCEntryForm, CommonAppActivityForm, CommonAppHonorForm, MITEntryForm
 from .models import UCEntry, CommonAppActivity, CommonAppHonor, MITEntry
+from core.models import CoreActivity, Applicant
 
 
 def _get_cross_links(core_activity, exclude_model=None, exclude_pk=None):
@@ -31,18 +32,39 @@ def _get_cross_links(core_activity, exclude_model=None, exclude_pk=None):
     return linked
 
 
+def _prefetch_core_activities(applicant):
+    qs = list(
+        CoreActivity.objects.filter(applicant=applicant).order_by('order')
+        .prefetch_related('uc_entries', 'common_app_activities', 'common_app_honors', 'mit_entries')
+    )
+    for a in qs:
+        a.uc_entry = next(iter(a.uc_entries.all()), None)
+        a.ca_entry = next(iter(a.common_app_activities.all()), None)
+        a.honor_entry = next(iter(a.common_app_honors.all()), None)
+        a.mit_entry = next(iter(a.mit_entries.all()), None)
+    return qs
+
+
 def activities_home(request):
-    tab = request.GET.get('tab', 'uc')
+    tab = request.GET.get('tab', 'centralized')
+    if tab == 'honors':
+        tab = 'common_app'
+    applicant = Applicant.objects.get(pk=1)
     context = {
         'tab': tab,
-        'uc_entries': UCEntry.objects.select_related('core_activity').all(),
-        'uc_count': UCEntry.objects.count(),
-        'common_app_activities': CommonAppActivity.objects.select_related('core_activity').all(),
-        'ca_count': CommonAppActivity.objects.count(),
-        'common_app_honors': CommonAppHonor.objects.select_related('core_activity').all(),
-        'honor_count': CommonAppHonor.objects.count(),
-        'mit_entries': MITEntry.objects.select_related('core_activity').all(),
-        'mit_count': MITEntry.objects.count(),
+        'core_activities': _prefetch_core_activities(applicant),
+        'core_activity_count': CoreActivity.objects.filter(applicant=applicant).count(),
+        'uc_entries': UCEntry.objects.filter(applicant=applicant).select_related('core_activity'),
+        'uc_count': UCEntry.objects.filter(applicant=applicant).count(),
+        'uc_category_choices': UCEntry.CATEGORY_CHOICES,
+        'common_app_activities': CommonAppActivity.objects.filter(applicant=applicant).select_related('core_activity'),
+        'ca_count': CommonAppActivity.objects.filter(applicant=applicant).count(),
+        'ca_type_choices': CommonAppActivity.ACTIVITY_TYPE_CHOICES,
+        'common_app_honors': CommonAppHonor.objects.filter(applicant=applicant).select_related('core_activity'),
+        'honor_count': CommonAppHonor.objects.filter(applicant=applicant).count(),
+        'mit_entries': MITEntry.objects.filter(applicant=applicant).select_related('core_activity'),
+        'mit_count': MITEntry.objects.filter(applicant=applicant).count(),
+        'mit_category_choices': MITEntry.CATEGORY_CHOICES,
         'mit_category_limits': MITEntry.CATEGORY_LIMITS,
     }
     if request.headers.get('HX-Request'):
@@ -87,6 +109,26 @@ def uc_edit(request, pk):
         'entry': entry, 'linked': linked,
         'char_fields': {'background': 250, 'description': 350},
     })
+
+
+def uc_cell(request, pk, field):
+    entry = get_object_or_404(UCEntry, pk=pk)
+    ctx = {'entry': entry, 'uc_category_choices': UCEntry.CATEGORY_CHOICES}
+    if request.method == 'POST':
+        if field in ('name', 'background', 'description', 'hours_per_week', 'weeks_per_year'):
+            setattr(entry, field, request.POST.get('value', ''))
+            entry.save()
+        elif field == 'category':
+            entry.category = request.POST.get('value', '')
+            entry.save()
+        elif field == 'grades':
+            entry.grade_9 = 'grade_9' in request.POST
+            entry.grade_10 = 'grade_10' in request.POST
+            entry.grade_11 = 'grade_11' in request.POST
+            entry.grade_12 = 'grade_12' in request.POST
+            entry.save()
+        return render(request, 'activities/_uc_row.html', ctx)
+    return render(request, 'activities/_uc_row.html', {**ctx, 'editing': field})
 
 
 @require_POST
@@ -136,6 +178,35 @@ def ca_edit(request, pk):
     })
 
 
+def ca_cell(request, pk, field):
+    activity = get_object_or_404(CommonAppActivity, pk=pk)
+    ctx = {'activity': activity, 'ca_type_choices': CommonAppActivity.ACTIVITY_TYPE_CHOICES}
+    if request.method == 'POST':
+        if field in ('position', 'organization', 'description'):
+            setattr(activity, field, request.POST.get('value', ''))
+            activity.save()
+        elif field == 'activity_type':
+            activity.activity_type = request.POST.get('value', '')
+            activity.save()
+        elif field in ('hours_per_week', 'weeks_per_year'):
+            val = request.POST.get('value', '').strip()
+            setattr(activity, field, int(val) if val.isdigit() else None)
+            activity.save()
+        elif field == 'grades':
+            activity.grade_9 = 'grade_9' in request.POST
+            activity.grade_10 = 'grade_10' in request.POST
+            activity.grade_11 = 'grade_11' in request.POST
+            activity.grade_12 = 'grade_12' in request.POST
+            activity.save()
+        elif field == 'timing':
+            activity.timing_school = 'timing_school' in request.POST
+            activity.timing_breaks = 'timing_breaks' in request.POST
+            activity.timing_all_year = 'timing_all_year' in request.POST
+            activity.save()
+        return render(request, 'activities/_ca_row.html', ctx)
+    return render(request, 'activities/_ca_row.html', {**ctx, 'editing': field})
+
+
 @require_POST
 def ca_delete(request, pk):
     get_object_or_404(CommonAppActivity, pk=pk).delete()
@@ -181,6 +252,29 @@ def honor_edit(request, pk):
         'entry': entry, 'linked': linked,
         'char_fields': {},
     })
+
+
+def honor_cell(request, pk, field):
+    honor = get_object_or_404(CommonAppHonor, pk=pk)
+    ctx = {'honor': honor}
+    if request.method == 'POST':
+        if field == 'title':
+            honor.title = request.POST.get('value', '')
+            honor.save()
+        elif field == 'grades':
+            honor.grade_9 = 'grade_9' in request.POST
+            honor.grade_10 = 'grade_10' in request.POST
+            honor.grade_11 = 'grade_11' in request.POST
+            honor.grade_12 = 'grade_12' in request.POST
+            honor.save()
+        elif field == 'levels':
+            honor.level_school = 'level_school' in request.POST
+            honor.level_state_regional = 'level_state_regional' in request.POST
+            honor.level_national = 'level_national' in request.POST
+            honor.level_international = 'level_international' in request.POST
+            honor.save()
+        return render(request, 'activities/_honor_row.html', ctx)
+    return render(request, 'activities/_honor_row.html', {**ctx, 'editing': field})
 
 
 @require_POST
@@ -230,6 +324,24 @@ def mit_edit(request, pk):
         'char_fields': {},
         'word_fields': {'description': 40},
     })
+
+
+def mit_cell(request, pk, field):
+    entry = get_object_or_404(MITEntry, pk=pk)
+    ctx = {'entry': entry, 'mit_category_choices': MITEntry.CATEGORY_CHOICES}
+    if request.method == 'POST':
+        if field in ('org_name', 'role_award', 'participation_period', 'description'):
+            setattr(entry, field, request.POST.get('value', ''))
+            entry.save()
+        elif field == 'category':
+            entry.category = request.POST.get('value', '')
+            entry.save()
+        elif field in ('hours_per_week', 'weeks_per_year'):
+            val = request.POST.get('value', '').strip()
+            setattr(entry, field, int(val) if val.isdigit() else None)
+            entry.save()
+        return render(request, 'activities/_mit_row.html', ctx)
+    return render(request, 'activities/_mit_row.html', {**ctx, 'editing': field})
 
 
 @require_POST

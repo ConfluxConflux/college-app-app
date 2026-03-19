@@ -1,0 +1,44 @@
+{% comment %}
+  Reusable textbox component.
+
+  Parameters:
+    name        — form field name (required)
+    value       — initial content (required, can be empty string)
+    rows        — textarea height, default 4
+    char_limit  — max characters; shows counter, does not hard-block input
+    word_limit  — max words (space-separated, Common App style); shows counter
+    autofocus   — boolean, adds autofocus attribute
+    extra_attrs — raw HTML attributes to add to the textarea (e.g. hx-post="...")
+
+  Counter appears bottom-right only when at least one limit is set.
+  Color: grey → orange (≥90%) → red (≥100%)
+{% endcomment %}
+<div x-data="{
+  text: '',
+  get words() { return this.text.trim() === '' ? 0 : this.text.trim().split(' ').length; },
+  get chars()  { return this.text.length; },
+  wordColor:   function(limit) { var r = this.words / limit; return r >= 1 ? 'has-text-danger has-text-weight-semibold' : r >= 0.9 ? 'has-text-warning-dark' : 'has-text-grey'; },
+  charColor:   function(limit) { var r = this.chars / limit; return r >= 1 ? 'has-text-danger has-text-weight-semibold' : r >= 0.9 ? 'has-text-warning-dark' : 'has-text-grey'; }
+}" x-init="text = $refs.box.value">
+  <textarea
+    name="{{ name }}"
+    class="textarea{% if extra_class %} {{ extra_class }}{% endif %}"
+    rows="{{ rows|default:4 }}"
+    x-model="text"
+    x-ref="box"
+    {% if autofocus %}autofocus{% endif %}
+    {% if char_limit %}maxlength="{{ char_limit }}"{% endif %}
+    {{ extra_attrs }}
+  >{{ value }}</textarea>
+  {% if word_limit or char_limit %}
+  <p style="text-align:right; margin-top:0.25rem; font-size:0.75rem; line-height:1;">
+    {% if word_limit %}
+    <span :class="wordColor({{ word_limit }})" x-text="words + ' / {{ word_limit }} words'"></span>
+    {% endif %}
+    {% if word_limit and char_limit %}<span class="has-text-grey"> &nbsp;·&nbsp; </span>{% endif %}
+    {% if char_limit %}
+    <span :class="charColor({{ char_limit }})" x-text="chars + ' / {{ char_limit }} chars'"></span>
+    {% endif %}
+  </p>
+  {% endif %}
+</div>

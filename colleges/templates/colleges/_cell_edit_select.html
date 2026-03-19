@@ -1,21 +1,30 @@
 {% load college_tags %}
 <tr id="college-row-{{ college.pk }}" class="status-{{ college.apply_status }} has-background-white-ter">
   {% for field_name, field_label in table_fields %}
-  <td>
+  <td class="col-{{ field_name }}">
     {% if field_name == field %}
     <form hx-post="{% url 'colleges:edit_cell' college.pk field %}"
           hx-target="#college-row-{{ college.pk }}"
           hx-swap="outerHTML">
       {% csrf_token %}
-      <div class="select is-small">
-        <select name="value" autofocus
-                onchange="this.form.requestSubmit()"
-                onkeydown="if(event.key==='Escape'){htmx.ajax('GET','{% url 'colleges:list' %}','#college-table-wrapper')}">
-          <option value="">—</option>
-          {% for val, label in choices %}
-          <option value="{{ val }}" {% if val == current_value %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
+      <div class="field has-addons">
+        <div class="control">
+          <div class="select is-small">
+            <select name="value" autofocus
+                    onchange="this.form.requestSubmit()"
+                    onkeydown="if(event.key==='Escape'){htmx.ajax('GET','{% url 'colleges:list' %}','#college-table-wrapper')}">
+              <option value="">—</option>
+              {% for val, label in choices %}
+              <option value="{{ val }}" {% if val == current_value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="control">
+          <button type="button" class="button is-small is-light"
+                  hx-get="{% url 'colleges:list' %}"
+                  hx-target="#college-table-wrapper">&#10005;</button>
+        </div>
       </div>
     </form>
     {% elif field_name == 'name' %}
@@ -29,9 +38,4 @@
     {% endif %}
   </td>
   {% endfor %}
-  <td>
-    <button class="button is-small is-light"
-            hx-get="{% url 'colleges:list' %}"
-            hx-target="#college-table-wrapper">Cancel</button>
-  </td>
 </tr>

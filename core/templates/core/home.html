@@ -3,8 +3,7 @@
 {% block title %}Dashboard - College App App{% endblock %}
 
 {% block content %}
-<h1 class="title">College App App</h1>
-<p class="subtitle">Your college application command center</p>
+<h1 class="title">Dashboard</h1>
 
 <div class="columns is-multiline">
   <div class="column is-4">
@@ -36,12 +35,10 @@
   <div class="column is-4">
     <div class="box">
       <h2 class="title is-5">
-        <a href="{% url 'supplements:home' %}">Supplements</a>
+        <a href="{% url 'supplements:home' %}">Essays</a>
       </h2>
-      <p class="is-size-3 has-text-weight-bold has-text-primary">
-        {{ essay_done_count }}/{{ essay_count }}
-      </p>
-      <p class="has-text-grey">essays done</p>
+      <p class="has-text-grey">A place to keep track of personal essays and supplementals.</p>
+      <p class="has-text-danger has-text-weight-bold" style="margin-top: 0.5rem;">I HAVE NOT MADE THIS YET</p>
     </div>
   </div>
 </div>
