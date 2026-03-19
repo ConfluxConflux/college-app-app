@@ -82,9 +82,25 @@
           <th>Name</th>
           <th>Category</th>
           <th>
-            <span class="th-tooltip" data-tip="UC prompt: &quot;Briefly describe the background of this activity or award, including eligibility requirements or fees.&quot; (0–250 chars)">
-              Background <span class="has-text-grey is-size-7">(250ch)</span>
-            </span>
+            Background <span class="has-text-grey is-size-7">(250ch)</span>
+            <span class="th-info-icon" id="bg-tip-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="bg-tip-popup">
+              <table class="table is-narrow is-bordered mb-0" style="background:white; min-width:380px">
+                <thead>
+                  <tr>
+                    <th style="background:#f5f5f5; white-space:nowrap">Category</th>
+                    <th style="background:#f5f5f5">Background (0–250 chars)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td style="white-space:nowrap">Award or honor</td><td>What are the eligibility reqs. for this award or honor?</td></tr>
+                  <tr><td style="white-space:nowrap">Extracurricular activity</td><td class="has-text-grey">–</td></tr>
+                  <tr><td style="white-space:nowrap">Volunteer / Community Service</td><td>Describe the organization, program, school or group.</td></tr>
+                  <tr><td style="white-space:nowrap">Work experience</td><td>Briefly describe the company or organization where you worked.</td></tr>
+                  <tr><td style="white-space:nowrap">Other coursework</td><td class="has-text-grey">–</td></tr>
+                </tbody>
+              </table>
+            </div>
           </th>
           <th>Description <span class="has-text-grey is-size-7">(350ch)</span></th>
           <th>Grades</th>
@@ -100,11 +116,7 @@
           {% if slot %}
             {% include "activities/_uc_row.html" with entry=slot slot_num=forloop.counter uc_category_choices=uc_category_choices %}
           {% else %}
-            <tr class="uc-placeholder">
-              <td style="width:18px"></td>
-              <td class="is-size-7" style="width:28px">{{ forloop.counter }}</td>
-              <td colspan="10" class="is-size-7">— empty —</td>
-            </tr>
+            {% include "activities/_uc_empty_row.html" with slot_num=forloop.counter %}
           {% endif %}
         {% endfor %}
         {% for entry in uc_overflow %}
@@ -118,13 +130,6 @@
       </tbody>
     </table>
   </div>
-  <p class="is-size-7 has-text-grey mt-2">
-    <span style="display:inline-block;width:12px;height:12px;background:#fefce8;border:1px solid #ddd;vertical-align:middle"></span> Award/honor &nbsp;
-    <span style="display:inline-block;width:12px;height:12px;background:#eff6ff;border:1px solid #ddd;vertical-align:middle"></span> Extracurricular &nbsp;
-    <span style="display:inline-block;width:12px;height:12px;background:#f0fdf4;border:1px solid #ddd;vertical-align:middle"></span> Volunteer &nbsp;
-    <span style="display:inline-block;width:12px;height:12px;background:#fff7ed;border:1px solid #ddd;vertical-align:middle"></span> Work &nbsp;
-    <span style="display:inline-block;width:12px;height:12px;background:#faf5ff;border:1px solid #ddd;vertical-align:middle"></span> Coursework
-  </p>
 </div>
 
 <!-- Common App Activities & Honors -->

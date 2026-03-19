@@ -148,6 +148,25 @@ def uc_delete(request, pk):
 
 
 @require_POST
+def uc_slot_add(request, slot):
+    """Create a new UCEntry for an empty slot, returned in edit mode."""
+    field = request.POST.get('field', 'name')
+    applicant = Applicant.objects.get(pk=1)
+    entry = UCEntry.objects.create(
+        applicant=applicant,
+        order=slot,
+        category='extracurricular',
+    )
+    ctx = {
+        'entry': entry,
+        'uc_category_choices': UCEntry.CATEGORY_CHOICES,
+        'editing': field,
+        'slot_num': slot,
+    }
+    return render(request, 'activities/_uc_row.html', ctx)
+
+
+@require_POST
 def uc_reorder(request):
     applicant = Applicant.objects.get(pk=1)
     data = json.loads(request.body)

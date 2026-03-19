@@ -98,16 +98,16 @@ body {
   color: #ffe08a;
 }
 
-/* UC category row colors */
-.uc-cat-award           { background-color: #fefce8 !important; }
-.uc-cat-extracurricular { background-color: #eff6ff !important; }
-.uc-cat-volunteer       { background-color: #f0fdf4 !important; }
-.uc-cat-work            { background-color: #fff7ed !important; }
-.uc-cat-coursework      { background-color: #faf5ff !important; }
+/* UC category row colors — must beat .table tbody tr specificity (0,1,2) */
+.table tbody tr.uc-cat-award           { background-color: #fef9c3 !important; }
+.table tbody tr.uc-cat-extracurricular { background-color: #dbeafe !important; }
+.table tbody tr.uc-cat-volunteer       { background-color: #dcfce7 !important; }
+.table tbody tr.uc-cat-work            { background-color: #ffedd5 !important; }
+.table tbody tr.uc-cat-coursework      { background-color: #ede9fe !important; }
 
 /* UC placeholder (empty slot) rows */
-.uc-placeholder td { color: #bbb !important; font-style: italic; }
-.uc-placeholder { background-color: rgba(245,245,245,0.4) !important; }
+.table tbody tr.uc-placeholder { background-color: rgba(248,248,248,0.5) !important; }
+.uc-placeholder td { color: #ccc !important; }
 
 /* Drag handle */
 .drag-handle {
@@ -118,33 +118,27 @@ body {
 }
 .drag-handle:active { cursor: grabbing; }
 
-/* Column header tooltip */
-.th-tooltip {
-  position: relative;
+/* Column header info icon */
+.th-info-icon {
   cursor: help;
-  border-bottom: 1px dashed #aaa;
-  display: inline-block;
-}
-.th-tooltip::after {
-  content: attr(data-tip);
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: #333;
-  color: #fff;
+  color: #aaa;
   font-size: 0.72rem;
-  font-weight: normal;
-  padding: 6px 10px;
-  border-radius: 4px;
-  white-space: normal;
-  width: 280px;
-  text-align: left;
-  z-index: 200;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.15s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.35);
-  line-height: 1.4;
+  margin-left: 3px;
+  vertical-align: middle;
 }
-.th-tooltip:hover::after { opacity: 1; }
+.th-info-icon:hover { color: #555; }
+
+/* Tooltip popup (positioned via JS, escapes table overflow) */
+.th-tooltip-popup {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 8px 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  font-weight: normal;
+  white-space: normal;
+  transform: translateX(-50%);
+}

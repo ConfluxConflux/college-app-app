@@ -12,6 +12,26 @@
     if (parts.length === 2) return parts.pop().split(';').shift();
   }
 
+  // Tooltip: use position:fixed so it escapes table overflow clipping
+  function initTooltips() {
+    document.querySelectorAll('.th-info-icon').forEach(function(icon) {
+      const popupId = icon.id.replace('-anchor', '-popup');
+      const popup = document.getElementById(popupId);
+      if (!popup) return;
+      icon.addEventListener('mouseenter', function() {
+        popup.style.display = 'block';
+        const rect = icon.getBoundingClientRect();
+        const pw = popup.offsetWidth;
+        const ph = popup.offsetHeight;
+        popup.style.left = Math.max(4, rect.left + rect.width / 2 - pw / 2) + 'px';
+        popup.style.top = (rect.top - ph - 8) + 'px';
+      });
+      icon.addEventListener('mouseleave', function() {
+        popup.style.display = 'none';
+      });
+    });
+  }
+
   function initUcSort() {
     const tbody = document.getElementById('uc-entries-tbody');
     if (!tbody) return;
@@ -33,7 +53,10 @@
     });
   }
 
-  document.addEventListener('DOMContentLoaded', initUcSort);
+  document.addEventListener('DOMContentLoaded', function() {
+    initTooltips();
+    initUcSort();
+  });
 })();
 </script>
 {% endblock %}
