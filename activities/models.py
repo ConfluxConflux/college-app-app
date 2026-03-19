@@ -99,7 +99,7 @@ class CommonAppActivity(models.Model):
     )
     order = models.IntegerField(default=0)
     activity_type = models.CharField(max_length=30, choices=ACTIVITY_TYPE_CHOICES)
-    position = models.CharField(max_length=50, blank=True)
+    position = models.CharField(max_length=150, blank=True)
     organization = models.CharField(max_length=100, blank=True)
     description = models.CharField(max_length=150, blank=True)
 
