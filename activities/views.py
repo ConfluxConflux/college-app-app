@@ -447,11 +447,11 @@ def export_uc(request):
             f'  {e.description or "(empty)"}',
         ]
         if e.category == 'award':
-            levels = [l for l, label in [
+            levels = [label for val, label in [
                 (e.level_school, 'School'), (e.level_city, 'City'),
                 (e.level_state, 'State'), (e.level_regional, 'Regional'),
                 (e.level_national, 'National'), (e.level_international, 'International'),
-            ] if l]
+            ] if val]
             row.append(f'Level(s) of Recognition: {", ".join(levels) or "—"}')
             academic = 'Yes' if e.is_academic else ('No' if e.is_academic is False else '—')
             row.append(f'Academic: {academic}')
