@@ -38,19 +38,19 @@ body {
 }
 
 
-/* Status colors — applied to Tabulator rows, pill selects, and badges */
-.status-applying    { background-color: #b8d4f5 !important; }
-.status-likely      { background-color: #eff5fb !important; }
-.status-considering { background-color: #d4b8f5 !important; }
-.status-unlikely    { background-color: #feecf0 !important; }
-.status-not_applying{ background-color: #f5f5f5 !important; }
-.status-applied     { background-color: #eff1fa !important; }
-.status-accepted    { background-color: #dbf5e8 !important; }
-.status-deferred    { background-color: #fff3d6 !important; }
-.status-waitlisted  { background-color: #fff3d6 !important; }
-.status-rejected    { background-color: #fde0e6 !important; }
-.status-enrolled    { background-color: #ebf0f7 !important; }
-.status-withdrawn   { background-color: #e8ddd4 !important; }
+/* Status colors — used by the Applications page pill select */
+.status-applying    { background-color: #2196F3 !important; color: #fff !important; }
+.status-likely      { background-color: #6fb3e0 !important; color: #fff !important; }
+.status-considering { background-color: #9C27B0 !important; color: #fff !important; }
+.status-unlikely    { background-color: #e88a8a !important; color: #fff !important; }
+.status-not_applying{ background-color: #9E9E9E !important; color: #fff !important; }
+.status-applied     { background-color: #43A047 !important; color: #fff !important; }
+.status-accepted    { background-color: #4CAF50 !important; color: #fff !important; }
+.status-deferred    { background-color: #FF9800 !important; color: #fff !important; }
+.status-waitlisted  { background-color: #FF9800 !important; color: #fff !important; }
+.status-rejected    { background-color: #F44336 !important; color: #fff !important; }
+.status-enrolled    { background-color: #00BCD4 !important; color: #fff !important; }
+.status-withdrawn   { background-color: #795548 !important; color: #fff !important; }
 
 /* Status badge pill (inside Tabulator status cell) */
 .status-badge {
