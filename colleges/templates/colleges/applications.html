@@ -88,7 +88,7 @@
 
   {# Essays tile #}
   <div class="column is-one-third">
-    <a href="{% url 'supplements:home' %}"
+    <a href="{% url 'supplements:home' %}{% if selected %}?college={{ selected.pk }}{% endif %}"
        class="box is-block" style="text-decoration:none; color:inherit; height:100%;">
       <p class="app-tile-heading">Supplemental Essays</p>
       {% if essay_total %}
@@ -267,7 +267,7 @@
       </div>
     </div>
     <div class="level-right">
-      <a href="{% url 'supplements:home' %}" class="is-size-7 has-text-grey">
+      <a href="{% url 'supplements:home' %}{% if selected %}?college={{ selected.pk }}{% endif %}" class="is-size-7 has-text-grey">
         Edit in Essays →
       </a>
     </div>
@@ -287,7 +287,7 @@
     <tbody>
       {% for essay in essays %}
       <tr x-data="{ s: '{{ essay.status }}' }"
-          onclick="window.location='{% url 'supplements:home' %}'"
+          onclick="window.location='{% url 'supplements:home' %}{% if selected %}?college={{ selected.pk }}{% endif %}'"
           style="cursor:pointer;">
         <td @click.stop>
           <select x-model="s" name="status"
@@ -333,7 +333,7 @@
   <div class="has-text-centered py-5" style="color:#aaa;">
     <p style="font-size:1rem; margin-bottom:0.4rem;">No essays added yet for <strong style="color:#777;">{{ selected.name }}</strong>.</p>
     <p style="font-size:0.85rem;">
-      Add supplemental prompts in the <a href="{% url 'supplements:home' %}">Essays tab</a>.
+      Add supplemental prompts in the <a href="{% url 'supplements:home' %}{% if selected %}?college={{ selected.pk }}{% endif %}">Essays tab</a>.
     </p>
   </div>
   {% endif %}

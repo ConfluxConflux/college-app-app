@@ -1,48 +1,336 @@
 {% extends "base.html" %}
 
-{% block title %}Essays - College App App{% endblock %}
+{% block title %}Essays — College App App{% endblock %}
 
 {% block content %}
-<h1 class="title">Essays</h1>
-<p class="subtitle">A place to keep track of personal essays and supplementals.</p>
-<p class="has-text-danger has-text-weight-bold" style="margin-bottom: 1.5rem;">I HAVE NOT MADE THIS YET</p>
 
-<div class="table-container">
-  <table class="table is-bordered is-striped is-hoverable is-fullwidth">
-    <thead>
-      <tr>
-        <th>College</th>
-        <th>Category</th>
-        <th>Prompt</th>
-        <th>Status</th>
-        <th>Words</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for essay in essays %}
-      <tr>
-        <td>{{ essay.college.name }}</td>
-        <td>{{ essay.category.name|default:"—" }}</td>
-        <td>{{ essay.prompt|truncatewords:20 }}</td>
-        <td>
-          {% if essay.status %}
-          <span class="tag {{ essay.status_color }}">{{ essay.get_status_display }}</span>
-          {% else %}
-          —
-          {% endif %}
-        </td>
-        <td>
-          {{ essay.word_count }}{% if essay.word_limit %}/{{ essay.word_limit }}{% endif %}
-        </td>
-      </tr>
-      {% empty %}
-      <tr>
-        <td colspan="5" class="has-text-centered has-text-grey">
-          No essays yet. Add colleges and their supplement prompts!
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<p class="has-text-danger has-text-weight-bold" style="margin-bottom:1rem;">
+  BASICALLY FULLY DESIGNED BY CLAUDE, VERY WIP
+</p>
+
+<div class="is-flex is-align-items-baseline" style="gap:1rem; margin-bottom:1.5rem;">
+  <h1 class="title mb-0">Essays</h1>
+  <p class="subtitle mb-0" style="color:#888;">Track and write your supplemental essays across all schools.</p>
 </div>
+
+{# ─────────────────────────────────────────────────────────────────
+   Outer Alpine component — owns view state and college selection
+   ───────────────────────────────────────────────────────────────── #}
+<div x-data="{
+  view: localStorage.getItem('essays_view') || 'by_topic',
+  selectedCollege: {% if selected_college %}{{ selected_college.pk }}{% else %}{% if matrix_colleges %}{{ matrix_colleges.0.pk }}{% else %}null{% endif %}{% endif %},
+  clickTimer: null,
+
+  setView(v) {
+    this.view = v;
+    localStorage.setItem('essays_view', v);
+  },
+  switchToCollege(pk) {
+    this.selectedCollege = pk;
+    this.setView('by_college');
+  },
+  handleCellClick(collegePk) {
+    if (this.clickTimer) {
+      clearTimeout(this.clickTimer);
+      this.clickTimer = null;
+      return; /* second click — dblclick handler will fire next */
+    }
+    const pk = collegePk;
+    this.clickTimer = setTimeout(() => {
+      this.clickTimer = null;
+      this.switchToCollege(pk);
+    }, 260);
+  },
+  handleCellDblClick(url) {
+    if (this.clickTimer) { clearTimeout(this.clickTimer); this.clickTimer = null; }
+    window.location.href = url;
+  }
+}" x-init="{% if selected_college %}setView('by_college'){% endif %}">
+
+{# ── Tab Bar ── #}
+<div class="essays-tab-bar">
+  <button class="essays-tab-btn" :class="{'is-active': view==='by_topic'}"
+          @click="setView('by_topic')">
+    By Topic
+  </button>
+  <button class="essays-tab-btn" :class="{'is-active': view==='by_college'}"
+          @click="setView('by_college')">
+    By College
+  </button>
+</div>
+
+{# ───────────────────────────────────────── #}
+{# BY TOPIC VIEW — spreadsheet matrix       #}
+{# ───────────────────────────────────────── #}
+<div x-show="view === 'by_topic'" x-cloak>
+
+  <p style="font-size:0.82rem; color:#999; margin-bottom:0.75rem;">
+    Click a college header to view and edit that college's essays.
+    Double-click any cell to enter focus mode.
+  </p>
+
+  {# Design decision: single-click behavior on cells #}
+  <div class="design-decision">
+    <strong>DESIGN DECISION</strong> — Click behavior in the matrix<br>
+    <em>Current choice:</em> Single-click on a cell switches to By College view for that school
+    (so any click on a row navigates away from the matrix). Double-click goes to focus mode.<br>
+    <em>Alternative:</em> Single-click on a cell does nothing (or highlights it); only clicking
+    the column header navigates to By College. Double-click still → focus. This keeps the matrix
+    stable and browsable without accidentally leaving it.
+  </div>
+
+  <div class="table-container" style="margin-top:1rem;">
+    <table class="table is-bordered matrix-table">
+      <thead>
+        <tr>
+          <th class="matrix-cat-header">Topic / Category</th>
+          {% for college in matrix_colleges %}
+          <th class="matrix-col-header"
+              @click="switchToCollege({{ college.pk }})"
+              title="Click to view {{ college.name }}'s essays">
+            {{ college.name }}
+          </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in matrix_rows %}
+        <tr>
+          <td class="matrix-cat-cell">{{ row.category.name }}</td>
+          {% for cell in row.cells %}
+          <td class="matrix-cell {% if cell.essays %}matrix-cell-filled{% else %}matrix-cell-empty{% endif %}"
+              {% if cell.essays %}
+              @click="handleCellClick({{ cell.college.pk }})"
+              @dblclick.prevent="handleCellDblClick('{% url 'supplements:essay_focus' cell.essays.0.pk %}')"
+              title="Double-click for focus mode"
+              {% endif %}>
+            {% if cell.essays %}
+              {% with e=cell.essays.0 %}
+              <div class="matrix-cell-inner">
+                <span class="essay-status-pill {{ e.status|default:'blank' }}">
+                  {{ e.get_status_display }}
+                </span>
+                {% if e.limit_display %}
+                <span class="matrix-count-chip">{{ e.count_display }}</span>
+                {% endif %}
+                {% if e.progress_pct > 0 %}
+                <div class="app-progress-bar matrix-mini-bar">
+                  <div style="width:{{ e.progress_pct }}%; background:{% if e.progress_pct >= 100 %}#43A047{% else %}#2a9d8f{% endif %};"></div>
+                </div>
+                {% endif %}
+                {% if cell.essays|length > 1 %}
+                <span class="matrix-multi-tag">+{{ cell.essays|length|add:"-1" }} more</span>
+                {% endif %}
+              </div>
+              {% endwith %}
+            {% else %}
+              <span class="matrix-empty-dash">—</span>
+            {% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {# Design decision: empty cell behavior #}
+  <div class="design-decision" style="margin-top:1.25rem;">
+    <strong>DESIGN DECISION</strong> — Clicking an empty matrix cell<br>
+    <em>Current choice:</em> Empty cells are not clickable — you'd need to go to "By College"
+    and create a new essay manually. This keeps data creation intentional.<br>
+    <em>Alternative:</em> Clicking an empty cell auto-creates a blank essay for that
+    college + category combination and immediately opens it in focus mode. Much faster
+    workflow, but might create accidental essays that are hard to delete.
+  </div>
+
+</div>{# end by_topic #}
+
+
+{# ───────────────────────────────────────── #}
+{# BY COLLEGE VIEW — essay cards            #}
+{# ───────────────────────────────────────── #}
+<div x-show="view === 'by_college'" x-cloak>
+
+  {# College selector tab row #}
+  <div class="college-selector-row">
+    {% for item in by_college_list %}
+    <button class="college-selector-btn"
+            :class="{'is-active': selectedCollege === {{ item.college.pk }}}"
+            @click="selectedCollege = {{ item.college.pk }}">
+      {{ item.college.name }}
+    </button>
+    {% endfor %}
+  </div>
+
+  <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-top:0.75rem; margin-bottom:1.25rem;">
+    {# Design decision: always-visible textarea #}
+    <div class="design-decision" style="flex:1; min-width:260px;">
+      <strong>DESIGN DECISION</strong> — Textarea visibility<br>
+      <em>Current choice:</em> Textareas are always visible and immediately editable —
+      no clicking needed to start writing.<br>
+      <em>Alternative:</em> Show only the prompt + a word count chip by default; click anywhere
+      on the card to expand the textarea. Cleaner when just reviewing, but adds friction for editing.
+    </div>
+
+    {# Design decision: topic tagging UI #}
+    <div class="design-decision" style="flex:1; min-width:260px;">
+      <strong>DESIGN DECISION</strong> — Topic tagging interface<br>
+      <em>Current choice:</em> A compact dropdown on each card lets you assign any existing
+      category (topic). Changes immediately update the matrix.<br>
+      <em>Alternative:</em> A drag-and-drop or type-ahead tag picker — more discoverable
+      and faster when there are many categories, but much more complex to build.
+    </div>
+  </div>
+
+  {# Per-college essay cards #}
+  {% for item in by_college_list %}
+  <div x-show="selectedCollege === {{ item.college.pk }}" x-cloak>
+
+    <div style="margin-bottom:1.5rem; margin-top:0.5rem;">
+      <a href="{% url 'colleges:applications' %}?college={{ item.college.pk }}"
+         style="font-size:0.78rem; color:#aaa;">
+        ↗ View {{ item.college.name }} on Applications dashboard
+      </a>
+    </div>
+
+    {% for essay in item.essays %}
+    {# Per-essay Alpine component #}
+    <div class="essay-card box"
+         x-data="{
+           text: '{{ essay.response|escapejs }}',
+           s: '{{ essay.status|escapejs }}',
+           saved: true,
+           saving: false,
+           limitType: '{{ essay.limit_type }}',
+           limitVal: {{ essay.limit_val }},
+           get wc() { return this.text.trim() ? this.text.trim().split(/\s+/).length : 0; },
+           get cc() { return this.text.length; },
+           get count() { return this.limitType === 'char' ? this.cc : this.wc; },
+           get overLimit() { return this.limitVal > 0 && this.count > this.limitVal; },
+           get nearLimit() { return this.limitVal > 0 && this.count >= Math.floor(this.limitVal * 0.9) && !this.overLimit; },
+           onInput(val) {
+             this.text = val;
+             this.saved = false;
+           }
+         }">
+
+      {# Card header row #}
+      <div class="essay-card-header">
+        <div class="essay-card-meta">
+          {# Topic tag — select for reassigning category #}
+          <select class="essay-cat-select"
+                  hx-post="{% url 'supplements:essay_category' essay.pk %}"
+                  hx-trigger="change"
+                  hx-swap="none"
+                  name="category"
+                  title="Assign topic — groups this essay in the By Topic matrix">
+            <option value="">— no topic —</option>
+            {% for cat in all_categories %}
+            <option value="{{ cat.pk }}" {% if essay.category_id == cat.pk %}selected{% endif %}>
+              {{ cat.name }}
+            </option>
+            {% endfor %}
+          </select>
+          {% if essay.limit_display %}
+          <span class="essay-limit-chip">{{ essay.limit_display }}</span>
+          {% endif %}
+        </div>
+        <div class="essay-card-actions">
+          {# Status pill select #}
+          <select class="essay-status-pill"
+                  :class="s || 'blank'"
+                  x-model="s"
+                  hx-post="{% url 'supplements:essay_status' essay.pk %}"
+                  hx-trigger="change"
+                  hx-swap="none"
+                  name="status">
+            {% for val, label in status_choices %}
+            <option value="{{ val }}" {% if val == essay.status %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+
+          <a href="{% url 'supplements:essay_focus' essay.pk %}"
+             class="focus-link-btn"
+             title="Open in focus mode">
+            ⛶ Focus
+          </a>
+        </div>
+      </div>
+
+      {# Prompt #}
+      <p class="essay-prompt-text">{{ essay.prompt }}</p>
+
+      {# Auto-save textarea form #}
+      <form hx-post="{% url 'supplements:essay_save' essay.pk %}"
+            hx-trigger="input delay:900ms"
+            hx-swap="none"
+            @htmx:before-request="saving=true"
+            @htmx:after-request="saving=false; saved=true">
+        {% csrf_token %}
+        <textarea class="essay-textarea"
+                  name="response"
+                  placeholder="Write your response here…"
+                  x-init="$el.style.height=$el.scrollHeight+'px'"
+                  @input="onInput($el.value); $el.style.height='auto'; $el.style.height=$el.scrollHeight+'px'"
+                  spellcheck="true">{{ essay.response }}</textarea>
+      </form>
+
+      {# Counter + saved indicator #}
+      <div class="essay-card-footer">
+        <span class="essay-word-counter"
+              :class="{'is-over': overLimit, 'is-near': nearLimit}">
+          <span x-text="count">{{ essay.word_count }}</span>
+          <span x-show="limitVal > 0">
+            / <span x-text="limitVal"></span>
+            <span x-show="limitType === 'char'">ch</span>
+            <span x-show="limitType !== 'char'">w</span>
+          </span>
+          <span x-show="limitVal === 0"> words</span>
+        </span>
+
+        <span class="essay-saved-indicator"
+              :class="saving ? 'is-saving' : (saved ? 'is-saved' : 'is-unsaved')">
+          <span x-show="saving" style="display:none">Saving…</span>
+          <span x-show="!saving && saved">Saved</span>
+          <span x-show="!saving && !saved" style="display:none">Unsaved</span>
+        </span>
+      </div>
+
+    </div>{# end essay-card #}
+    {% empty %}
+    <p class="has-text-grey" style="margin-top:1rem;">No essays for this college yet.</p>
+    {% endfor %}
+
+  </div>{# end per-college div #}
+  {% endfor %}
+
+  {# Design decision: personal essay inclusion #}
+  <div class="design-decision" style="margin-top:1.5rem;">
+    <strong>DESIGN DECISION</strong> — Personal Essay in the Essays tab<br>
+    <em>Current choice:</em> The Common App personal statement appears as a row in the matrix
+    and as an essay card in By College view, just like any other essay. This keeps it all in
+    one place.<br>
+    <em>Alternative:</em> Give the personal essay its own pinned section at the top (above the
+    tab switcher), since it's the same essay submitted to every school and is a fundamentally
+    different kind of writing task.
+  </div>
+
+</div>{# end by_college #}
+
+</div>{# end outer Alpine #}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  /* Restore last selected college from URL param on load */
+  (function() {
+    const params = new URLSearchParams(window.location.search);
+    const collegePk = params.get('college');
+    if (collegePk) {
+      /* Alpine will have already used selectedCollege from x-init */
+      localStorage.setItem('essays_view', 'by_college');
+    }
+  })();
+</script>
 {% endblock %}

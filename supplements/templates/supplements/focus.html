@@ -1,0 +1,92 @@
+{% extends "focus_base.html" %}
+
+{% block title %}Focus — {{ essay.college.name }}{% endblock %}
+
+{% block content %}
+<div class="focus-shell"
+     x-data="{
+       text: '{{ essay.response|escapejs }}',
+       saved: true,
+       saving: false,
+       limitType: '{{ essay.limit_type }}',
+       limitVal: {{ essay.limit_val }},
+       get wc() {
+         return this.text.trim() ? this.text.trim().split(/\s+/).length : 0;
+       },
+       get cc() { return this.text.length; },
+       get count() { return this.limitType === 'char' ? this.cc : this.wc; },
+       get overLimit() { return this.limitVal > 0 && this.count > this.limitVal; },
+       get nearLimit() { return this.limitVal > 0 && this.count >= Math.floor(this.limitVal * 0.9) && !this.overLimit; },
+       onInput() {
+         this.saved = false;
+       }
+     }">
+
+  <!-- Back bar -->
+  <div class="focus-topbar">
+    <a href="javascript:history.back()" class="focus-back-btn">
+      ← Back
+    </a>
+    <span class="focus-college-label">{{ essay.college.name }}</span>
+    <span class="focus-saved-label" :class="saving ? 'is-saving' : (saved ? 'is-saved' : 'is-unsaved')">
+      <span x-show="saving">Saving…</span>
+      <span x-show="!saving && saved">Saved</span>
+      <span x-show="!saving && !saved">Unsaved</span>
+    </span>
+  </div>
+
+  <!-- Prompt area -->
+  <div class="focus-prompt-area">
+    {% if essay.category %}
+    <div class="focus-category-tag">{{ essay.category.name }}</div>
+    {% endif %}
+    <p class="focus-prompt-text">{{ essay.prompt }}</p>
+    {% if essay.limit_display %}
+    <span class="focus-limit-chip">{{ essay.limit_display }}</span>
+    {% endif %}
+  </div>
+
+  <!-- Editor -->
+  <div class="focus-editor-area">
+    <form id="focus-save-form"
+          hx-post="{% url 'supplements:essay_save' essay.pk %}"
+          hx-trigger="input delay:900ms"
+          hx-swap="none"
+          @htmx:before-request="saving=true"
+          @htmx:after-request="saving=false; saved=true">
+      {% csrf_token %}
+      <textarea
+        class="focus-textarea"
+        name="response"
+        placeholder="Write your response here…"
+        x-model="text"
+        x-init="$el.style.height = Math.max($el.scrollHeight, 320) + 'px'"
+        @input="onInput(); $el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
+        spellcheck="true"
+        autocomplete="off"
+      >{{ essay.response }}</textarea>
+    </form>
+
+    <!-- Counter -->
+    <div class="focus-counter-row">
+      <span class="focus-counter"
+            :class="{ 'is-over': overLimit, 'is-near': nearLimit }">
+        <span x-text="count"></span>
+        <span x-show="limitVal > 0"> / <span x-text="limitVal"></span>
+          <span x-text="limitType === 'char' ? ' characters' : ' words'"></span>
+        </span>
+        <span x-show="limitVal === 0"> words</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- Design decision: Focus mode background -->
+  <div class="design-decision" style="position:fixed; bottom:1.5rem; right:1.5rem; max-width:280px; font-size:0.78rem;">
+    <strong>DESIGN DECISION</strong> — Focus mode background<br>
+    <em>Current:</em> Same teal gradient as the rest of the app — maintains visual continuity.<br>
+    <em>Alternative:</em> Solid white or off-white (#fafafa) — more "distraction-free writing tool" feel,
+    like iA Writer. Gradient might be too decorative for deep focus.
+  </div>
+
+</div>
+{% endblock %}
