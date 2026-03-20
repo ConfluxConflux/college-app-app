@@ -430,19 +430,37 @@ def export_uc(request):
     entries = UCEntry.objects.filter(applicant=applicant)
     lines = ['UC ACTIVITIES & AWARDS EXPORT', '=' * 40, '']
     for i, e in enumerate(entries, 1):
-        lines += [
+        row = [
             f'Entry {i} of {entries.count()}: {e.name}',
             f'Category: {e.get_category_display()}',
             f'Grades: {_grades(e)}',
-            f'Hours/week: {e.hours_per_week or "—"}    Weeks/year: {e.weeks_per_year or "—"}',
-            f'Background ({len(e.background)}/250 chars):',
-            f'  {e.background or "(empty)"}',
+        ]
+        if e.category != 'award':
+            row.append(f'Hours/week: {e.hours_per_week or "—"}    Weeks/year: {e.weeks_per_year or "—"}')
+        if e.category in ('award', 'volunteer', 'work'):
+            row += [
+                f'Background ({len(e.background)}/250 chars):',
+                f'  {e.background or "(empty)"}',
+            ]
+        row += [
             f'Description ({len(e.description)}/350 chars):',
             f'  {e.description or "(empty)"}',
-            '',
-            '-' * 40,
-            '',
         ]
+        if e.category == 'award':
+            levels = [l for l, label in [
+                (e.level_school, 'School'), (e.level_city, 'City'),
+                (e.level_state, 'State'), (e.level_regional, 'Regional'),
+                (e.level_national, 'National'), (e.level_international, 'International'),
+            ] if l]
+            row.append(f'Level(s) of Recognition: {", ".join(levels) or "—"}')
+            academic = 'Yes' if e.is_academic else ('No' if e.is_academic is False else '—')
+            row.append(f'Academic: {academic}')
+        if e.category == 'work':
+            still = 'Yes' if e.still_working else ('No' if e.still_working is False else '—')
+            row.append(f'Still working there: {still}')
+        if e.personal_notes:
+            row.append(f'Private notes: {e.personal_notes}')
+        lines += row + ['', '-' * 40, '']
     content = '\n'.join(lines)
     content += '\n\nJacob thinks this could be formatted better but hasn\'t put effort into reformatting it. It would take like 2 minutes with claude so please email him at chromaticconflux@gmail.com if it should be reformatted for easier copy-pasting'
     response = HttpResponse(content, content_type='text/plain; charset=utf-8')
