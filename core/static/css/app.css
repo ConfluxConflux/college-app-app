@@ -39,9 +39,9 @@ body {
 
 
 /* Status colors — used by the Applications page pill select */
-.status-applying    { background-color: #a8c8e8 !important; color: #222 !important; }
-.status-likely      { background-color: #b8d8f0 !important; color: #222 !important; }
-.status-considering { background-color: #c8a8e0 !important; color: #222 !important; }
+.status-applying    { background-color: #b8d8fc !important; color: #222 !important; }
+.status-likely      { background-color: #cce4fd !important; color: #222 !important; }
+.status-considering { background-color: #b8b0e8 !important; color: #222 !important; }
 .status-unlikely    { background-color: #e8b8b8 !important; color: #222 !important; }
 .status-not_applying{ background-color: #c8c8c8 !important; color: #222 !important; }
 .status-applied     { background-color: #43A047 !important; color: #fff !important; }
