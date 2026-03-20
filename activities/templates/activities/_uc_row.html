@@ -22,7 +22,8 @@
     </form>
   </td>
 
-  {# Background (250ch) #}
+  {# Background (250ch) — N/A for extracurricular, edu_prep, coursework #}
+  {% if entry.category == 'award' or entry.category == 'volunteer' or entry.category == 'work' %}
   <td style="min-width:200px" x-data="{
     e:false, v:'{{ entry.background|escapejs }}',
     get chars(){ return this.v.length; },
@@ -36,6 +37,9 @@
       <p style="text-align:right;margin-top:0.25rem;font-size:0.75rem;line-height:1;"><span :class="cc(250)" x-text="chars+' / 250 chars'"></span></p>
     </div>
   </td>
+  {% else %}
+  <td class="cell-na" style="min-width:200px">—</td>
+  {% endif %}
 
   {# Description (350ch) #}
   <td style="min-width:220px" x-data="{
@@ -64,21 +68,29 @@
     </form>
   </td>
 
-  {# Hrs/wk #}
+  {# Hrs/wk — N/A for awards #}
+  {% if entry.category != 'award' %}
   <td style="width:70px" x-data="{ e:false, v:'{{ entry.hours_per_week|escapejs }}' }">
     <span x-show="!e" @click="e=true; $nextTick(()=>$refs.i.focus())" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||'—'"></span>
     <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v" style="width:55px"
       hx-post="{% url 'activities:uc_cell' entry.pk 'hours_per_week' %}" hx-trigger="blur" hx-swap="none"
       @blur="e=false">
   </td>
+  {% else %}
+  <td class="cell-na" style="width:70px">—</td>
+  {% endif %}
 
-  {# Wks/yr #}
+  {# Wks/yr — N/A for awards #}
+  {% if entry.category != 'award' %}
   <td style="width:70px" x-data="{ e:false, v:'{{ entry.weeks_per_year|escapejs }}' }">
     <span x-show="!e" @click="e=true; $nextTick(()=>$refs.i.focus())" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||'—'"></span>
     <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v" style="width:55px"
       hx-post="{% url 'activities:uc_cell' entry.pk 'weeks_per_year' %}" hx-trigger="blur" hx-swap="none"
       @blur="e=false">
   </td>
+  {% else %}
+  <td class="cell-na" style="width:70px">—</td>
+  {% endif %}
 
   {# Notes #}
   <td style="min-width:140px" x-data="{ e:false, v:'{{ entry.personal_notes|escapejs }}' }">
@@ -87,6 +99,50 @@
       hx-post="{% url 'activities:uc_cell' entry.pk 'personal_notes' %}" hx-trigger="blur" hx-swap="none"
       @blur="e=false">
   </td>
+
+  {# Level(s) of Recognition — only for awards #}
+  {% if entry.category == 'award' %}
+  <td>
+    <form hx-post="{% url 'activities:uc_cell' entry.pk 'recognition_levels' %}" hx-trigger="change" hx-swap="none">
+      <div class="is-size-7" style="line-height:1.9; white-space:nowrap">
+        <label style="display:block"><input type="checkbox" name="level_school" {% if entry.level_school %}checked{% endif %}> Sch.</label>
+        <label style="display:block"><input type="checkbox" name="level_city" {% if entry.level_city %}checked{% endif %}> City</label>
+        <label style="display:block"><input type="checkbox" name="level_state" {% if entry.level_state %}checked{% endif %}> State</label>
+        <label style="display:block"><input type="checkbox" name="level_regional" {% if entry.level_regional %}checked{% endif %}> Reg.</label>
+        <label style="display:block"><input type="checkbox" name="level_national" {% if entry.level_national %}checked{% endif %}> Natl.</label>
+        <label style="display:block"><input type="checkbox" name="level_international" {% if entry.level_international %}checked{% endif %}> Intl.</label>
+      </div>
+    </form>
+  </td>
+  {% else %}
+  <td class="cell-na">—</td>
+  {% endif %}
+
+  {# Academic? — only for awards #}
+  {% if entry.category == 'award' %}
+  <td style="text-align:center">
+    <button class="button is-small {% if entry.is_academic %}is-success{% elif entry.is_academic is False %}is-light{% else %}is-light has-text-grey{% endif %}"
+      hx-post="{% url 'activities:uc_cell' entry.pk 'is_academic' %}"
+      hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML">
+      {% if entry.is_academic %}Yes{% elif entry.is_academic is False %}No{% else %}—{% endif %}
+    </button>
+  </td>
+  {% else %}
+  <td class="cell-na">—</td>
+  {% endif %}
+
+  {# Still work there? — only for work experience #}
+  {% if entry.category == 'work' %}
+  <td style="text-align:center">
+    <button class="button is-small {% if entry.still_working %}is-success{% elif entry.still_working is False %}is-light{% else %}is-light has-text-grey{% endif %}"
+      hx-post="{% url 'activities:uc_cell' entry.pk 'still_working' %}"
+      hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML">
+      {% if entry.still_working %}Yes{% elif entry.still_working is False %}No{% else %}—{% endif %}
+    </button>
+  </td>
+  {% else %}
+  <td class="cell-na">—</td>
+  {% endif %}
 
   {# Delete #}
   <td style="width:40px">

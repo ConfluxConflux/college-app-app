@@ -135,6 +135,20 @@ def uc_cell(request, pk, field):
             entry.grade_11 = 'grade_11' in request.POST
             entry.grade_12 = 'grade_12' in request.POST
             entry.save()
+        elif field == 'recognition_levels':
+            entry.level_school = 'level_school' in request.POST
+            entry.level_city = 'level_city' in request.POST
+            entry.level_state = 'level_state' in request.POST
+            entry.level_regional = 'level_regional' in request.POST
+            entry.level_national = 'level_national' in request.POST
+            entry.level_international = 'level_international' in request.POST
+            entry.save()
+        elif field == 'is_academic':
+            entry.is_academic = not entry.is_academic if entry.is_academic is not None else True
+            entry.save()
+        elif field == 'still_working':
+            entry.still_working = not entry.still_working if entry.still_working is not None else True
+            entry.save()
         return render(request, 'activities/_uc_row.html', ctx)
     return render(request, 'activities/_uc_row.html', {**ctx, 'editing': field})
 

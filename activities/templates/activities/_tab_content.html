@@ -79,34 +79,173 @@
         <tr>
           <th style="width:18px"></th>
           <th style="width:28px">#</th>
-          <th>Name</th>
-          <th>Category</th>
-          <th>
-            Background <span class="has-text-grey is-size-7">(250ch)</span>
-            <span class="th-info-icon" id="bg-tip-anchor">ⓘ</span>
-            <div class="th-tooltip-popup is-size-7" id="bg-tip-popup" style="display:none">
-              <table class="table is-narrow is-bordered mb-0" style="background:white; min-width:380px">
-                <thead>
-                  <tr>
-                    <th style="background:#f5f5f5; white-space:nowrap">Category</th>
-                    <th style="background:#f5f5f5">Background (0–250 chars)</th>
-                  </tr>
-                </thead>
+
+          {# Name #}
+          <th>Name
+            <span class="th-info-icon" id="uc-name-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="uc-name-popup" style="display:none; white-space:normal">
+              <table class="table is-narrow is-bordered mb-0" style="background:white; min-width:500px">
+                <thead><tr><th style="background:#f5f5f5; white-space:nowrap">Category</th><th style="background:#f5f5f5">UC prompt for "Name"</th></tr></thead>
                 <tbody>
-                  <tr><td style="white-space:nowrap">Award or honor</td><td>What are the eligibility reqs. for this award or honor?</td></tr>
-                  <tr><td style="white-space:nowrap">Extracurricular activity</td><td class="has-text-grey">–</td></tr>
-                  <tr><td style="white-space:nowrap">Volunteer / Community Service</td><td>Describe the organization, program, school or group.</td></tr>
-                  <tr><td style="white-space:nowrap">Work experience</td><td>Briefly describe the company or organization where you worked.</td></tr>
-                  <tr><td style="white-space:nowrap">Other coursework</td><td class="has-text-grey">–</td></tr>
+                  <tr><td style="white-space:nowrap">Award or honor</td><td>What's the name of the award or honor?</td></tr>
+                  <tr><td style="white-space:nowrap">Educational prep. program</td><td>What was the program name?</td></tr>
+                  <tr><td style="white-space:nowrap">Extracurricular activity</td><td>What's the name of the activity?</td></tr>
+                  <tr><td style="white-space:nowrap">Volunteer / Community service</td><td>What's the name of the organization, program, school, or group you volunteered for?</td></tr>
+                  <tr><td style="white-space:nowrap">Work experience</td><td>Where did you work? (Note: your job title goes here too.)</td></tr>
+                  <tr><td style="white-space:nowrap">Other coursework</td><td>What was the course name?</td></tr>
                 </tbody>
               </table>
             </div>
           </th>
-          <th>Description <span class="has-text-grey is-size-7">(350ch)</span></th>
-          <th>Grades</th>
-          <th>Hrs/wk</th>
-          <th>Wks/yr</th>
+
+          {# Category #}
+          <th>Category
+            <span class="th-info-icon" id="uc-cat-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="uc-cat-popup" style="display:none; white-space:normal">
+              <table class="table is-narrow is-bordered mb-0" style="background:white; min-width:460px">
+                <thead><tr><th style="background:#f5f5f5; white-space:nowrap">Category</th><th style="background:#f5f5f5">What it means</th></tr></thead>
+                <tbody>
+                  <tr><td style="white-space:nowrap">Award or honor</td><td>Awards and honors you've received that mean the most to you.</td></tr>
+                  <tr><td style="white-space:nowrap">Educational prep. program</td><td>Programs or activities that have enriched your academic experiences or helped you prepare for college.</td></tr>
+                  <tr><td style="white-space:nowrap">Extracurricular activity</td><td>Hobbies, clubs, sports, or anything else you haven't had the chance to tell UC about.</td></tr>
+                  <tr><td style="white-space:nowrap">Volunteer / Community service</td><td>Activities you've donated time and effort to without getting paid.</td></tr>
+                  <tr><td style="white-space:nowrap">Work experience</td><td>Any paid jobs or paid internships you've had.</td></tr>
+                  <tr><td style="white-space:nowrap">Other coursework</td><td>Courses other than those required for UC admission — courses that do not fit in UC's A-G subject areas.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </th>
+
+          {# Background #}
+          <th>Background <span class="has-text-grey is-size-7">(250ch)</span>
+            <span class="th-info-icon" id="uc-bg-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="uc-bg-popup" style="display:none; white-space:normal">
+              <p class="mb-2 has-text-grey"><em>Grayed out for categories where this field is not asked.</em></p>
+              <table class="table is-narrow is-bordered mb-0" style="background:white; min-width:500px">
+                <thead><tr><th style="background:#f5f5f5; white-space:nowrap">Category</th><th style="background:#f5f5f5">UC prompt (0–250 chars)</th></tr></thead>
+                <tbody>
+                  <tr><td style="white-space:nowrap">Award or honor</td><td>What are the eligibility requirements for this award or honor? For example: How are award recipients chosen? How many people are selected? Is there an application or nomination?</td></tr>
+                  <tr><td style="white-space:nowrap">Educational prep. program</td><td class="has-text-grey">— (not asked; describe the program in the Description column)</td></tr>
+                  <tr><td style="white-space:nowrap">Extracurricular activity</td><td class="has-text-grey">— (not asked)</td></tr>
+                  <tr><td style="white-space:nowrap">Volunteer / Community service</td><td>Please describe the organization, program, school or group. Consider what kind of work it does: What's the reason it exists today? How does it help a certain community or population?</td></tr>
+                  <tr><td style="white-space:nowrap">Work experience</td><td>Please briefly describe the company or organization where you worked. Consider describing the industry, the size of the company or organization, or its main focus.</td></tr>
+                  <tr><td style="white-space:nowrap">Other coursework</td><td class="has-text-grey">— (not asked)</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </th>
+
+          {# Description #}
+          <th>Description <span class="has-text-grey is-size-7">(350ch)</span>
+            <span class="th-info-icon" id="uc-desc-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="uc-desc-popup" style="display:none; white-space:normal">
+              <table class="table is-narrow is-bordered mb-0" style="background:white; min-width:540px">
+                <thead><tr><th style="background:#f5f5f5; white-space:nowrap">Category</th><th style="background:#f5f5f5">UC prompt (0–350 chars)</th></tr></thead>
+                <tbody>
+                  <tr><td style="white-space:nowrap">Award or honor</td><td>What did you do to achieve this award or honor? We'd like to understand what it took — on your part — to achieve this award. For instance: Were there multiple competitions you had to participate in? How much time did you dedicate?</td></tr>
+                  <tr><td style="white-space:nowrap">Educational prep. program</td><td>Briefly describe the program. Think about the program's main focus, your experience, and what you accomplished and learned while participating.</td></tr>
+                  <tr><td style="white-space:nowrap">Extracurricular activity</td><td>What did you do? Think about your experience, and what you accomplished and learned. We'd also like to know if you've held a leadership role — it can mean being a mentor, acting as a point-person in charge of a specific task, or taking a lead role in organizing an event or project.</td></tr>
+                  <tr><td style="white-space:nowrap">Volunteer / Community service</td><td>What did you do? Think about your experience, and what you accomplished and learned while volunteering. Leadership roles count too — mentoring, coordinating tasks, or organizing events.</td></tr>
+                  <tr><td style="white-space:nowrap">Work experience</td><td>What were your job responsibilities?</td></tr>
+                  <tr><td style="white-space:nowrap">Other coursework</td><td>Briefly describe the course. What program or school offered it? Think about the major themes or topics it covered, and what knowledge or skills you gained.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </th>
+
+          {# Grades #}
+          <th>Grades
+            <span class="th-info-icon" id="uc-grades-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="uc-grades-popup" style="display:none; white-space:normal">
+              <p class="mb-2 has-text-grey-dark"><em>If the activity occurred during the summer, select the grade you were in <strong>before</strong> that summer.</em></p>
+              <table class="table is-narrow is-bordered mb-0" style="background:white; min-width:400px">
+                <thead><tr><th style="background:#f5f5f5; white-space:nowrap">Category</th><th style="background:#f5f5f5">UC prompt for "Grades" column</th></tr></thead>
+                <tbody>
+                  <tr><td style="white-space:nowrap">Award or honor</td><td>When did you receive it?</td></tr>
+                  <tr><td style="white-space:nowrap">Educational prep. program</td><td>When did you participate in the program?</td></tr>
+                  <tr><td style="white-space:nowrap">Extracurricular activity</td><td>When did you participate in this activity?</td></tr>
+                  <tr><td style="white-space:nowrap">Volunteer / Community service</td><td>When did you volunteer?</td></tr>
+                  <tr><td style="white-space:nowrap">Work experience</td><td>When did you work at this job?</td></tr>
+                  <tr><td style="white-space:nowrap">Other coursework</td><td>When did you take this course?</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </th>
+
+          {# Hrs/wk #}
+          <th>Hrs/wk
+            <span class="th-info-icon" id="uc-hrs-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="uc-hrs-popup" style="display:none; white-space:normal">
+              <p class="mb-2 has-text-grey"><em>It's ok to estimate, but try to be as accurate as possible. Grayed out for awards (not asked).</em></p>
+              <table class="table is-narrow is-bordered mb-0" style="background:white; min-width:320px">
+                <thead><tr><th style="background:#f5f5f5; white-space:nowrap">Category</th><th style="background:#f5f5f5">UC prompt</th></tr></thead>
+                <tbody>
+                  <tr><td style="white-space:nowrap">Award or honor</td><td class="has-text-grey">— (not asked)</td></tr>
+                  <tr><td style="white-space:nowrap">All others</td><td>How much time did you spend? — Hours per week</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </th>
+
+          {# Wks/yr #}
+          <th>Wks/yr
+            <span class="th-info-icon" id="uc-wks-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="uc-wks-popup" style="display:none; white-space:normal">
+              <p class="mb-2 has-text-grey"><em>It's ok to estimate, but try to be as accurate as possible. Grayed out for awards (not asked).</em></p>
+              <table class="table is-narrow is-bordered mb-0" style="background:white; min-width:320px">
+                <thead><tr><th style="background:#f5f5f5; white-space:nowrap">Category</th><th style="background:#f5f5f5">UC prompt</th></tr></thead>
+                <tbody>
+                  <tr><td style="white-space:nowrap">Award or honor</td><td class="has-text-grey">— (not asked)</td></tr>
+                  <tr><td style="white-space:nowrap">All others</td><td>How much time did you spend? — Weeks per year</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </th>
+
           <th>Notes</th>
+
+          {# Level(s) of Rec #}
+          <th>Level(s) of Rec.
+            <span class="th-info-icon" id="uc-rec-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="uc-rec-popup" style="display:none; white-space:normal">
+              <p class="mb-2"><strong>Award or honor only.</strong> Grayed out for all other categories.</p>
+              <p class="mb-2">UC prompt: <em>"Level of recognition"</em></p>
+              <table class="table is-narrow is-bordered mb-0" style="background:white; min-width:300px">
+                <thead><tr><th style="background:#f5f5f5">Level</th><th style="background:#f5f5f5">Abbreviation</th></tr></thead>
+                <tbody>
+                  <tr><td>School</td><td>Sch.</td></tr>
+                  <tr><td>City / Community</td><td>City</td></tr>
+                  <tr><td>State</td><td>State</td></tr>
+                  <tr><td>Regional</td><td>Reg.</td></tr>
+                  <tr><td>National</td><td>Natl.</td></tr>
+                  <tr><td>International</td><td>Intl.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </th>
+
+          {# Academic? #}
+          <th>Academic?
+            <span class="th-info-icon" id="uc-acad-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="uc-acad-popup" style="display:none; white-space:normal">
+              <p class="mb-2"><strong>Award or honor only.</strong> Grayed out for all other categories.</p>
+              <p class="mb-2">UC prompt: <em>"Type of award or honor"</em></p>
+              <p class="mb-1"><strong>Yes (Academic):</strong> Honor societies, academic competitions &amp; programs, grade-based &amp; department awards.</p>
+              <p><strong>No (Non-academic):</strong> Athletics, leadership, volunteering/community service.</p>
+              <p class="mt-2 has-text-grey">Click the button to toggle Yes / No.</p>
+            </div>
+          </th>
+
+          {# Still work there? #}
+          <th>Still work there?
+            <span class="th-info-icon" id="uc-still-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="uc-still-popup" style="display:none; white-space:normal">
+              <p class="mb-2"><strong>Work experience only.</strong> Grayed out for all other categories.</p>
+              <p class="mb-2">UC prompt: <em>"Do you still work at this job?"</em></p>
+              <p class="has-text-grey">Click the button to toggle Yes / No.</p>
+            </div>
+          </th>
+
           <th style="width:40px"></th>
         </tr>
       </thead>

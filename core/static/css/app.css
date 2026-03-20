@@ -85,6 +85,15 @@ body {
   overflow-x: auto;
 }
 
+/* N/A cells — fields that don't apply to the current category */
+.cell-na {
+  background-color: rgba(0,0,0,0.04) !important;
+  color: #ccc !important;
+  text-align: center;
+  cursor: default;
+  user-select: none;
+}
+
 /* Character counter styling */
 .char-counter {
   font-size: 0.8rem;

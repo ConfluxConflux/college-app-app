@@ -38,8 +38,13 @@ class UCEntry(models.Model):
     hours_per_week = models.CharField(max_length=20, blank=True)
     weeks_per_year = models.CharField(max_length=20, blank=True)
 
-    # Award-specific
-    recognition_level = models.CharField(max_length=50, blank=True)
+    # Award-specific: recognition levels (multiple can apply)
+    level_school = models.BooleanField(default=False)
+    level_city = models.BooleanField(default=False)
+    level_state = models.BooleanField(default=False)
+    level_regional = models.BooleanField(default=False)
+    level_national = models.BooleanField(default=False)
+    level_international = models.BooleanField(default=False)
     is_academic = models.BooleanField(null=True, blank=True)
 
     # Work-specific
