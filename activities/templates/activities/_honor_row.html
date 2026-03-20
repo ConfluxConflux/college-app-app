@@ -2,10 +2,11 @@
   <td class="has-text-grey is-size-7" style="width:30px">{{ honor.order }}</td>
 
   {# Title #}
-  <td style="min-width:200px">
-    <form hx-post="{% url 'activities:honor_cell' honor.pk 'title' %}" hx-trigger="focusout, input delay:1500ms" hx-swap="none">
-      <input class="input is-small autosave-input" type="text" name="value" value="{{ honor.title }}" maxlength="200">
-    </form>
+  <td style="min-width:200px" x-data="{ e:false, v:'{{ honor.title|escapejs }}' }">
+    <strong x-show="!e" @click="e=true; $nextTick(()=>$refs.i.focus())" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||'—'"></strong>
+    <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="200"
+      hx-post="{% url 'activities:honor_cell' honor.pk 'title' %}" hx-trigger="blur" hx-swap="none"
+      @blur="e=false">
   </td>
 
   {# Grades #}

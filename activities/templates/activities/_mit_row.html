@@ -4,49 +4,59 @@
   {# Category #}
   <td>
     <form hx-post="{% url 'activities:mit_cell' entry.pk 'category' %}" hx-trigger="change" hx-swap="none">
-      <div class="select is-small">
-        <select name="value">
-          {% for val, label in mit_category_choices %}
-          <option value="{{ val }}" {% if entry.category == val %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-      </div>
+      <div class="select is-small"><select name="value">
+        {% for val, label in mit_category_choices %}
+        <option value="{{ val }}" {% if entry.category == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select></div>
     </form>
   </td>
 
   {# Organization #}
-  <td style="min-width:140px">
-    <form hx-post="{% url 'activities:mit_cell' entry.pk 'org_name' %}" hx-trigger="focusout, input delay:1500ms" hx-swap="none">
-      <input class="input is-small autosave-input" type="text" name="value" value="{{ entry.org_name }}" maxlength="200">
-    </form>
+  <td style="min-width:140px" x-data="{ e:false, v:'{{ entry.org_name|escapejs }}' }">
+    <strong x-show="!e" @click="e=true; $nextTick(()=>$refs.i.focus())" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||'—'"></strong>
+    <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="200"
+      hx-post="{% url 'activities:mit_cell' entry.pk 'org_name' %}" hx-trigger="blur" hx-swap="none"
+      @blur="e=false">
   </td>
 
   {# Role / Award #}
-  <td style="min-width:120px">
-    <form hx-post="{% url 'activities:mit_cell' entry.pk 'role_award' %}" hx-trigger="focusout, input delay:1500ms" hx-swap="none">
-      <input class="input is-small autosave-input" type="text" name="value" value="{{ entry.role_award }}" maxlength="200">
-    </form>
+  <td style="min-width:120px" x-data="{ e:false, v:'{{ entry.role_award|escapejs }}' }">
+    <span x-show="!e" @click="e=true; $nextTick(()=>$refs.i.focus())" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||'—'"></span>
+    <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="200"
+      hx-post="{% url 'activities:mit_cell' entry.pk 'role_award' %}" hx-trigger="blur" hx-swap="none"
+      @blur="e=false">
   </td>
 
   {# Period #}
-  <td style="min-width:90px">
-    <form hx-post="{% url 'activities:mit_cell' entry.pk 'participation_period' %}" hx-trigger="focusout, input delay:1500ms" hx-swap="none">
-      <input class="input is-small autosave-input" type="text" name="value" value="{{ entry.participation_period }}" maxlength="100">
-    </form>
+  <td style="min-width:90px" x-data="{ e:false, v:'{{ entry.participation_period|escapejs }}' }">
+    <span x-show="!e" @click="e=true; $nextTick(()=>$refs.i.focus())" class="is-size-7" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||'—'"></span>
+    <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="100"
+      hx-post="{% url 'activities:mit_cell' entry.pk 'participation_period' %}" hx-trigger="blur" hx-swap="none"
+      @blur="e=false">
   </td>
 
   {# Hrs/wk #}
-  <td style="width:70px">
-    <form hx-post="{% url 'activities:mit_cell' entry.pk 'hours_per_week' %}" hx-trigger="focusout, input delay:1500ms" hx-swap="none">
-      <input class="input is-small autosave-input" type="number" name="value" value="{{ entry.hours_per_week|default:'' }}" style="width:55px">
-    </form>
+  <td style="width:70px" x-data="{ e:false, v:'{{ entry.hours_per_week|default:''|escapejs }}' }">
+    <span x-show="!e" @click="e=true; $nextTick(()=>$refs.i.focus())" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||'—'"></span>
+    <input x-show="e" x-ref="i" class="input is-small" type="number" name="value" x-model="v" style="width:55px"
+      hx-post="{% url 'activities:mit_cell' entry.pk 'hours_per_week' %}" hx-trigger="blur" hx-swap="none"
+      @blur="e=false">
   </td>
 
   {# Description (40 words) #}
-  <td style="min-width:200px">
-    <form hx-post="{% url 'activities:mit_cell' entry.pk 'description' %}" hx-trigger="focusout, input delay:1500ms" hx-swap="none">
-      {% include "core/_textbox.html" with name="value" value=entry.description rows=3 word_limit=40 extra_class="is-small autosave-textarea" %}
-    </form>
+  <td style="min-width:200px" x-data="{
+    e:false, v:'{{ entry.description|escapejs }}',
+    get words(){ return this.v.trim()===''?0:this.v.trim().split(' ').length; },
+    wc(l){ var r=this.words/l; return r>1?'has-text-danger has-text-weight-semibold':r>=0.9?'has-text-warning-dark':'has-text-grey'; }
+  }">
+    <div x-show="!e" @click="e=true; $nextTick(()=>$refs.t.focus())" class="is-size-7" style="cursor:pointer; white-space:pre-wrap; min-height:1.2em" x-text="v||'—'"></div>
+    <div x-show="e">
+      <textarea x-ref="t" class="textarea is-small" name="value" rows="3" x-model="v"
+        hx-post="{% url 'activities:mit_cell' entry.pk 'description' %}" hx-trigger="blur, input delay:1500ms" hx-swap="none"
+        @blur="e=false"></textarea>
+      <p style="text-align:right;margin-top:0.25rem;font-size:0.75rem;line-height:1;"><span :class="wc(40)" x-text="words+' / 40 words'"></span></p>
+    </div>
   </td>
 
   {# Hub (read-only) #}
