@@ -4,11 +4,12 @@
   <td class="has-text-grey is-size-7" style="width:28px">{{ slot_num|default:entry.order }}</td>
 
   {# Name #}
-  <td style="min-width:140px" x-data="{ e:false, v:'{{ entry.name|escapejs }}' }">
-    <strong x-show="!e" @click="e=true; $nextTick(()=>$refs.i.focus())" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||'—'"></strong>
+  <td style="min-width:140px; cursor:pointer" x-data="{ e:false, v:'{{ entry.name|escapejs }}' }"
+      @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
+    <strong x-show="!e" x-text="v"></strong>
     <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="100"
       hx-post="{% url 'activities:uc_cell' entry.pk 'name' %}" hx-trigger="blur" hx-swap="none"
-      @blur="e=false">
+      @blur="e=false" @click.stop>
   </td>
 
   {# Category — swap outerHTML so row background color updates #}
@@ -24,13 +25,13 @@
 
   {# Background (250ch) — N/A for extracurricular, edu_prep, coursework #}
   {% if entry.category == 'award' or entry.category == 'volunteer' or entry.category == 'work' %}
-  <td style="min-width:200px" x-data="{
+  <td style="min-width:200px; cursor:pointer" x-data="{
     e:false, v:'{{ entry.background|escapejs }}',
     get chars(){ return this.v.length; },
     cc(l){ var r=this.chars/l; return r>1?'has-text-danger has-text-weight-semibold':r>=0.9?'has-text-warning-dark':'has-text-grey'; }
-  }">
-    <div x-show="!e" @click="e=true; $nextTick(()=>$refs.t.focus())" class="is-size-7" style="cursor:pointer; white-space:pre-wrap; min-height:1.2em" x-text="v"></div>
-    <div x-show="e">
+  }" @click="if(!e){ e=true; $nextTick(()=>$refs.t.focus()) }">
+    <div x-show="!e" class="is-size-7" style="white-space:pre-wrap" x-text="v"></div>
+    <div x-show="e" @click.stop>
       <textarea x-ref="t" class="textarea is-small" name="value" rows="3" x-model="v" maxlength="250"
         hx-post="{% url 'activities:uc_cell' entry.pk 'background' %}" hx-trigger="blur, input delay:1500ms" hx-swap="none"
         @blur="e=false"></textarea>
@@ -42,13 +43,13 @@
   {% endif %}
 
   {# Description (350ch) #}
-  <td style="min-width:220px" x-data="{
+  <td style="min-width:220px; cursor:pointer" x-data="{
     e:false, v:'{{ entry.description|escapejs }}',
     get chars(){ return this.v.length; },
     cc(l){ var r=this.chars/l; return r>1?'has-text-danger has-text-weight-semibold':r>=0.9?'has-text-warning-dark':'has-text-grey'; }
-  }">
-    <div x-show="!e" @click="e=true; $nextTick(()=>$refs.t.focus())" class="is-size-7" style="cursor:pointer; white-space:pre-wrap; min-height:1.2em" x-text="v"></div>
-    <div x-show="e">
+  }" @click="if(!e){ e=true; $nextTick(()=>$refs.t.focus()) }">
+    <div x-show="!e" class="is-size-7" style="white-space:pre-wrap" x-text="v"></div>
+    <div x-show="e" @click.stop>
       <textarea x-ref="t" class="textarea is-small" name="value" rows="3" x-model="v" maxlength="350"
         hx-post="{% url 'activities:uc_cell' entry.pk 'description' %}" hx-trigger="blur, input delay:1500ms" hx-swap="none"
         @blur="e=false"></textarea>
@@ -70,11 +71,12 @@
 
   {# Hrs/wk — N/A for awards #}
   {% if entry.category != 'award' %}
-  <td style="width:70px" x-data="{ e:false, v:'{{ entry.hours_per_week|escapejs }}' }">
-    <span x-show="!e" @click="e=true; $nextTick(()=>$refs.i.focus())" style="cursor:pointer; display:block; min-height:1.2em" x-text="v"></span>
+  <td style="width:70px; cursor:pointer" x-data="{ e:false, v:'{{ entry.hours_per_week|escapejs }}' }"
+      @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
+    <span x-show="!e" x-text="v"></span>
     <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v" style="width:55px"
       hx-post="{% url 'activities:uc_cell' entry.pk 'hours_per_week' %}" hx-trigger="blur" hx-swap="none"
-      @blur="e=false">
+      @blur="e=false" @click.stop>
   </td>
   {% else %}
   <td class="cell-na" style="width:70px">—</td>
@@ -82,11 +84,12 @@
 
   {# Wks/yr — N/A for awards #}
   {% if entry.category != 'award' %}
-  <td style="width:70px" x-data="{ e:false, v:'{{ entry.weeks_per_year|escapejs }}' }">
-    <span x-show="!e" @click="e=true; $nextTick(()=>$refs.i.focus())" style="cursor:pointer; display:block; min-height:1.2em" x-text="v"></span>
+  <td style="width:70px; cursor:pointer" x-data="{ e:false, v:'{{ entry.weeks_per_year|escapejs }}' }"
+      @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
+    <span x-show="!e" x-text="v"></span>
     <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v" style="width:55px"
       hx-post="{% url 'activities:uc_cell' entry.pk 'weeks_per_year' %}" hx-trigger="blur" hx-swap="none"
-      @blur="e=false">
+      @blur="e=false" @click.stop>
   </td>
   {% else %}
   <td class="cell-na" style="width:70px">—</td>
@@ -137,11 +140,12 @@
   {% endif %}
 
   {# Private Notes #}
-  <td style="min-width:140px" x-data="{ e:false, v:'{{ entry.personal_notes|escapejs }}' }">
-    <span x-show="!e" @click="e=true; $nextTick(()=>$refs.i.focus())" class="is-size-7" style="cursor:pointer; display:block; min-height:1.2em" x-text="v"></span>
+  <td style="min-width:140px; cursor:pointer" x-data="{ e:false, v:'{{ entry.personal_notes|escapejs }}' }"
+      @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
+    <span x-show="!e" class="is-size-7" x-text="v"></span>
     <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v"
       hx-post="{% url 'activities:uc_cell' entry.pk 'personal_notes' %}" hx-trigger="blur" hx-swap="none"
-      @blur="e=false">
+      @blur="e=false" @click.stop>
   </td>
 
   {# Delete #}
