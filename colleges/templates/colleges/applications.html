@@ -4,25 +4,19 @@
 
 {% block content %}
 
-<div style="display:flex; align-items:baseline; gap:0.4em; flex-wrap:wrap; margin-bottom:2rem;">
-  <div class="select" style="font-size:2rem; font-family:'Libre Baskerville',Georgia,serif;">
+<div style="display:flex; align-items:baseline; gap:0.5em; margin-bottom:2rem;">
+  <h1 class="title mb-0" style="white-space:nowrap;">Application Progress:</h1>
+  <div class="select" style="font-size:2rem; font-family:'Libre Baskerville',Georgia,serif; flex:1;">
     <select id="college-select"
-            style="font-size:inherit; font-family:inherit; font-weight:bold; height:auto; padding:0.15rem 3.5rem 0.15rem 0.5rem;"
-            onchange="autosizeSelect(this); if(this.value){ localStorage.setItem('applications_college', this.value); window.location='?college='+this.value; }">
+            style="font-size:inherit; font-family:inherit; font-weight:bold; height:auto; padding:0.15rem 3.5rem 0.15rem 0.5rem; width:100%;"
+            onchange="if(this.value){ localStorage.setItem('applications_college', this.value); window.location='?college='+this.value; }">
       <option value="" {% if not selected %}selected{% endif %} disabled>[select college]</option>
       {% for college in colleges %}
       <option value="{{ college.pk }}" {% if selected.pk == college.pk %}selected{% endif %}>{{ college.name }}</option>
       {% endfor %}
     </select>
   </div>
-  <h1 class="title mb-0" style="white-space:nowrap;">Application Progress</h1>
 </div>
-
-{# Hidden ruler span for measuring text width #}
-<span id="select-ruler" aria-hidden="true"
-      style="visibility:hidden; position:fixed; top:-9999px; font-size:2rem;
-             font-family:'Libre Baskerville',Georgia,serif; font-weight:bold;
-             white-space:nowrap; pointer-events:none;"></span>
 
 {% if selected %}
 <div class="mt-4">
@@ -34,24 +28,12 @@
 
 {% block extra_js %}
 <script>
-function autosizeSelect(sel) {
-  const ruler = document.getElementById('select-ruler');
-  ruler.textContent = sel.options[sel.selectedIndex].text;
-  // Add room for left/right padding + dropdown arrow
-  sel.style.width = (ruler.offsetWidth + 70) + 'px';
-}
 document.addEventListener('DOMContentLoaded', function() {
-  const sel = document.getElementById('college-select');
-  // If no college in URL, restore from localStorage
   const params = new URLSearchParams(window.location.search);
   if (!params.has('college')) {
     const stored = localStorage.getItem('applications_college');
-    if (stored) {
-      window.location = '?college=' + stored;
-      return;
-    }
+    if (stored) window.location = '?college=' + stored;
   }
-  autosizeSelect(sel);
 });
 </script>
 {% endblock %}
