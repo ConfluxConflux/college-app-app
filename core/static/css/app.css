@@ -39,18 +39,18 @@ body {
 
 
 /* Status colors — used by the Applications page pill select */
-.status-applying    { background-color: #2196F3 !important; color: #fff !important; }
-.status-likely      { background-color: #6fb3e0 !important; color: #fff !important; }
-.status-considering { background-color: #9C27B0 !important; color: #fff !important; }
-.status-unlikely    { background-color: #e88a8a !important; color: #fff !important; }
-.status-not_applying{ background-color: #9E9E9E !important; color: #fff !important; }
+.status-applying    { background-color: #a8c8e8 !important; color: #222 !important; }
+.status-likely      { background-color: #b8d8f0 !important; color: #222 !important; }
+.status-considering { background-color: #c8a8e0 !important; color: #222 !important; }
+.status-unlikely    { background-color: #e8b8b8 !important; color: #222 !important; }
+.status-not_applying{ background-color: #c8c8c8 !important; color: #222 !important; }
 .status-applied     { background-color: #43A047 !important; color: #fff !important; }
-.status-accepted    { background-color: #4CAF50 !important; color: #fff !important; }
-.status-deferred    { background-color: #FF9800 !important; color: #fff !important; }
-.status-waitlisted  { background-color: #FF9800 !important; color: #fff !important; }
-.status-rejected    { background-color: #F44336 !important; color: #fff !important; }
-.status-enrolled    { background-color: #00BCD4 !important; color: #fff !important; }
-.status-withdrawn   { background-color: #795548 !important; color: #fff !important; }
+.status-accepted    { background-color: #a0d8a0 !important; color: #222 !important; }
+.status-deferred    { background-color: #f5d080 !important; color: #222 !important; }
+.status-waitlisted  { background-color: #f5c890 !important; color: #222 !important; }
+.status-rejected    { background-color: #f0a0a0 !important; color: #222 !important; }
+.status-enrolled    { background-color: #90ccd8 !important; color: #222 !important; }
+.status-withdrawn   { background-color: #c8b0a0 !important; color: #222 !important; }
 
 /* Status badge pill (inside Tabulator status cell) */
 .status-badge {
