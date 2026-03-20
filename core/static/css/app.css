@@ -85,8 +85,11 @@ body {
   overflow-x: auto;
 }
 
-/* N/A cells — fields that don't apply to the current category */
-.cell-na {
+/* N/A cells — fields that don't apply to the current category.
+   Override Bulma's --bulma-table-cell-background-color CSS var AND use high-specificity selector
+   so we beat any !important from Bulma's .table td rule. */
+.table tbody tr td.cell-na {
+  --bulma-table-cell-background-color: #d8d8d8;
   background-color: #d8d8d8 !important;
   color: #b0b0b0 !important;
   text-align: center;

@@ -12,19 +12,24 @@
     if (parts.length === 2) return parts.pop().split(';').shift();
   }
 
-  // Tooltip: use position:fixed so it escapes table overflow clipping
+  // Tooltip: move popups to <body> so position:fixed is always viewport-relative
+  // (avoids any ancestor transform/filter/backdrop-filter creating a different containing block)
   function initTooltips() {
     document.querySelectorAll('.th-info-icon').forEach(function(icon) {
       const popupId = icon.id.replace('-anchor', '-popup');
       const popup = document.getElementById(popupId);
       if (!popup) return;
+      // Move to body so no table ancestor can affect fixed positioning
+      document.body.appendChild(popup);
       icon.addEventListener('click', function(e) {
         e.stopPropagation();
         const isOpen = popup.style.display === 'block';
-        if (isOpen) {
-          popup.style.display = 'none';
-        } else {
-          // Render off-screen first so we can measure dimensions
+        // Close all other open tooltips
+        document.querySelectorAll('.th-tooltip-popup').forEach(function(p) {
+          p.style.display = 'none';
+        });
+        if (!isOpen) {
+          // Render off-screen to measure, then position
           popup.style.left = '-9999px';
           popup.style.top = '-9999px';
           popup.style.display = 'block';
@@ -34,11 +39,10 @@
           const vw = window.innerWidth;
           const vh = window.innerHeight;
           const margin = 8;
-          // Center above the icon, then clamp to viewport
           let left = rect.left + rect.width / 2 - pw / 2;
           let top = rect.top - ph - margin;
           left = Math.min(vw - pw - margin, Math.max(margin, left));
-          if (top < margin) top = rect.bottom + margin; // flip below if no room above
+          if (top < margin) top = rect.bottom + margin;
           top = Math.min(vh - ph - margin, Math.max(margin, top));
           popup.style.left = left + 'px';
           popup.style.top = top + 'px';

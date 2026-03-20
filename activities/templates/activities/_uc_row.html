@@ -128,7 +128,7 @@
 
   {# Still work? — only for work experience #}
   {% if entry.category == 'work' %}
-  <td style="text-align:center">
+  <td style="text-align:center; white-space:nowrap">
     <button class="button is-small {% if entry.still_working %}is-success{% elif entry.still_working is False %}is-light{% else %}is-light has-text-grey{% endif %}"
       hx-post="{% url 'activities:uc_cell' entry.pk 'still_working' %}"
       hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML">
