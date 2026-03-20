@@ -8,7 +8,7 @@
   <div class="select" style="font-size:2rem; font-family:'Libre Baskerville',Georgia,serif;">
     <select id="college-select"
             style="font-size:inherit; font-family:inherit; font-weight:bold; height:auto; padding:0.15rem 3.5rem 0.15rem 0.5rem;"
-            onchange="autosizeSelect(this); if(this.value) window.location='?college='+this.value">
+            onchange="autosizeSelect(this); if(this.value){ localStorage.setItem('applications_college', this.value); window.location='?college='+this.value; }">
       <option value="" {% if not selected %}selected{% endif %} disabled>[select college]</option>
       {% for college in colleges %}
       <option value="{{ college.pk }}" {% if selected.pk == college.pk %}selected{% endif %}>{{ college.name }}</option>
@@ -41,7 +41,17 @@ function autosizeSelect(sel) {
   sel.style.width = (ruler.offsetWidth + 70) + 'px';
 }
 document.addEventListener('DOMContentLoaded', function() {
-  autosizeSelect(document.getElementById('college-select'));
+  const sel = document.getElementById('college-select');
+  // If no college in URL, restore from localStorage
+  const params = new URLSearchParams(window.location.search);
+  if (!params.has('college')) {
+    const stored = localStorage.getItem('applications_college');
+    if (stored) {
+      window.location = '?college=' + stored;
+      return;
+    }
+  }
+  autosizeSelect(sel);
 });
 </script>
 {% endblock %}
