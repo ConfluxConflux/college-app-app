@@ -87,8 +87,8 @@ body {
 
 /* N/A cells — fields that don't apply to the current category */
 .cell-na {
-  background-color: rgba(0,0,0,0.04) !important;
-  color: #ccc !important;
+  background-color: #d8d8d8 !important;
+  color: #b0b0b0 !important;
   text-align: center;
   cursor: default;
   user-select: none;
@@ -149,5 +149,5 @@ body {
   box-shadow: 0 4px 20px rgba(0,0,0,0.15);
   font-weight: normal;
   white-space: normal;
-  transform: translateX(-50%);
 }
+

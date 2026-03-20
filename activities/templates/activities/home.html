@@ -21,13 +21,27 @@
       icon.addEventListener('click', function(e) {
         e.stopPropagation();
         const isOpen = popup.style.display === 'block';
-        popup.style.display = isOpen ? 'none' : 'block';
-        if (!isOpen) {
+        if (isOpen) {
+          popup.style.display = 'none';
+        } else {
+          // Render off-screen first so we can measure dimensions
+          popup.style.left = '-9999px';
+          popup.style.top = '-9999px';
+          popup.style.display = 'block';
           const rect = icon.getBoundingClientRect();
           const pw = popup.offsetWidth;
           const ph = popup.offsetHeight;
-          popup.style.left = Math.max(4, rect.left + rect.width / 2 - pw / 2) + 'px';
-          popup.style.top = (rect.top - ph - 8) + 'px';
+          const vw = window.innerWidth;
+          const vh = window.innerHeight;
+          const margin = 8;
+          // Center above the icon, then clamp to viewport
+          let left = rect.left + rect.width / 2 - pw / 2;
+          let top = rect.top - ph - margin;
+          left = Math.min(vw - pw - margin, Math.max(margin, left));
+          if (top < margin) top = rect.bottom + margin; // flip below if no room above
+          top = Math.min(vh - ph - margin, Math.max(margin, top));
+          popup.style.left = left + 'px';
+          popup.style.top = top + 'px';
         }
       });
       document.addEventListener('click', function() {
