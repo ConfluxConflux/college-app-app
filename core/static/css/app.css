@@ -85,6 +85,27 @@ body {
   overflow-x: auto;
 }
 
+/* Auto-save inputs: invisible until hovered/focused */
+.autosave-input,
+.autosave-textarea {
+  border-color: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  transition: border-color 0.15s, background-color 0.15s, box-shadow 0.15s;
+}
+.autosave-input:hover,
+.autosave-textarea:hover {
+  border-color: #b5b5b5 !important;
+  background-color: rgba(255,255,255,0.5) !important;
+}
+.autosave-input:focus,
+.autosave-textarea:focus {
+  border-color: var(--periwinkle-dark) !important;
+  background-color: white !important;
+  box-shadow: 0 0 0 0.125em rgba(42,157,143,0.25) !important;
+  outline: none;
+}
+
 /* Character counter styling */
 .char-counter {
   font-size: 0.8rem;

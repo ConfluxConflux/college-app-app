@@ -4,203 +4,173 @@
   <td class="has-text-grey is-size-7" style="width:28px">{{ activity.order }}</td>
 
   {# Name #}
-  {% if editing == 'name' %}
-  <td style="min-width:160px"><form hx-post="{% url 'core:core_activity_cell' activity.pk 'name' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% csrf_token %}
-    <div class="field has-addons"><div class="control is-expanded"><input class="input is-small" type="text" name="value" value="{{ activity.name }}" autofocus></div><div class="control"><button type="submit" class="button is-small is-success">&#10003;</button></div></div>
-  </form></td>
-  {% else %}
-  <td style="min-width:160px; cursor:pointer" hx-get="{% url 'core:core_activity_cell' activity.pk 'name' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML"><strong>{{ activity.name|default:"—" }}</strong></td>
-  {% endif %}
+  <td style="min-width:160px">
+    <form hx-post="{% url 'core:core_activity_cell' activity.pk 'name' %}" hx-trigger="focusout, input delay:1500ms" hx-swap="none">
+      <input class="input is-small autosave-input" type="text" name="value" value="{{ activity.name }}">
+    </form>
+  </td>
 
   {# Grades #}
-  {% if editing == 'grades' %}
-  <td><form hx-post="{% url 'core:core_activity_cell' activity.pk 'grades' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% csrf_token %}
-    <div class="is-size-7" style="white-space:nowrap">
-      <label><input type="checkbox" name="grade_9" {% if activity.grade_9 %}checked{% endif %}> 9</label>&nbsp;
-      <label><input type="checkbox" name="grade_10" {% if activity.grade_10 %}checked{% endif %}> 10</label>&nbsp;
-      <label><input type="checkbox" name="grade_11" {% if activity.grade_11 %}checked{% endif %}> 11</label>&nbsp;
-      <label><input type="checkbox" name="grade_12" {% if activity.grade_12 %}checked{% endif %}> 12</label>
-      <button type="submit" class="button is-small is-success ml-1">&#10003;</button>
-    </div>
-  </form></td>
-  {% else %}
-  <td class="is-size-7" style="cursor:pointer; white-space:nowrap" hx-get="{% url 'core:core_activity_cell' activity.pk 'grades' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% if activity.grade_9 %}9 {% endif %}{% if activity.grade_10 %}10 {% endif %}{% if activity.grade_11 %}11 {% endif %}{% if activity.grade_12 %}12{% endif %}{% if not activity.grade_9 and not activity.grade_10 and not activity.grade_11 and not activity.grade_12 %}—{% endif %}</td>
-  {% endif %}
+  <td>
+    <form hx-post="{% url 'core:core_activity_cell' activity.pk 'grades' %}" hx-trigger="change" hx-swap="none">
+      <div class="is-size-7" style="white-space:nowrap">
+        <label><input type="checkbox" name="grade_9" {% if activity.grade_9 %}checked{% endif %}> 9</label>&nbsp;
+        <label><input type="checkbox" name="grade_10" {% if activity.grade_10 %}checked{% endif %}> 10</label>&nbsp;
+        <label><input type="checkbox" name="grade_11" {% if activity.grade_11 %}checked{% endif %}> 11</label>&nbsp;
+        <label><input type="checkbox" name="grade_12" {% if activity.grade_12 %}checked{% endif %}> 12</label>
+      </div>
+    </form>
+  </td>
 
   {# Hrs/wk #}
-  {% if editing == 'hours_per_week' %}
-  <td style="width:65px"><form hx-post="{% url 'core:core_activity_cell' activity.pk 'hours_per_week' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% csrf_token %}
-    <input class="input is-small" type="text" name="value" value="{{ activity.hours_per_week }}" autofocus style="width:45px">
-    <button type="submit" class="button is-small is-success">&#10003;</button>
-  </form></td>
-  {% else %}
-  <td style="width:65px; cursor:pointer" hx-get="{% url 'core:core_activity_cell' activity.pk 'hours_per_week' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{{ activity.hours_per_week|default:"—" }}</td>
-  {% endif %}
+  <td style="width:65px">
+    <form hx-post="{% url 'core:core_activity_cell' activity.pk 'hours_per_week' %}" hx-trigger="focusout, input delay:1500ms" hx-swap="none">
+      <input class="input is-small autosave-input" type="text" name="value" value="{{ activity.hours_per_week }}" style="width:55px">
+    </form>
+  </td>
 
   {# Wks/yr #}
-  {% if editing == 'weeks_per_year' %}
-  <td style="width:65px"><form hx-post="{% url 'core:core_activity_cell' activity.pk 'weeks_per_year' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% csrf_token %}
-    <input class="input is-small" type="text" name="value" value="{{ activity.weeks_per_year }}" autofocus style="width:45px">
-    <button type="submit" class="button is-small is-success">&#10003;</button>
-  </form></td>
-  {% else %}
-  <td style="width:65px; cursor:pointer" hx-get="{% url 'core:core_activity_cell' activity.pk 'weeks_per_year' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{{ activity.weeks_per_year|default:"—" }}</td>
-  {% endif %}
+  <td style="width:65px">
+    <form hx-post="{% url 'core:core_activity_cell' activity.pk 'weeks_per_year' %}" hx-trigger="focusout, input delay:1500ms" hx-swap="none">
+      <input class="input is-small autosave-input" type="text" name="value" value="{{ activity.weeks_per_year }}" style="width:55px">
+    </form>
+  </td>
 
   {# Description #}
-  {% if editing == 'full_description' %}
-  <td style="min-width:220px"><form hx-post="{% url 'core:core_activity_cell' activity.pk 'full_description' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% csrf_token %}
-    <textarea class="textarea is-small" name="value" rows="4" autofocus>{{ activity.full_description }}</textarea>
-    <button type="submit" class="button is-small is-success mt-1">&#10003;</button>
-  </form></td>
-  {% else %}
-  <td class="is-size-7" style="min-width:220px; cursor:pointer; white-space:pre-wrap" hx-get="{% url 'core:core_activity_cell' activity.pk 'full_description' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{{ activity.full_description|default:"—" }}</td>
-  {% endif %}
+  <td style="min-width:220px">
+    <form hx-post="{% url 'core:core_activity_cell' activity.pk 'full_description' %}" hx-trigger="focusout, input delay:1500ms" hx-swap="none">
+      <textarea class="textarea is-small autosave-textarea" name="value" rows="4">{{ activity.full_description }}</textarea>
+    </form>
+  </td>
 
   {# Notes #}
-  {% if editing == 'personal_notes' %}
-  <td style="min-width:160px"><form hx-post="{% url 'core:core_activity_cell' activity.pk 'personal_notes' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% csrf_token %}
-    <textarea class="textarea is-small" name="value" rows="4" autofocus>{{ activity.personal_notes }}</textarea>
-    <button type="submit" class="button is-small is-success mt-1">&#10003;</button>
-  </form></td>
-  {% else %}
-  <td class="is-size-7" style="min-width:160px; cursor:pointer; white-space:pre-wrap" hx-get="{% url 'core:core_activity_cell' activity.pk 'personal_notes' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{{ activity.personal_notes|default:"—" }}</td>
-  {% endif %}
+  <td style="min-width:160px">
+    <form hx-post="{% url 'core:core_activity_cell' activity.pk 'personal_notes' %}" hx-trigger="focusout, input delay:1500ms" hx-swap="none">
+      <textarea class="textarea is-small autosave-textarea" name="value" rows="4">{{ activity.personal_notes }}</textarea>
+    </form>
+  </td>
 
   {# ── UC ── #}
 
   {# UC Category #}
-  {% if editing == 'uc_category' %}
-  <td><form hx-post="{% url 'core:core_activity_uc_cell' activity.pk 'category' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% csrf_token %}
-    <div class="field has-addons"><div class="control"><div class="select is-small"><select name="value">{% for val, label in uc_category_choices %}<option value="{{ val }}" {% if uc_entry.category == val %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div></div><div class="control"><button type="submit" class="button is-small is-success">&#10003;</button></div></div>
-  </form></td>
-  {% else %}
-  <td style="cursor:pointer" hx-get="{% url 'core:core_activity_uc_cell' activity.pk 'category' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% if uc_entry %}<span class="tag is-info is-light is-small">{{ uc_entry.get_category_display }}</span>{% else %}<span class="has-text-grey">—</span>{% endif %}</td>
-  {% endif %}
+  <td>
+    <form hx-post="{% url 'core:core_activity_uc_cell' activity.pk 'category' %}" hx-trigger="change" hx-swap="none">
+      <div class="select is-small">
+        <select name="value">
+          {% for val, label in uc_category_choices %}
+          <option value="{{ val }}" {% if uc_entry.category == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </form>
+  </td>
 
   {# UC Background (250ch) #}
-  {% if editing == 'uc_background' %}
-  <td style="min-width:200px"><form hx-post="{% url 'core:core_activity_uc_cell' activity.pk 'background' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% csrf_token %}
-    {% include "core/_textbox.html" with name="value" value=uc_entry.background rows=3 char_limit=250 autofocus=True extra_class="is-small" %}
-    <button type="submit" class="button is-small is-success mt-1">&#10003;</button>
-  </form></td>
-  {% else %}
-  <td class="is-size-7" style="min-width:200px; cursor:pointer; white-space:pre-wrap" hx-get="{% url 'core:core_activity_uc_cell' activity.pk 'background' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{{ uc_entry.background|default:"—" }}</td>
-  {% endif %}
+  <td style="min-width:200px">
+    <form hx-post="{% url 'core:core_activity_uc_cell' activity.pk 'background' %}" hx-trigger="focusout, input delay:1500ms" hx-swap="none">
+      {% include "core/_textbox.html" with name="value" value=uc_entry.background rows=3 char_limit=250 extra_class="is-small autosave-textarea" %}
+    </form>
+  </td>
 
   {# UC Description (350ch) #}
-  {% if editing == 'uc_description' %}
-  <td style="min-width:220px"><form hx-post="{% url 'core:core_activity_uc_cell' activity.pk 'description' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% csrf_token %}
-    {% include "core/_textbox.html" with name="value" value=uc_entry.description rows=3 char_limit=350 autofocus=True extra_class="is-small" %}
-    <button type="submit" class="button is-small is-success mt-1">&#10003;</button>
-  </form></td>
-  {% else %}
-  <td class="is-size-7" style="min-width:220px; cursor:pointer; white-space:pre-wrap" hx-get="{% url 'core:core_activity_uc_cell' activity.pk 'description' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{{ uc_entry.description|default:"—" }}</td>
-  {% endif %}
+  <td style="min-width:220px">
+    <form hx-post="{% url 'core:core_activity_uc_cell' activity.pk 'description' %}" hx-trigger="focusout, input delay:1500ms" hx-swap="none">
+      {% include "core/_textbox.html" with name="value" value=uc_entry.description rows=3 char_limit=350 extra_class="is-small autosave-textarea" %}
+    </form>
+  </td>
 
   {# ── COMMON APP ── #}
 
   {# CA Type #}
-  {% if editing == 'ca_activity_type' %}
-  <td><form hx-post="{% url 'core:core_activity_ca_cell' activity.pk 'activity_type' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% csrf_token %}
-    <div class="field has-addons"><div class="control"><div class="select is-small"><select name="value">{% for val, label in ca_type_choices %}<option value="{{ val }}" {% if ca_entry.activity_type == val %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div></div><div class="control"><button type="submit" class="button is-small is-success">&#10003;</button></div></div>
-  </form></td>
-  {% else %}
-  <td style="cursor:pointer" hx-get="{% url 'core:core_activity_ca_cell' activity.pk 'activity_type' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% if ca_entry %}<span class="tag is-link is-light is-small">{{ ca_entry.get_activity_type_display }}</span>{% else %}<span class="has-text-grey">—</span>{% endif %}</td>
-  {% endif %}
+  <td>
+    <form hx-post="{% url 'core:core_activity_ca_cell' activity.pk 'activity_type' %}" hx-trigger="change" hx-swap="none">
+      <div class="select is-small">
+        <select name="value">
+          {% for val, label in ca_type_choices %}
+          <option value="{{ val }}" {% if ca_entry.activity_type == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </form>
+  </td>
 
   {# CA Position (50ch) #}
-  {% if editing == 'ca_position' %}
-  <td style="min-width:120px"><form hx-post="{% url 'core:core_activity_ca_cell' activity.pk 'position' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% csrf_token %}
-    <div class="field has-addons"><div class="control is-expanded"><input class="input is-small" type="text" name="value" value="{{ ca_entry.position }}" autofocus maxlength="50"></div><div class="control"><button type="submit" class="button is-small is-success">&#10003;</button></div></div>
-  </form></td>
-  {% else %}
-  <td style="min-width:120px; cursor:pointer" hx-get="{% url 'core:core_activity_ca_cell' activity.pk 'position' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{{ ca_entry.position|default:"—" }}</td>
-  {% endif %}
+  <td style="min-width:120px">
+    <form hx-post="{% url 'core:core_activity_ca_cell' activity.pk 'position' %}" hx-trigger="focusout, input delay:1500ms" hx-swap="none">
+      <input class="input is-small autosave-input" type="text" name="value" value="{{ ca_entry.position }}" maxlength="50">
+    </form>
+  </td>
 
   {# CA Organization (100ch) #}
-  {% if editing == 'ca_organization' %}
-  <td style="min-width:140px"><form hx-post="{% url 'core:core_activity_ca_cell' activity.pk 'organization' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% csrf_token %}
-    <div class="field has-addons"><div class="control is-expanded"><input class="input is-small" type="text" name="value" value="{{ ca_entry.organization }}" autofocus maxlength="100"></div><div class="control"><button type="submit" class="button is-small is-success">&#10003;</button></div></div>
-  </form></td>
-  {% else %}
-  <td style="min-width:140px; cursor:pointer" hx-get="{% url 'core:core_activity_ca_cell' activity.pk 'organization' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{{ ca_entry.organization|default:"—" }}</td>
-  {% endif %}
+  <td style="min-width:140px">
+    <form hx-post="{% url 'core:core_activity_ca_cell' activity.pk 'organization' %}" hx-trigger="focusout, input delay:1500ms" hx-swap="none">
+      <input class="input is-small autosave-input" type="text" name="value" value="{{ ca_entry.organization }}" maxlength="100">
+    </form>
+  </td>
 
   {# CA Description (150ch) #}
-  {% if editing == 'ca_description' %}
-  <td style="min-width:200px"><form hx-post="{% url 'core:core_activity_ca_cell' activity.pk 'description' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% csrf_token %}
-    {% include "core/_textbox.html" with name="value" value=ca_entry.description rows=3 char_limit=150 autofocus=True extra_class="is-small" %}
-    <button type="submit" class="button is-small is-success mt-1">&#10003;</button>
-  </form></td>
-  {% else %}
-  <td class="is-size-7" style="min-width:200px; cursor:pointer; white-space:pre-wrap" hx-get="{% url 'core:core_activity_ca_cell' activity.pk 'description' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{{ ca_entry.description|default:"—" }}</td>
-  {% endif %}
+  <td style="min-width:200px">
+    <form hx-post="{% url 'core:core_activity_ca_cell' activity.pk 'description' %}" hx-trigger="focusout, input delay:1500ms" hx-swap="none">
+      {% include "core/_textbox.html" with name="value" value=ca_entry.description rows=3 char_limit=150 extra_class="is-small autosave-textarea" %}
+    </form>
+  </td>
 
   {# ── HONORS ── #}
 
   {# Honor Title #}
-  {% if editing == 'honor_title' %}
-  <td style="min-width:180px"><form hx-post="{% url 'core:core_activity_honor_cell' activity.pk 'title' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% csrf_token %}
-    <div class="field has-addons"><div class="control is-expanded"><input class="input is-small" type="text" name="value" value="{{ honor_entry.title }}" autofocus maxlength="200"></div><div class="control"><button type="submit" class="button is-small is-success">&#10003;</button></div></div>
-  </form></td>
-  {% else %}
-  <td style="min-width:180px; cursor:pointer" hx-get="{% url 'core:core_activity_honor_cell' activity.pk 'title' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{{ honor_entry.title|default:"—" }}</td>
-  {% endif %}
+  <td style="min-width:180px">
+    <form hx-post="{% url 'core:core_activity_honor_cell' activity.pk 'title' %}" hx-trigger="focusout, input delay:1500ms" hx-swap="none">
+      <input class="input is-small autosave-input" type="text" name="value" value="{{ honor_entry.title }}" maxlength="200">
+    </form>
+  </td>
 
   {# Honor Levels #}
-  {% if editing == 'honor_levels' %}
-  <td><form hx-post="{% url 'core:core_activity_honor_cell' activity.pk 'levels' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% csrf_token %}
-    <div class="is-size-7" style="white-space:nowrap">
-      <label><input type="checkbox" name="level_school" {% if honor_entry.level_school %}checked{% endif %}> School</label>&nbsp;
-      <label><input type="checkbox" name="level_state_regional" {% if honor_entry.level_state_regional %}checked{% endif %}> State</label>&nbsp;
-      <label><input type="checkbox" name="level_national" {% if honor_entry.level_national %}checked{% endif %}> Natl</label>&nbsp;
-      <label><input type="checkbox" name="level_international" {% if honor_entry.level_international %}checked{% endif %}> Intl</label>
-      <button type="submit" class="button is-small is-success ml-1">&#10003;</button>
-    </div>
-  </form></td>
-  {% else %}
-  <td style="cursor:pointer" hx-get="{% url 'core:core_activity_honor_cell' activity.pk 'levels' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% if honor_entry %}{% if honor_entry.level_school %}<span class="tag is-small">School</span> {% endif %}{% if honor_entry.level_state_regional %}<span class="tag is-small is-info is-light">State</span> {% endif %}{% if honor_entry.level_national %}<span class="tag is-small is-warning">Natl</span> {% endif %}{% if honor_entry.level_international %}<span class="tag is-small is-success">Intl</span>{% endif %}{% else %}<span class="has-text-grey">—</span>{% endif %}</td>
-  {% endif %}
+  <td>
+    <form hx-post="{% url 'core:core_activity_honor_cell' activity.pk 'levels' %}" hx-trigger="change" hx-swap="none">
+      <div class="is-size-7" style="white-space:nowrap">
+        <label><input type="checkbox" name="level_school" {% if honor_entry.level_school %}checked{% endif %}> School</label>&nbsp;
+        <label><input type="checkbox" name="level_state_regional" {% if honor_entry.level_state_regional %}checked{% endif %}> State</label>&nbsp;
+        <label><input type="checkbox" name="level_national" {% if honor_entry.level_national %}checked{% endif %}> Natl</label>&nbsp;
+        <label><input type="checkbox" name="level_international" {% if honor_entry.level_international %}checked{% endif %}> Intl</label>
+      </div>
+    </form>
+  </td>
 
   {# ── MIT ── #}
 
   {# MIT Category #}
-  {% if editing == 'mit_category' %}
-  <td><form hx-post="{% url 'core:core_activity_mit_cell' activity.pk 'category' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% csrf_token %}
-    <div class="field has-addons"><div class="control"><div class="select is-small"><select name="value">{% for val, label in mit_category_choices %}<option value="{{ val }}" {% if mit_entry.category == val %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div></div><div class="control"><button type="submit" class="button is-small is-success">&#10003;</button></div></div>
-  </form></td>
-  {% else %}
-  <td style="cursor:pointer" hx-get="{% url 'core:core_activity_mit_cell' activity.pk 'category' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% if mit_entry %}<span class="tag is-small {% if mit_entry.category == 'job' %}is-dark{% elif mit_entry.category == 'activity' %}is-info is-light{% elif mit_entry.category == 'summer' %}is-warning is-light{% elif mit_entry.category == 'scholastic' %}is-success is-light{% else %}is-light{% endif %}">{{ mit_entry.get_category_display }}</span>{% else %}<span class="has-text-grey">—</span>{% endif %}</td>
-  {% endif %}
+  <td>
+    <form hx-post="{% url 'core:core_activity_mit_cell' activity.pk 'category' %}" hx-trigger="change" hx-swap="none">
+      <div class="select is-small">
+        <select name="value">
+          {% for val, label in mit_category_choices %}
+          <option value="{{ val }}" {% if mit_entry.category == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </form>
+  </td>
 
   {# MIT Org #}
-  {% if editing == 'mit_org_name' %}
-  <td style="min-width:140px"><form hx-post="{% url 'core:core_activity_mit_cell' activity.pk 'org_name' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% csrf_token %}
-    <div class="field has-addons"><div class="control is-expanded"><input class="input is-small" type="text" name="value" value="{{ mit_entry.org_name }}" autofocus maxlength="200"></div><div class="control"><button type="submit" class="button is-small is-success">&#10003;</button></div></div>
-  </form></td>
-  {% else %}
-  <td style="min-width:140px; cursor:pointer" hx-get="{% url 'core:core_activity_mit_cell' activity.pk 'org_name' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{{ mit_entry.org_name|default:"—" }}</td>
-  {% endif %}
+  <td style="min-width:140px">
+    <form hx-post="{% url 'core:core_activity_mit_cell' activity.pk 'org_name' %}" hx-trigger="focusout, input delay:1500ms" hx-swap="none">
+      <input class="input is-small autosave-input" type="text" name="value" value="{{ mit_entry.org_name }}" maxlength="200">
+    </form>
+  </td>
 
   {# MIT Role/Award #}
-  {% if editing == 'mit_role_award' %}
-  <td style="min-width:130px"><form hx-post="{% url 'core:core_activity_mit_cell' activity.pk 'role_award' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% csrf_token %}
-    <div class="field has-addons"><div class="control is-expanded"><input class="input is-small" type="text" name="value" value="{{ mit_entry.role_award }}" autofocus maxlength="200"></div><div class="control"><button type="submit" class="button is-small is-success">&#10003;</button></div></div>
-  </form></td>
-  {% else %}
-  <td style="min-width:130px; cursor:pointer" hx-get="{% url 'core:core_activity_mit_cell' activity.pk 'role_award' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{{ mit_entry.role_award|default:"—" }}</td>
-  {% endif %}
+  <td style="min-width:130px">
+    <form hx-post="{% url 'core:core_activity_mit_cell' activity.pk 'role_award' %}" hx-trigger="focusout, input delay:1500ms" hx-swap="none">
+      <input class="input is-small autosave-input" type="text" name="value" value="{{ mit_entry.role_award }}" maxlength="200">
+    </form>
+  </td>
 
   {# MIT Description (40 words) #}
-  {% if editing == 'mit_description' %}
-  <td style="min-width:200px"><form hx-post="{% url 'core:core_activity_mit_cell' activity.pk 'description' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{% csrf_token %}
-    {% include "core/_textbox.html" with name="value" value=mit_entry.description rows=3 word_limit=40 autofocus=True extra_class="is-small" %}
-    <button type="submit" class="button is-small is-success mt-1">&#10003;</button>
-  </form></td>
-  {% else %}
-  <td class="is-size-7" style="min-width:200px; cursor:pointer; white-space:pre-wrap" hx-get="{% url 'core:core_activity_mit_cell' activity.pk 'description' %}" hx-target="#core-activity-{{ activity.pk }}" hx-swap="outerHTML">{{ mit_entry.description|default:"—" }}</td>
-  {% endif %}
+  <td style="min-width:200px">
+    <form hx-post="{% url 'core:core_activity_mit_cell' activity.pk 'description' %}" hx-trigger="focusout, input delay:1500ms" hx-swap="none">
+      {% include "core/_textbox.html" with name="value" value=mit_entry.description rows=3 word_limit=40 extra_class="is-small autosave-textarea" %}
+    </form>
+  </td>
 
   {# Delete #}
   <td style="width:40px">
