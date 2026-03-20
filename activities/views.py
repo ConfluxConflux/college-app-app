@@ -1,3 +1,5 @@
+import csv
+import io
 import json
 
 from django.http import HttpResponse, JsonResponse
@@ -465,6 +467,50 @@ def export_uc(request):
     content += '\n\nJacob thinks this could be formatted better but hasn\'t put effort into reformatting it. It would take like 2 minutes with claude so please email him at chromaticconflux@gmail.com if it should be reformatted for easier copy-pasting'
     response = HttpResponse(content, content_type='text/plain; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename="uc_activities.txt"'
+    return response
+
+
+def export_uc_csv(request):
+    applicant = Applicant.objects.get(pk=1)
+    entries = UCEntry.objects.filter(applicant=applicant).order_by('order')
+
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow([
+        'Name', 'Category', 'Background (250ch)', 'Description (350ch)',
+        'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12',
+        'Hrs/wk', 'Wks/yr',
+        'Level: School', 'Level: City', 'Level: State',
+        'Level: Regional', 'Level: National', 'Level: International',
+        'Academic?', 'Still work?', 'Private Notes',
+    ])
+    for e in entries:
+        academic = 'Yes' if e.is_academic else ('No' if e.is_academic is False else '')
+        still = 'Yes' if e.still_working else ('No' if e.still_working is False else '')
+        writer.writerow([
+            e.name,
+            e.get_category_display(),
+            e.background,
+            e.description,
+            'Yes' if e.grade_9 else '',
+            'Yes' if e.grade_10 else '',
+            'Yes' if e.grade_11 else '',
+            'Yes' if e.grade_12 else '',
+            e.hours_per_week,
+            e.weeks_per_year,
+            'Yes' if e.level_school else '',
+            'Yes' if e.level_city else '',
+            'Yes' if e.level_state else '',
+            'Yes' if e.level_regional else '',
+            'Yes' if e.level_national else '',
+            'Yes' if e.level_international else '',
+            academic,
+            still,
+            e.personal_notes,
+        ])
+
+    response = HttpResponse(buf.getvalue(), content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="uc_activities.csv"'
     return response
 
 

@@ -24,6 +24,7 @@ urlpatterns = [
     path('honors/<int:pk>/delete/', views.honor_delete, name='honor_delete'),
     # Exports
     path('export/uc/', views.export_uc, name='export_uc'),
+    path('export/uc/csv/', views.export_uc_csv, name='export_uc_csv'),
     path('export/common-app/', views.export_common_app, name='export_common_app'),
     path('export/mit/', views.export_mit, name='export_mit'),
     # MIT
