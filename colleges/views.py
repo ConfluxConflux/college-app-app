@@ -54,6 +54,23 @@ VIEWS = {
     },
 }
 
+# Sort order for Applications page
+APP_PROGRESS_STATUS_ORDER = Case(
+    When(apply_status='applying', then=Value(1)),
+    When(apply_status='likely', then=Value(2)),
+    When(apply_status='considering', then=Value(3)),
+    When(apply_status='unlikely', then=Value(4)),
+    When(apply_status='deferred', then=Value(5)),
+    When(apply_status='waitlisted', then=Value(6)),
+    When(apply_status='applied', then=Value(7)),
+    When(apply_status='accepted', then=Value(8)),
+    When(apply_status='rejected', then=Value(9)),
+    When(apply_status='enrolled', then=Value(10)),
+    When(apply_status='not_applying', then=Value(11)),
+    default=Value(12),
+    output_field=IntegerField(),
+)
+
 # Sort order for "All Colleges" view — most likely to apply first
 STATUS_ORDER = Case(
     When(apply_status='applying', then=Value(1)),
@@ -265,3 +282,23 @@ def college_delete(request, pk):
     if request.headers.get('HX-Request'):
         return HttpResponse('')
     return redirect('colleges:list')
+
+
+def applications(request):
+    colleges = College.objects.all().annotate(
+        status_order=APP_PROGRESS_STATUS_ORDER
+    ).order_by('status_order', 'name')
+
+    selected = None
+    selected_pk = request.GET.get('college')
+    if selected_pk:
+        try:
+            selected = colleges.get(pk=int(selected_pk))
+        except (College.DoesNotExist, ValueError):
+            pass
+
+    return render(request, 'colleges/applications.html', {
+        'colleges': colleges,
+        'selected': selected,
+    })
+

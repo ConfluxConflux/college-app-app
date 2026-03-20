@@ -34,9 +34,13 @@
            href="{% url 'core:home' %}">
           Dashboard
         </a>
-        <a class="navbar-item {% if request.resolver_match.app_name == 'colleges' %}is-active{% endif %}"
+        <a class="navbar-item {% if request.resolver_match.app_name == 'colleges' and request.resolver_match.url_name != 'applications' %}is-active{% endif %}"
            href="{% url 'colleges:list' %}">
           Colleges
+        </a>
+        <a class="navbar-item {% if request.resolver_match.url_name == 'applications' %}is-active{% endif %}"
+           href="{% url 'colleges:applications' %}">
+          Applications
         </a>
         <a class="navbar-item {% if request.resolver_match.app_name == 'activities' %}is-active{% endif %}"
            href="{% url 'activities:home' %}">
