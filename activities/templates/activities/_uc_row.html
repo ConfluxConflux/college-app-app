@@ -5,7 +5,7 @@
 
   {# Name #}
   <td style="min-width:140px" x-data="{ e:false, v:'{{ entry.name|escapejs }}' }">
-    <strong x-show="!e" @click="e=true; $nextTick(()=>$refs.i.focus())" style="cursor:pointer; display:block; min-height:1.2em" x-text="v"></strong>
+    <strong x-show="!e" @click="e=true; $nextTick(()=>$refs.i.focus())" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||'—'"></strong>
     <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="100"
       hx-post="{% url 'activities:uc_cell' entry.pk 'name' %}" hx-trigger="blur" hx-swap="none"
       @blur="e=false">
