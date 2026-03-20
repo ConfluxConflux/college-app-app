@@ -69,8 +69,7 @@
       <h2 class="title is-4 mb-0">UC Activities & Awards</h2>
     </div>
     <div class="level-right">
-      <a href="{% url 'activities:export_uc' %}" class="button is-light is-small mr-2">Export .txt</a>
-      <a href="{% url 'activities:uc_add' %}" class="button is-primary is-small">+ Add UC Entry</a>
+      <a href="{% url 'activities:export_uc' %}" class="button is-light is-small">Export .txt</a>
     </div>
   </div>
   <div class="table-container">
@@ -274,6 +273,10 @@
       </tbody>
     </table>
   </div>
+  <button class="button is-primary is-small mt-2"
+      hx-post="{% url 'activities:uc_add' %}"
+      hx-target="#uc-entries-tbody"
+      hx-swap="beforeend">+ Add Row</button>
 </div>
 
 <!-- Common App Activities & Honors -->

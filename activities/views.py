@@ -83,6 +83,18 @@ def activities_home(request):
 # ── UC Entry CRUD ──
 
 def uc_add(request):
+    if request.method == 'POST' and request.headers.get('HX-Request'):
+        applicant = Applicant.objects.get(pk=1)
+        entry = UCEntry.objects.create(
+            applicant=applicant,
+            category='extracurricular',
+            name='',
+            order=UCEntry.objects.filter(applicant=applicant).count(),
+        )
+        return render(request, 'activities/_uc_row.html', {
+            'entry': entry,
+            'uc_category_choices': UCEntry.CATEGORY_CHOICES,
+        })
     if request.method == 'POST':
         form = UCEntryForm(request.POST)
         if form.is_valid():
