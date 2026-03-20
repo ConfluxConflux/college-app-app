@@ -6,8 +6,8 @@
   {# Name #}
   <td style="min-width:140px; cursor:pointer" x-data="{ e:false, v:'{{ entry.name|escapejs }}' }"
       @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
-    <strong x-show="!e" x-text="v"></strong>
-    <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="100"
+    <strong x-show="!e" style="font-size:1.5rem" x-text="v"></strong>
+    <input x-show="e" x-ref="i" class="input" style="font-size:1.5rem" type="text" name="value" x-model="v" maxlength="100"
       hx-post="{% url 'activities:uc_cell' entry.pk 'name' %}" hx-trigger="blur" hx-swap="none"
       @blur="e=false" @click.stop>
   </td>
@@ -15,7 +15,7 @@
   {# Category — swap outerHTML so row background color updates #}
   <td>
     <form hx-post="{% url 'activities:uc_cell' entry.pk 'category' %}" hx-trigger="change" hx-target="#uc-{{ entry.pk }}" hx-swap="outerHTML">
-      <div class="select is-small"><select name="value">
+      <div class="select"><select name="value">
         {% for val, label in uc_category_choices %}
         <option value="{{ val }}" {% if entry.category == val %}selected{% endif %}>{{ label }}</option>
         {% endfor %}
