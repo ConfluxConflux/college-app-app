@@ -39,9 +39,9 @@ body {
 
 
 /* Status colors for college list rows */
-.status-applying { background-color: #effaf5 !important; }
+.status-applying { background-color: #ddeeff !important; }
 .status-likely { background-color: #eff5fb !important; }
-.status-considering { background-color: #fffaeb !important; }
+.status-considering { background-color: #ede8f7 !important; }
 .status-unlikely { background-color: #feecf0 !important; }
 .status-not_applying { background-color: #f5f5f5 !important; }
 .status-applied { background-color: #eff1fa !important; }
