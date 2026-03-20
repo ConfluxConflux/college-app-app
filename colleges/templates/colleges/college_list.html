@@ -189,9 +189,21 @@
     placeholder: 'No colleges match your filters.',
     rowFormatter: function(row) {
       var status = row.getData().apply_status;
-      var el = row.getElement();
-      el.className = el.className.replace(/\bstatus-\S+/g, '');
-      if (status) el.classList.add('status-' + status);
+      var colors = {
+        'applying':    '#b8d4f5',
+        'likely':      '#eff5fb',
+        'considering': '#d4b8f5',
+        'unlikely':    '#feecf0',
+        'not_applying':'#f5f5f5',
+        'applied':     '#eff1fa',
+        'accepted':    '#dbf5e8',
+        'deferred':    '#fff3d6',
+        'waitlisted':  '#fff3d6',
+        'rejected':    '#fde0e6',
+        'enrolled':    '#ebf0f7',
+        'withdrawn':   '#e8ddd4',
+      };
+      row.getElement().style.backgroundColor = colors[status] || '';
     },
     cellEdited: function(cell) {
       var row = cell.getRow().getData();
