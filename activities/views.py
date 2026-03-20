@@ -59,6 +59,17 @@ def activities_home(request):
     while len(uc_slots) < 20:
         uc_slots.append(None)
     uc_overflow = uc_entries_list[20:]
+    ca_entries_list = list(CommonAppActivity.objects.filter(applicant=applicant).order_by('order').select_related('core_activity'))
+    ca_slots = ca_entries_list[:10]
+    while len(ca_slots) < 10:
+        ca_slots.append(None)
+    ca_overflow = ca_entries_list[10:]
+
+    honors_list = list(CommonAppHonor.objects.filter(applicant=applicant).order_by('order').select_related('core_activity'))
+    honor_slots = honors_list[:5]
+    while len(honor_slots) < 5:
+        honor_slots.append(None)
+
     context = {
         'tab': tab,
         'core_activities': _prefetch_core_activities(applicant),
@@ -67,11 +78,12 @@ def activities_home(request):
         'uc_overflow': uc_overflow,
         'uc_count': len(uc_entries_list),
         'uc_category_choices': UCEntry.CATEGORY_CHOICES,
-        'common_app_activities': CommonAppActivity.objects.filter(applicant=applicant).select_related('core_activity'),
-        'ca_count': CommonAppActivity.objects.filter(applicant=applicant).count(),
+        'ca_slots': ca_slots,
+        'ca_overflow': ca_overflow,
+        'ca_count': len(ca_entries_list),
         'ca_type_choices': CommonAppActivity.ACTIVITY_TYPE_CHOICES,
-        'common_app_honors': CommonAppHonor.objects.filter(applicant=applicant).select_related('core_activity'),
-        'honor_count': CommonAppHonor.objects.filter(applicant=applicant).count(),
+        'honor_slots': honor_slots,
+        'honor_count': len(honors_list),
         'mit_entries': MITEntry.objects.filter(applicant=applicant).select_related('core_activity'),
         'mit_count': MITEntry.objects.filter(applicant=applicant).count(),
         'mit_category_choices': MITEntry.CATEGORY_CHOICES,
@@ -246,7 +258,7 @@ def ca_cell(request, pk, field):
     activity = get_object_or_404(CommonAppActivity, pk=pk)
     ctx = {'activity': activity, 'ca_type_choices': CommonAppActivity.ACTIVITY_TYPE_CHOICES}
     if request.method == 'POST':
-        if field in ('position', 'organization', 'description'):
+        if field in ('position', 'organization', 'description', 'personal_notes'):
             setattr(activity, field, request.POST.get('value', ''))
             activity.save()
         elif field == 'activity_type':
@@ -267,8 +279,41 @@ def ca_cell(request, pk, field):
             activity.timing_breaks = 'timing_breaks' in request.POST
             activity.timing_all_year = 'timing_all_year' in request.POST
             activity.save()
+        elif field == 'similar_in_college':
+            activity.similar_in_college = (
+                not activity.similar_in_college
+                if activity.similar_in_college is not None
+                else True
+            )
+            activity.save()
         return render(request, 'activities/_ca_row.html', ctx)
     return render(request, 'activities/_ca_row.html', {**ctx, 'editing': field})
+
+
+@require_POST
+def ca_slot_add(request, slot):
+    field = request.POST.get('field', 'organization')
+    applicant = Applicant.objects.get(pk=1)
+    activity = CommonAppActivity.objects.create(
+        applicant=applicant,
+        order=slot,
+        activity_type='other',
+    )
+    return render(request, 'activities/_ca_row.html', {
+        'activity': activity,
+        'ca_type_choices': CommonAppActivity.ACTIVITY_TYPE_CHOICES,
+        'editing': field,
+        'slot_num': slot,
+    })
+
+
+@require_POST
+def ca_reorder(request):
+    applicant = Applicant.objects.get(pk=1)
+    data = json.loads(request.body)
+    for i, pk in enumerate(data.get('order', []), start=1):
+        CommonAppActivity.objects.filter(pk=pk, applicant=applicant).update(order=i)
+    return HttpResponse(status=204)
 
 
 @require_POST
@@ -322,8 +367,8 @@ def honor_cell(request, pk, field):
     honor = get_object_or_404(CommonAppHonor, pk=pk)
     ctx = {'honor': honor}
     if request.method == 'POST':
-        if field == 'title':
-            honor.title = request.POST.get('value', '')
+        if field in ('title', 'personal_notes'):
+            setattr(honor, field, request.POST.get('value', ''))
             honor.save()
         elif field == 'grades':
             honor.grade_9 = 'grade_9' in request.POST

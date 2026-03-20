@@ -282,41 +282,131 @@
 
 <!-- Common App Activities & Honors -->
 <div x-show="tab === 'common_app'">
+
+  <!-- Activities -->
   <div class="level mb-3">
     <div class="level-left">
       <h2 class="title is-4 mb-0">Common App Activities</h2>
     </div>
     <div class="level-right">
-      <a href="{% url 'activities:export_common_app' %}" class="button is-light is-small mr-2">Export .txt</a>
-      <a href="{% url 'activities:ca_add' %}" class="button is-primary is-small">+ Add Activity</a>
+      <a href="{% url 'activities:export_common_app' %}" class="button is-light is-small">Export .txt</a>
     </div>
   </div>
+
   <div class="table-container">
     <table class="table is-bordered is-hoverable is-fullwidth is-narrow">
       <thead>
         <tr>
-          <th style="width:30px">#</th>
-          <th>Type</th>
-          <th>Position <span class="has-text-grey is-size-7">(50ch)</span></th>
-          <th>Organization <span class="has-text-grey is-size-7">(100ch)</span></th>
-          <th>Description <span class="has-text-grey is-size-7">(150ch)</span></th>
-          <th>Grades</th>
-          <th>Timing</th>
-          <th>Hrs/wk</th>
-          <th>Hub</th>
+          <th style="width:18px"></th>
+          <th style="width:28px">#</th>
+
+          <th>Type
+            <span class="th-info-icon" id="ca-type-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="ca-type-popup" style="display:none; white-space:normal; max-width:300px">
+              <p>The Common App's activity categorization. Use <strong>Other Club/Activity</strong> as the catch-all when nothing else fits. The type is shown to admissions officers.</p>
+            </div>
+          </th>
+
+          <th>Position <span class="has-text-grey is-size-7">(50ch)</span>
+            <span class="th-info-icon" id="ca-pos-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="ca-pos-popup" style="display:none; white-space:normal; max-width:340px">
+              <p class="mb-2">Common App prompt: <strong>"Position/Leadership description"</strong></p>
+              <p>Your role or title in the activity. Examples: "Puzzle creator", "Teaching Assistant", "Podcast cohost / market creator / events organizer". Max <strong>50 characters</strong>.</p>
+            </div>
+          </th>
+
+          <th>Organization <span class="has-text-grey is-size-7">(100ch)</span>
+            <span class="th-info-icon" id="ca-org-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="ca-org-popup" style="display:none; white-space:normal; max-width:340px">
+              <p class="mb-2">Common App prompt: <strong>"Organization Name"</strong></p>
+              <p>Name of the organization, publication, team, camp, or platform. Max <strong>100 characters</strong>.</p>
+            </div>
+          </th>
+
+          <th>Description <span class="has-text-grey is-size-7">(150ch)</span>
+            <span class="th-info-icon" id="ca-desc-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="ca-desc-popup" style="display:none; white-space:normal; max-width:400px">
+              <p class="mb-2">Common App prompt:</p>
+              <p><em>"Please describe this activity, including what you accomplished and any recognition you received, etc."</em></p>
+              <p class="mt-2">Max <strong>150 characters</strong>. Every character counts — this is prime real estate.</p>
+            </div>
+          </th>
+
+          <th>Grades
+            <span class="th-info-icon" id="ca-grades-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="ca-grades-popup" style="display:none; white-space:normal; max-width:340px">
+              <p class="mb-2">Common App prompt: <strong>"Participation grade levels"</strong></p>
+              <p>Check each grade you participated. For summer activities, check the grade you were <em>rising into</em> that fall.</p>
+            </div>
+          </th>
+
+          <th>Timing
+            <span class="th-info-icon" id="ca-timing-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="ca-timing-popup" style="display:none; white-space:normal; max-width:340px">
+              <p class="mb-2">Common App prompt: <strong>"Timing of participation"</strong></p>
+              <ul style="list-style:disc; padding-left:1.2em">
+                <li><strong>School yr</strong> — During the school year</li>
+                <li><strong>Breaks</strong> — During school breaks</li>
+                <li><strong>All year</strong> — Year-round (school year + breaks)</li>
+              </ul>
+            </div>
+          </th>
+
+          <th>Hrs/wk
+            <span class="th-info-icon" id="ca-hrs-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="ca-hrs-popup" style="display:none; white-space:normal; max-width:280px">
+              <p>Common App prompt: <strong>"Hours spent per week"</strong></p>
+              <p class="mt-1 has-text-grey">Estimate as needed.</p>
+            </div>
+          </th>
+
+          <th>Wks/yr
+            <span class="th-info-icon" id="ca-wks-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="ca-wks-popup" style="display:none; white-space:normal; max-width:280px">
+              <p>Common App prompt: <strong>"Weeks spent per year"</strong></p>
+              <p class="mt-1 has-text-grey">Estimate as needed.</p>
+            </div>
+          </th>
+
+          <th>College?
+            <span class="th-info-icon" id="ca-college-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="ca-college-popup" style="display:none; white-space:normal; max-width:340px">
+              <p class="mb-2">Common App prompt: <strong>"I intend to participate in a similar activity in college."</strong></p>
+              <p>Yes / No. Click the button to toggle. Leave — if undecided.</p>
+            </div>
+          </th>
+
+          <th>Notes
+            <span class="th-info-icon" id="ca-notes-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="ca-notes-popup" style="display:none; white-space:normal; max-width:260px">
+              <p>Private notes — not submitted to Common App. For your own reference.</p>
+            </div>
+          </th>
+
           <th style="width:40px"></th>
         </tr>
       </thead>
-      <tbody>
-        {% for activity in common_app_activities %}
-          {% include "activities/_ca_row.html" %}
-        {% empty %}
-        <tr><td colspan="10" class="has-text-centered has-text-grey py-4">No Common App activities yet.</td></tr>
+      <tbody id="ca-entries-tbody">
+        {% for slot in ca_slots %}
+          {% if slot %}
+            {% include "activities/_ca_row.html" with activity=slot slot_num=forloop.counter ca_type_choices=ca_type_choices %}
+          {% else %}
+            {% include "activities/_ca_empty_row.html" with slot_num=forloop.counter %}
+          {% endif %}
+        {% endfor %}
+        {% for activity in ca_overflow %}
+        <tr id="ca-{{ activity.pk }}" data-pk="{{ activity.pk }}" style="opacity:0.45" title="Beyond CA limit of 10 — not submitted">
+          <td style="width:18px"></td>
+          <td class="has-text-grey is-size-7">{{ forloop.counter|add:"10" }}</td>
+          <td class="is-size-7"><strong>{{ activity.organization }}</strong> <span class="tag is-warning is-light is-small ml-1">over limit</span></td>
+          <td colspan="9" class="has-text-grey is-size-7">Not considered by Common App (activities 11+)</td>
+        </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 
+  <!-- Honors -->
   <div class="level mb-3 mt-6">
     <div class="level-left">
       <h2 class="title is-4 mb-0">Common App Honors</h2>
@@ -329,19 +419,61 @@
     <table class="table is-bordered is-hoverable is-fullwidth is-narrow">
       <thead>
         <tr>
-          <th style="width:30px">#</th>
-          <th>Title</th>
-          <th>Grades</th>
-          <th>Recognition Level</th>
-          <th>Hub</th>
+          <th style="width:28px">#</th>
+
+          <th>Title
+            <span class="th-info-icon" id="honor-title-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="honor-title-popup" style="display:none; white-space:normal; max-width:300px">
+              <p>The name of the honor or award. Click to edit inline.</p>
+            </div>
+          </th>
+
+          <th>Grades
+            <span class="th-info-icon" id="honor-grades-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="honor-grades-popup" style="display:none; white-space:normal; max-width:300px">
+              <p>Common App prompt: <strong>"Grade level in school when you received the honor."</strong></p>
+            </div>
+          </th>
+
+          <th>Level
+            <span class="th-info-icon" id="honor-level-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="honor-level-popup" style="display:none; white-space:normal; max-width:340px">
+              <p class="mb-2">Common App prompt: <strong>"Level of recognition"</strong></p>
+              <table class="table is-narrow is-bordered mb-0" style="background:white; min-width:260px">
+                <thead><tr><th style="background:#f5f5f5">Option</th><th style="background:#f5f5f5">Meaning</th></tr></thead>
+                <tbody>
+                  <tr><td>School</td><td>School-level award</td></tr>
+                  <tr><td>State/Reg.</td><td>State or regional award</td></tr>
+                  <tr><td>National</td><td>National award</td></tr>
+                  <tr><td>Intl.</td><td>International award</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </th>
+
+          <th>Notes
+            <span class="th-info-icon" id="honor-notes-anchor">ⓘ</span>
+            <div class="th-tooltip-popup is-size-7" id="honor-notes-popup" style="display:none; white-space:normal; max-width:260px">
+              <p>Private notes — not submitted to Common App.</p>
+            </div>
+          </th>
+
           <th style="width:40px"></th>
         </tr>
       </thead>
       <tbody>
-        {% for honor in common_app_honors %}
-          {% include "activities/_honor_row.html" %}
-        {% empty %}
-        <tr><td colspan="6" class="has-text-centered has-text-grey py-4">No honors yet.</td></tr>
+        {% for slot in honor_slots %}
+          {% if slot %}
+            {% include "activities/_honor_row.html" with honor=slot slot_num=forloop.counter %}
+          {% else %}
+          <tr class="ca-placeholder">
+            <td class="has-text-grey is-size-7">{{ forloop.counter }}</td>
+            <td colspan="4" class="has-text-grey is-size-7" style="font-style:italic">
+              <a href="{% url 'activities:honor_add' %}" class="has-text-grey">+ Add honor {{ forloop.counter }}</a>
+            </td>
+            <td></td>
+          </tr>
+          {% endif %}
         {% endfor %}
       </tbody>
     </table>

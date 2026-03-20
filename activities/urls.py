@@ -13,6 +13,8 @@ urlpatterns = [
     path('uc/<int:pk>/cell/<str:field>/', views.uc_cell, name='uc_cell'),
     path('uc/<int:pk>/delete/', views.uc_delete, name='uc_delete'),
     # Common App Activities
+    path('ca/reorder/', views.ca_reorder, name='ca_reorder'),
+    path('ca/slot/<int:slot>/add/', views.ca_slot_add, name='ca_slot_add'),
     path('ca/add/', views.ca_add, name='ca_add'),
     path('ca/<int:pk>/', views.ca_edit, name='ca_edit'),
     path('ca/<int:pk>/cell/<str:field>/', views.ca_cell, name='ca_cell'),

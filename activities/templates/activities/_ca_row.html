@@ -1,9 +1,14 @@
-<tr id="ca-{{ activity.pk }}">
-  <td class="has-text-grey is-size-7" style="width:30px">{{ activity.order }}</td>
+{% with t=activity.activity_type %}
+<tr id="ca-{{ activity.pk }}" data-pk="{{ activity.pk }}"
+    class="{% if t == 'art' or t == 'music_instrumental' or t == 'music_vocal' or t == 'dance' or t == 'theater_drama' %}ca-type-arts{% elif t == 'athletics_club' or t == 'athletics_jv_varsity' %}ca-type-sports{% elif t == 'community' or t == 'environmental' or t == 'religious' %}ca-type-community{% elif t == 'academic' or t == 'research' or t == 'science_math' or t == 'debate_speech' or t == 'computer_technology' or t == 'robotics' %}ca-type-academic{% elif t == 'journalism_publication' %}ca-type-journalism{% elif t == 'work_paid' or t == 'career' %}ca-type-work{% else %}ca-type-other{% endif %}"
+    style="--bulma-table-cell-background-color:transparent">
 
-  {# Type #}
+  <td class="drag-handle" style="width:18px">⠿</td>
+  <td class="has-text-grey is-size-7" style="width:28px">{% if slot_num %}{{ slot_num }}{% else %}{{ activity.order }}{% endif %}</td>
+
+  {# Type — outerHTML swap updates row color #}
   <td>
-    <form hx-post="{% url 'activities:ca_cell' activity.pk 'activity_type' %}" hx-trigger="change" hx-swap="none">
+    <form hx-post="{% url 'activities:ca_cell' activity.pk 'activity_type' %}" hx-trigger="change" hx-target="#ca-{{ activity.pk }}" hx-swap="outerHTML">
       <div class="select is-small"><select name="value">
         {% for val, label in ca_type_choices %}
         <option value="{{ val }}" {% if activity.activity_type == val %}selected{% endif %}>{{ label }}</option>
@@ -13,19 +18,33 @@
   </td>
 
   {# Position (50ch) #}
-  <td style="min-width:120px" x-data="{ e:false, v:'{{ activity.position|escapejs }}' }">
-    <span x-show="!e" @click="e=true; $nextTick(()=>$refs.i.focus())" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||'—'"></span>
-    <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="50"
-      hx-post="{% url 'activities:ca_cell' activity.pk 'position' %}" hx-trigger="blur" hx-swap="none"
-      @blur="e=false">
+  <td style="min-width:110px" x-data="{
+    e:false, v:'{{ activity.position|escapejs }}',
+    get chars(){ return this.v.length; },
+    cc(l){ var r=this.chars/l; return r>1?'has-text-danger has-text-weight-semibold':r>=0.9?'has-text-warning-dark':'has-text-grey'; }
+  }" @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
+    <span x-show="!e" style="cursor:pointer; display:block; min-height:1.2em; font-size:0.85rem" x-text="v||'—'"></span>
+    <div x-show="e" @click.stop>
+      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="50"
+        hx-post="{% url 'activities:ca_cell' activity.pk 'position' %}" hx-trigger="blur" hx-swap="none"
+        @blur="e=false">
+      <p style="text-align:right;margin-top:0.15rem;font-size:0.72rem;line-height:1;"><span :class="cc(50)" x-text="chars+'/50'"></span></p>
+    </div>
   </td>
 
   {# Organization (100ch) #}
-  <td style="min-width:140px" x-data="{ e:false, v:'{{ activity.organization|escapejs }}' }">
-    <strong x-show="!e" @click="e=true; $nextTick(()=>$refs.i.focus())" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||'—'"></strong>
-    <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="100"
-      hx-post="{% url 'activities:ca_cell' activity.pk 'organization' %}" hx-trigger="blur" hx-swap="none"
-      @blur="e=false">
+  <td style="min-width:140px" x-data="{
+    e:false, v:'{{ activity.organization|escapejs }}',
+    get chars(){ return this.v.length; },
+    cc(l){ var r=this.chars/l; return r>1?'has-text-danger has-text-weight-semibold':r>=0.9?'has-text-warning-dark':'has-text-grey'; }
+  }" @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
+    <strong x-show="!e" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||'—'"></strong>
+    <div x-show="e" @click.stop>
+      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="100"
+        hx-post="{% url 'activities:ca_cell' activity.pk 'organization' %}" hx-trigger="blur" hx-swap="none"
+        @blur="e=false">
+      <p style="text-align:right;margin-top:0.15rem;font-size:0.72rem;line-height:1;"><span :class="cc(100)" x-text="chars+'/100'"></span></p>
+    </div>
   </td>
 
   {# Description (150ch) #}
@@ -33,24 +52,24 @@
     e:false, v:'{{ activity.description|escapejs }}',
     get chars(){ return this.v.length; },
     cc(l){ var r=this.chars/l; return r>1?'has-text-danger has-text-weight-semibold':r>=0.9?'has-text-warning-dark':'has-text-grey'; }
-  }">
-    <div x-show="!e" @click="e=true; $nextTick(()=>$refs.t.focus())" class="is-size-7" style="cursor:pointer; white-space:pre-wrap; min-height:1.2em" x-text="v||'—'"></div>
-    <div x-show="e">
+  }" @click="if(!e){ e=true; $nextTick(()=>$refs.t.focus()) }">
+    <div x-show="!e" class="is-size-7" style="cursor:pointer; white-space:pre-wrap; min-height:1.2em" x-text="v||'—'"></div>
+    <div x-show="e" @click.stop>
       <textarea x-ref="t" class="textarea is-small" name="value" rows="3" x-model="v" maxlength="150"
         hx-post="{% url 'activities:ca_cell' activity.pk 'description' %}" hx-trigger="blur, input delay:1500ms" hx-swap="none"
         @blur="e=false"></textarea>
-      <p style="text-align:right;margin-top:0.25rem;font-size:0.75rem;line-height:1;"><span :class="cc(150)" x-text="chars+' / 150 chars'"></span></p>
+      <p style="text-align:right;margin-top:0.25rem;font-size:0.72rem;line-height:1;"><span :class="cc(150)" x-text="chars+'/150'"></span></p>
     </div>
   </td>
 
   {# Grades #}
   <td>
     <form hx-post="{% url 'activities:ca_cell' activity.pk 'grades' %}" hx-trigger="change" hx-swap="none">
-      <div class="is-size-7" style="white-space:nowrap">
-        <label><input type="checkbox" name="grade_9" {% if activity.grade_9 %}checked{% endif %}> 9</label>&nbsp;
-        <label><input type="checkbox" name="grade_10" {% if activity.grade_10 %}checked{% endif %}> 10</label>&nbsp;
-        <label><input type="checkbox" name="grade_11" {% if activity.grade_11 %}checked{% endif %}> 11</label>&nbsp;
-        <label><input type="checkbox" name="grade_12" {% if activity.grade_12 %}checked{% endif %}> 12</label>
+      <div class="is-size-7" style="line-height:1.9; white-space:nowrap">
+        <label style="display:block"><input type="checkbox" name="grade_9"  {% if activity.grade_9  %}checked{% endif %}> 9</label>
+        <label style="display:block"><input type="checkbox" name="grade_10" {% if activity.grade_10 %}checked{% endif %}> 10</label>
+        <label style="display:block"><input type="checkbox" name="grade_11" {% if activity.grade_11 %}checked{% endif %}> 11</label>
+        <label style="display:block"><input type="checkbox" name="grade_12" {% if activity.grade_12 %}checked{% endif %}> 12</label>
       </div>
     </form>
   </td>
@@ -58,27 +77,56 @@
   {# Timing #}
   <td>
     <form hx-post="{% url 'activities:ca_cell' activity.pk 'timing' %}" hx-trigger="change" hx-swap="none">
-      <div class="is-size-7" style="white-space:nowrap">
-        <label><input type="checkbox" name="timing_school" {% if activity.timing_school %}checked{% endif %}> School</label>&nbsp;
-        <label><input type="checkbox" name="timing_breaks" {% if activity.timing_breaks %}checked{% endif %}> Breaks</label>&nbsp;
-        <label><input type="checkbox" name="timing_all_year" {% if activity.timing_all_year %}checked{% endif %}> All year</label>
+      <div class="is-size-7" style="line-height:1.9; white-space:nowrap">
+        <label style="display:block"><input type="checkbox" name="timing_school"   {% if activity.timing_school   %}checked{% endif %}> School yr</label>
+        <label style="display:block"><input type="checkbox" name="timing_breaks"   {% if activity.timing_breaks   %}checked{% endif %}> Breaks</label>
+        <label style="display:block"><input type="checkbox" name="timing_all_year" {% if activity.timing_all_year %}checked{% endif %}> All year</label>
       </div>
     </form>
   </td>
 
   {# Hrs/wk #}
-  <td style="width:70px" x-data="{ e:false, v:'{{ activity.hours_per_week|default:''|escapejs }}' }">
-    <span x-show="!e" @click="e=true; $nextTick(()=>$refs.i.focus())" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||'—'"></span>
-    <input x-show="e" x-ref="i" class="input is-small" type="number" name="value" x-model="v" style="width:55px"
+  <td style="width:60px" x-data="{ e:false, v:'{{ activity.hours_per_week|default:''|escapejs }}' }"
+      @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
+    <span x-show="!e" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||'—'"></span>
+    <input x-show="e" x-ref="i" class="input is-small" type="number" name="value" x-model="v" style="width:50px"
       hx-post="{% url 'activities:ca_cell' activity.pk 'hours_per_week' %}" hx-trigger="blur" hx-swap="none"
-      @blur="e=false">
+      @blur="e=false" @click.stop>
   </td>
 
-  {# Hub (read-only) #}
-  <td class="is-size-7">{% if activity.core_activity %}<span class="tag is-light is-small" title="{{ activity.core_activity.name }}">{{ activity.core_activity.name|truncatewords:3 }}</span>{% else %}—{% endif %}</td>
+  {# Wks/yr #}
+  <td style="width:60px" x-data="{ e:false, v:'{{ activity.weeks_per_year|default:''|escapejs }}' }"
+      @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
+    <span x-show="!e" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||'—'"></span>
+    <input x-show="e" x-ref="i" class="input is-small" type="number" name="value" x-model="v" style="width:50px"
+      hx-post="{% url 'activities:ca_cell' activity.pk 'weeks_per_year' %}" hx-trigger="blur" hx-swap="none"
+      @blur="e=false" @click.stop>
+  </td>
+
+  {# Similar in college #}
+  <td style="text-align:center; width:70px">
+    <button class="button is-small {% if activity.similar_in_college %}is-success{% elif activity.similar_in_college is False %}is-light{% else %}is-light has-text-grey{% endif %}"
+      hx-post="{% url 'activities:ca_cell' activity.pk 'similar_in_college' %}"
+      hx-target="#ca-{{ activity.pk }}" hx-swap="outerHTML">
+      {% if activity.similar_in_college %}Yes{% elif activity.similar_in_college is False %}No{% else %}—{% endif %}
+    </button>
+  </td>
+
+  {# Private Notes #}
+  <td style="min-width:120px" x-data="{ e:false, v:'{{ activity.personal_notes|escapejs }}' }"
+      @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
+    <span x-show="!e" class="is-size-7" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||''"></span>
+    <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v"
+      hx-post="{% url 'activities:ca_cell' activity.pk 'personal_notes' %}" hx-trigger="blur" hx-swap="none"
+      @blur="e=false" @click.stop>
+  </td>
 
   {# Delete #}
   <td style="width:40px">
-    <button class="button is-small is-danger is-outlined" hx-post="{% url 'activities:ca_delete' activity.pk %}" hx-target="#ca-{{ activity.pk }}" hx-swap="outerHTML" hx-confirm="Delete this activity?">&times;</button>
+    <button class="button is-small is-danger is-outlined"
+      hx-post="{% url 'activities:ca_delete' activity.pk %}"
+      hx-target="#ca-{{ activity.pk }}" hx-swap="outerHTML"
+      hx-confirm="Delete this activity?">&times;</button>
   </td>
 </tr>
+{% endwith %}

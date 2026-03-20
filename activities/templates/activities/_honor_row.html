@@ -1,22 +1,29 @@
-<tr id="honor-{{ honor.pk }}">
-  <td class="has-text-grey is-size-7" style="width:30px">{{ honor.order }}</td>
+<tr id="honor-{{ honor.pk }}" data-pk="{{ honor.pk }}">
+  <td class="has-text-grey is-size-7" style="width:28px">{% if slot_num %}{{ slot_num }}{% else %}{{ honor.order|add:1 }}{% endif %}</td>
 
   {# Title #}
-  <td style="min-width:200px" x-data="{ e:false, v:'{{ honor.title|escapejs }}' }">
-    <strong x-show="!e" @click="e=true; $nextTick(()=>$refs.i.focus())" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||'—'"></strong>
-    <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="200"
-      hx-post="{% url 'activities:honor_cell' honor.pk 'title' %}" hx-trigger="blur" hx-swap="none"
-      @blur="e=false">
+  <td style="min-width:200px" x-data="{
+    e:false, v:'{{ honor.title|escapejs }}',
+    get chars(){ return this.v.length; },
+    cc(l){ var r=this.chars/l; return r>1?'has-text-danger has-text-weight-semibold':r>=0.9?'has-text-warning-dark':'has-text-grey'; }
+  }" @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
+    <strong x-show="!e" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||'—'"></strong>
+    <div x-show="e" @click.stop>
+      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v"
+        hx-post="{% url 'activities:honor_cell' honor.pk 'title' %}" hx-trigger="blur" hx-swap="none"
+        @blur="e=false">
+      <p style="text-align:right;margin-top:0.15rem;font-size:0.72rem;line-height:1; color:#aaa" x-text="chars+' chars'"></p>
+    </div>
   </td>
 
   {# Grades #}
   <td>
     <form hx-post="{% url 'activities:honor_cell' honor.pk 'grades' %}" hx-trigger="change" hx-swap="none">
-      <div class="is-size-7" style="white-space:nowrap">
-        <label><input type="checkbox" name="grade_9" {% if honor.grade_9 %}checked{% endif %}> 9</label>&nbsp;
-        <label><input type="checkbox" name="grade_10" {% if honor.grade_10 %}checked{% endif %}> 10</label>&nbsp;
-        <label><input type="checkbox" name="grade_11" {% if honor.grade_11 %}checked{% endif %}> 11</label>&nbsp;
-        <label><input type="checkbox" name="grade_12" {% if honor.grade_12 %}checked{% endif %}> 12</label>
+      <div class="is-size-7" style="line-height:1.9; white-space:nowrap">
+        <label style="display:block"><input type="checkbox" name="grade_9"  {% if honor.grade_9  %}checked{% endif %}> 9</label>
+        <label style="display:block"><input type="checkbox" name="grade_10" {% if honor.grade_10 %}checked{% endif %}> 10</label>
+        <label style="display:block"><input type="checkbox" name="grade_11" {% if honor.grade_11 %}checked{% endif %}> 11</label>
+        <label style="display:block"><input type="checkbox" name="grade_12" {% if honor.grade_12 %}checked{% endif %}> 12</label>
       </div>
     </form>
   </td>
@@ -24,20 +31,29 @@
   {# Recognition levels #}
   <td>
     <form hx-post="{% url 'activities:honor_cell' honor.pk 'levels' %}" hx-trigger="change" hx-swap="none">
-      <div class="is-size-7" style="white-space:nowrap">
-        <label><input type="checkbox" name="level_school" {% if honor.level_school %}checked{% endif %}> School</label>&nbsp;
-        <label><input type="checkbox" name="level_state_regional" {% if honor.level_state_regional %}checked{% endif %}> State</label>&nbsp;
-        <label><input type="checkbox" name="level_national" {% if honor.level_national %}checked{% endif %}> National</label>&nbsp;
-        <label><input type="checkbox" name="level_international" {% if honor.level_international %}checked{% endif %}> Intl</label>
+      <div class="is-size-7" style="line-height:1.9; white-space:nowrap">
+        <label style="display:block"><input type="checkbox" name="level_school"         {% if honor.level_school         %}checked{% endif %}> School</label>
+        <label style="display:block"><input type="checkbox" name="level_state_regional" {% if honor.level_state_regional %}checked{% endif %}> State/Reg.</label>
+        <label style="display:block"><input type="checkbox" name="level_national"       {% if honor.level_national       %}checked{% endif %}> National</label>
+        <label style="display:block"><input type="checkbox" name="level_international"  {% if honor.level_international  %}checked{% endif %}> Intl.</label>
       </div>
     </form>
   </td>
 
-  {# Hub (read-only) #}
-  <td class="is-size-7">{% if honor.core_activity %}<span class="tag is-light is-small" title="{{ honor.core_activity.name }}">{{ honor.core_activity.name|truncatewords:3 }}</span>{% else %}—{% endif %}</td>
+  {# Private Notes #}
+  <td style="min-width:120px" x-data="{ e:false, v:'{{ honor.personal_notes|escapejs }}' }"
+      @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
+    <span x-show="!e" class="is-size-7" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||''"></span>
+    <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v"
+      hx-post="{% url 'activities:honor_cell' honor.pk 'personal_notes' %}" hx-trigger="blur" hx-swap="none"
+      @blur="e=false" @click.stop>
+  </td>
 
   {# Delete #}
   <td style="width:40px">
-    <button class="button is-small is-danger is-outlined" hx-post="{% url 'activities:honor_delete' honor.pk %}" hx-target="#honor-{{ honor.pk }}" hx-swap="outerHTML" hx-confirm="Delete this honor?">&times;</button>
+    <button class="button is-small is-danger is-outlined"
+      hx-post="{% url 'activities:honor_delete' honor.pk %}"
+      hx-target="#honor-{{ honor.pk }}" hx-swap="outerHTML"
+      hx-confirm="Delete this honor?">&times;</button>
   </td>
 </tr>

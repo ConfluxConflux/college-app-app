@@ -634,3 +634,18 @@ body.focus-mode {
 .focus-counter.is-over { color: #f14668; }
 .focus-counter.is-near { color: #e0a020; }
 
+/* CA activity row supercategory color coding */
+.ca-type-arts      { --bulma-table-cell-background-color: #fdf4ff !important; }
+.ca-type-sports    { --bulma-table-cell-background-color: #eff9ff !important; }
+.ca-type-community { --bulma-table-cell-background-color: #f0fdf4 !important; }
+.ca-type-academic  { --bulma-table-cell-background-color: #fefce8 !important; }
+.ca-type-journalism { --bulma-table-cell-background-color: #fff7ed !important; }
+.ca-type-work      { --bulma-table-cell-background-color: #f8fafc !important; }
+.ca-type-other     { --bulma-table-cell-background-color: transparent !important; }
+
+/* CA empty slot placeholder rows */
+.ca-placeholder td {
+  color: #ccc;
+  font-size: 0.85rem;
+}
+

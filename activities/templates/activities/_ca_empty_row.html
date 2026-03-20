@@ -1,0 +1,44 @@
+<tr id="ca-slot-{{ slot_num }}" class="ca-placeholder">
+  <td style="width:18px"></td>
+  <td class="is-size-7" style="width:28px">{{ slot_num }}</td>
+
+  <td style="cursor:pointer"
+      hx-post="{% url 'activities:ca_slot_add' slot_num %}" hx-vals='{"field":"activity_type"}'
+      hx-target="#ca-slot-{{ slot_num }}" hx-swap="outerHTML">—</td>
+
+  <td style="cursor:pointer; min-width:110px"
+      hx-post="{% url 'activities:ca_slot_add' slot_num %}" hx-vals='{"field":"position"}'
+      hx-target="#ca-slot-{{ slot_num }}" hx-swap="outerHTML">—</td>
+
+  <td style="cursor:pointer; min-width:140px"
+      hx-post="{% url 'activities:ca_slot_add' slot_num %}" hx-vals='{"field":"organization"}'
+      hx-target="#ca-slot-{{ slot_num }}" hx-swap="outerHTML">—</td>
+
+  <td style="cursor:pointer; min-width:200px"
+      hx-post="{% url 'activities:ca_slot_add' slot_num %}" hx-vals='{"field":"description"}'
+      hx-target="#ca-slot-{{ slot_num }}" hx-swap="outerHTML">—</td>
+
+  <td style="cursor:pointer"
+      hx-post="{% url 'activities:ca_slot_add' slot_num %}" hx-vals='{"field":"grades"}'
+      hx-target="#ca-slot-{{ slot_num }}" hx-swap="outerHTML">—</td>
+
+  <td style="cursor:pointer"
+      hx-post="{% url 'activities:ca_slot_add' slot_num %}" hx-vals='{"field":"timing"}'
+      hx-target="#ca-slot-{{ slot_num }}" hx-swap="outerHTML">—</td>
+
+  <td style="width:60px; cursor:pointer"
+      hx-post="{% url 'activities:ca_slot_add' slot_num %}" hx-vals='{"field":"hours_per_week"}'
+      hx-target="#ca-slot-{{ slot_num }}" hx-swap="outerHTML">—</td>
+
+  <td style="width:60px; cursor:pointer"
+      hx-post="{% url 'activities:ca_slot_add' slot_num %}" hx-vals='{"field":"weeks_per_year"}'
+      hx-target="#ca-slot-{{ slot_num }}" hx-swap="outerHTML">—</td>
+
+  <td style="width:70px">—</td>
+
+  <td style="min-width:120px; cursor:pointer"
+      hx-post="{% url 'activities:ca_slot_add' slot_num %}" hx-vals='{"field":"personal_notes"}'
+      hx-target="#ca-slot-{{ slot_num }}" hx-swap="outerHTML">—</td>
+
+  <td style="width:40px"></td>
+</tr>

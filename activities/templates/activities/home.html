@@ -79,9 +79,31 @@
     });
   }
 
+  function initCaSort() {
+    const tbody = document.getElementById('ca-entries-tbody');
+    if (!tbody) return;
+    Sortable.create(tbody, {
+      handle: '.drag-handle',
+      filter: '.ca-placeholder',
+      animation: 150,
+      onEnd: function() {
+        const pks = [...tbody.querySelectorAll('tr[data-pk]')].map(r => r.dataset.pk);
+        fetch('{% url "activities:ca_reorder" %}', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+          },
+          body: JSON.stringify({order: pks}),
+        });
+      }
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
     initTooltips();
     initUcSort();
+    initCaSort();
   });
 })();
 </script>
