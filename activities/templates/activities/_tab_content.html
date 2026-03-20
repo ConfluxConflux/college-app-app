@@ -289,7 +289,8 @@
       <h2 class="title is-4 mb-0">Common App Activities</h2>
     </div>
     <div class="level-right">
-      <a href="{% url 'activities:export_common_app' %}" class="button is-light is-small">Export .txt</a>
+      <a href="{% url 'activities:export_ca_txt' %}" class="button is-light is-small mr-2">Export .txt</a>
+      <a href="{% url 'activities:export_ca_csv' %}" class="button is-light is-small">Export .csv</a>
     </div>
   </div>
 
@@ -412,7 +413,8 @@
       <h2 class="title is-4 mb-0">Common App Honors</h2>
     </div>
     <div class="level-right">
-      <a href="{% url 'activities:honor_add' %}" class="button is-primary is-small">+ Add Honor</a>
+      <a href="{% url 'activities:export_honors_txt' %}" class="button is-light is-small mr-2">Export .txt</a>
+      <a href="{% url 'activities:export_honors_csv' %}" class="button is-light is-small">Export .csv</a>
     </div>
   </div>
   <div class="table-container">
@@ -461,7 +463,7 @@
           <th style="width:40px"></th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="honors-entries-tbody">
         {% for slot in honor_slots %}
           {% if slot %}
             {% include "activities/_honor_row.html" with honor=slot slot_num=forloop.counter %}
@@ -469,7 +471,7 @@
           <tr class="ca-placeholder">
             <td class="has-text-grey is-size-7">{{ forloop.counter }}</td>
             <td colspan="4" class="has-text-grey is-size-7" style="font-style:italic">
-              <a href="{% url 'activities:honor_add' %}" class="has-text-grey">+ Add honor {{ forloop.counter }}</a>
+              <span class="has-text-grey">—</span>
             </td>
             <td></td>
           </tr>
@@ -478,6 +480,10 @@
       </tbody>
     </table>
   </div>
+  <button class="button is-primary is-small mt-2"
+      hx-post="{% url 'activities:honor_add' %}"
+      hx-target="#honors-entries-tbody"
+      hx-swap="beforeend">+ Add Honor</button>
 </div>
 
 <!-- MIT Entries -->

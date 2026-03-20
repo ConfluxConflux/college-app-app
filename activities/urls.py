@@ -28,6 +28,10 @@ urlpatterns = [
     path('export/uc/', views.export_uc, name='export_uc'),
     path('export/uc/csv/', views.export_uc_csv, name='export_uc_csv'),
     path('export/common-app/', views.export_common_app, name='export_common_app'),
+    path('export/ca/', views.export_ca_txt, name='export_ca_txt'),
+    path('export/ca/csv/', views.export_ca_csv, name='export_ca_csv'),
+    path('export/honors/', views.export_honors_txt, name='export_honors_txt'),
+    path('export/honors/csv/', views.export_honors_csv, name='export_honors_csv'),
     path('export/mit/', views.export_mit, name='export_mit'),
     # MIT
     path('mit/add/', views.mit_add, name='mit_add'),

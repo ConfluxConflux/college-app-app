@@ -327,6 +327,13 @@ def ca_delete(request, pk):
 # ── Common App Honor CRUD ──
 
 def honor_add(request):
+    if request.method == 'POST' and request.headers.get('HX-Request'):
+        applicant = Applicant.objects.get(pk=1)
+        honor = CommonAppHonor.objects.create(
+            applicant=applicant,
+            order=CommonAppHonor.objects.filter(applicant=applicant).count(),
+        )
+        return render(request, 'activities/_honor_row.html', {'honor': honor})
     if request.method == 'POST':
         form = CommonAppHonorForm(request.POST)
         if form.is_valid():
@@ -559,18 +566,16 @@ def export_uc_csv(request):
     return response
 
 
-def export_common_app(request):
+def export_ca_txt(request):
     applicant = Applicant.objects.get(pk=1)
-    activities = CommonAppActivity.objects.filter(applicant=applicant)
-    honors = CommonAppHonor.objects.filter(applicant=applicant)
-    lines = ['COMMON APP ACTIVITIES & HONORS EXPORT', '=' * 40, '']
-
-    lines += [f'ACTIVITIES ({activities.count()}/10)', '']
+    activities = CommonAppActivity.objects.filter(applicant=applicant).order_by('order')
+    lines = [f'COMMON APP ACTIVITIES ({activities.count()}/10)', '=' * 40, '']
     for i, a in enumerate(activities, 1):
         timing = []
         if a.timing_school: timing.append('During school year')
         if a.timing_breaks: timing.append('School breaks')
         if a.timing_all_year: timing.append('All year')
+        similar = 'Yes' if a.similar_in_college else ('No' if a.similar_in_college is False else '—')
         lines += [
             f'Activity {i}: {a.organization or "(no org)"}',
             f'Type: {a.get_activity_type_display()}',
@@ -579,14 +584,61 @@ def export_common_app(request):
             f'Grades: {_grades(a)}',
             f'Timing: {", ".join(timing) or "—"}',
             f'Hours/week: {a.hours_per_week or "—"}    Weeks/year: {a.weeks_per_year or "—"}',
+            f'Continuing in college: {similar}',
             f'Description ({len(a.description)}/150 chars):',
             f'  {a.description or "(empty)"}',
             '',
             '-' * 40,
             '',
         ]
+        if a.personal_notes:
+            lines.insert(-1, f'Private notes: {a.personal_notes}')
+    content = '\n'.join(lines)
+    response = HttpResponse(content, content_type='text/plain; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="ca_activities.txt"'
+    return response
 
-    lines += [f'HONORS ({honors.count()}/5)', '']
+
+def export_ca_csv(request):
+    applicant = Applicant.objects.get(pk=1)
+    activities = CommonAppActivity.objects.filter(applicant=applicant).order_by('order')
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow([
+        '#', 'Type', 'Position (50ch)', 'Organization (100ch)', 'Description (150ch)',
+        'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12',
+        'Timing: School yr', 'Timing: Breaks', 'Timing: All year',
+        'Hrs/wk', 'Wks/yr', 'Continuing in college?', 'Private Notes',
+    ])
+    for i, a in enumerate(activities, 1):
+        similar = 'Yes' if a.similar_in_college else ('No' if a.similar_in_college is False else '')
+        writer.writerow([
+            i,
+            a.get_activity_type_display(),
+            a.position,
+            a.organization,
+            a.description,
+            'Yes' if a.grade_9 else '',
+            'Yes' if a.grade_10 else '',
+            'Yes' if a.grade_11 else '',
+            'Yes' if a.grade_12 else '',
+            'Yes' if a.timing_school else '',
+            'Yes' if a.timing_breaks else '',
+            'Yes' if a.timing_all_year else '',
+            a.hours_per_week or '',
+            a.weeks_per_year or '',
+            similar,
+            a.personal_notes,
+        ])
+    response = HttpResponse(buf.getvalue(), content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="ca_activities.csv"'
+    return response
+
+
+def export_honors_txt(request):
+    applicant = Applicant.objects.get(pk=1)
+    honors = CommonAppHonor.objects.filter(applicant=applicant).order_by('order')
+    lines = [f'COMMON APP HONORS ({honors.count()}/5)', '=' * 40, '']
     for i, h in enumerate(honors, 1):
         levels = []
         if h.level_school: levels.append('School')
@@ -594,19 +646,51 @@ def export_common_app(request):
         if h.level_national: levels.append('National')
         if h.level_international: levels.append('International')
         lines += [
-            f'Honor {i}: {h.title}',
+            f'Honor {i}: {h.title or "(untitled)"}',
             f'Grades: {_grades(h)}',
             f'Recognition Level: {", ".join(levels) or "—"}',
-            '',
-            '-' * 40,
-            '',
         ]
-
+        if h.personal_notes:
+            lines.append(f'Private notes: {h.personal_notes}')
+        lines += ['', '-' * 40, '']
     content = '\n'.join(lines)
-    content += '\n\nJacob thinks this could be formatted better but hasn\'t put effort into reformatting it. It would take like 2 minutes with claude so please email him at chromaticconflux@gmail.com if it should be reformatted for easier copy-pasting'
     response = HttpResponse(content, content_type='text/plain; charset=utf-8')
-    response['Content-Disposition'] = 'attachment; filename="common_app_activities.txt"'
+    response['Content-Disposition'] = 'attachment; filename="ca_honors.txt"'
     return response
+
+
+def export_honors_csv(request):
+    applicant = Applicant.objects.get(pk=1)
+    honors = CommonAppHonor.objects.filter(applicant=applicant).order_by('order')
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow([
+        '#', 'Title', 'Grade 9', 'Grade 10', 'Grade 11', 'Grade 12',
+        'Level: School', 'Level: State/Regional', 'Level: National', 'Level: International',
+        'Private Notes',
+    ])
+    for i, h in enumerate(honors, 1):
+        writer.writerow([
+            i,
+            h.title,
+            'Yes' if h.grade_9 else '',
+            'Yes' if h.grade_10 else '',
+            'Yes' if h.grade_11 else '',
+            'Yes' if h.grade_12 else '',
+            'Yes' if h.level_school else '',
+            'Yes' if h.level_state_regional else '',
+            'Yes' if h.level_national else '',
+            'Yes' if h.level_international else '',
+            h.personal_notes,
+        ])
+    response = HttpResponse(buf.getvalue(), content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="ca_honors.csv"'
+    return response
+
+
+# Keep old combined export for backwards compatibility / direct links
+def export_common_app(request):
+    return export_ca_txt(request)
 
 
 def export_mit(request):
