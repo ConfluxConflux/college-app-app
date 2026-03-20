@@ -297,8 +297,24 @@ def applications(request):
         except (College.DoesNotExist, ValueError):
             pass
 
+    # Status choices in College List sort order
+    status_choices = [
+        ('applying', 'Applying'),
+        ('likely', 'Likely'),
+        ('considering', 'Considering'),
+        ('unlikely', 'Unlikely'),
+        ('not_applying', 'Not Applying'),
+        ('applied', 'Submitted'),
+        ('deferred', 'Deferred'),
+        ('waitlisted', 'Waitlisted'),
+        ('rejected', 'Rejected'),
+        ('enrolled', 'Enrolled'),
+        ('accepted', 'Accepted'),
+    ]
+
     return render(request, 'colleges/applications.html', {
         'colleges': colleges,
         'selected': selected,
+        'status_choices': status_choices,
     })
 
