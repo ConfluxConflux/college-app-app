@@ -17,7 +17,7 @@
   text: '',
   get words() { return this.text.trim() === '' ? 0 : this.text.trim().split(' ').length; },
   get chars()  { return this.text.length; },
-  wordColor:   function(limit) { var r = this.words / limit; return r >= 1 ? 'has-text-danger has-text-weight-semibold' : r >= 0.9 ? 'has-text-warning-dark' : 'has-text-grey'; },
+  wordColor:   function(limit) { var r = this.words / limit; return r > 1 ? 'has-text-danger has-text-weight-semibold' : r >= 0.9 ? 'has-text-warning-dark' : 'has-text-grey'; },
   charColor:   function(limit) { var r = this.chars / limit; return r > 1 ? 'has-text-danger has-text-weight-semibold' : r >= 0.9 ? 'has-text-warning-dark' : 'has-text-grey'; }
 }" x-init="text = $refs.box.value">
   <textarea
