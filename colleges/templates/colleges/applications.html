@@ -4,8 +4,8 @@
 
 {% block content %}
 
-<div style="display:flex; align-items:center; gap:0.75em; margin-bottom:2rem;">
-  <h1 class="title mb-0" style="white-space:nowrap;">Application Progress:</h1>
+<div style="display:flex; align-items:stretch; gap:0.75em; margin-bottom:2rem;">
+  <h1 class="title mb-0" style="white-space:nowrap; display:flex; align-items:center;">Application Progress:</h1>
   <div class="select" style="font-size:2rem; font-family:'Libre Baskerville',Georgia,serif; flex:1;">
     <select id="college-select"
             style="font-size:inherit; font-family:inherit; font-weight:bold; height:auto; padding:0.15rem 3.5rem 0.15rem 0.5rem; width:100%;"
@@ -17,11 +17,11 @@
     </select>
   </div>
   {% if selected %}
-  <div x-data="{ s: '{{ selected.apply_status }}' }" style="flex-shrink:0;">
+  <div x-data="{ s: '{{ selected.apply_status }}' }" style="flex-shrink:0; display:flex; align-items:stretch;">
     <select x-model="s" :class="'status-' + s" name="value"
             hx-post="{% url 'colleges:edit_cell' selected.pk 'apply_status' %}"
             hx-trigger="change" hx-swap="none"
-            style="font-size:1.25rem; font-weight:600; padding:0.55em 2em 0.55em 1em; border-radius:999px; border:1px solid rgba(0,0,0,0.12); cursor:pointer; height:auto; -webkit-appearance:none; appearance:none;">
+            style="font-size:1.25rem; font-weight:600; padding:0 1.5em; border-radius:999px; border:1px solid rgba(0,0,0,0.12); cursor:pointer; width:100%; -webkit-appearance:none; appearance:none;">
       {% for val, label in status_choices %}
       <option value="{{ val }}" {% if val == selected.apply_status %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
