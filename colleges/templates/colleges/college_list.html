@@ -119,6 +119,22 @@
     return { label: e[1], value: e[0] };
   });
 
+  // Badge: more saturated colors with text color for the pill inside the Status cell
+  var BADGE_STYLES = {
+    'applying':    { bg: '#2196F3', color: '#fff' },
+    'likely':      { bg: '#6fb3e0', color: '#fff' },
+    'considering': { bg: '#9C27B0', color: '#fff' },
+    'unlikely':    { bg: '#e88a8a', color: '#fff' },
+    'not_applying':{ bg: '#9E9E9E', color: '#fff' },
+    'applied':     { bg: '#5C6BC0', color: '#fff' },
+    'accepted':    { bg: '#4CAF50', color: '#fff' },
+    'deferred':    { bg: '#FF9800', color: '#fff' },
+    'waitlisted':  { bg: '#FF9800', color: '#fff' },
+    'rejected':    { bg: '#F44336', color: '#fff' },
+    'enrolled':    { bg: '#00BCD4', color: '#fff' },
+    'withdrawn':   { bg: '#795548', color: '#fff' },
+  };
+
   var OPTIONAL_FIELDS = [
     'tier', 'acceptance_rate', 'collegevine_chance', 'sat_avg',
     'undergrad_enrollment', 'location', 'app_platform', 'terms',
@@ -144,7 +160,8 @@
       formatter: function(cell) {
         var val = cell.getValue();
         var label = STATUS_LABELS[val] || val;
-        return '<span class="status-badge status-' + val + '">' + label + '</span>';
+        var s = BADGE_STYLES[val] || { bg: '#999', color: '#fff' };
+        return '<span style="display:inline-block;padding:0.2em 0.75em;border-radius:999px;font-size:0.82em;font-weight:600;background:' + s.bg + ';color:' + s.color + ';">' + label + '</span>';
       },
     },
     {
@@ -220,6 +237,9 @@
         if (!r.ok) {
           alert('Save failed. Please reload.');
           cell.restoreOldValue();
+        } else if (field === 'apply_status') {
+          // Re-fetch so view filter and sort order reflect the new status
+          table.replaceData(jsonUrl());
         }
       });
     },
