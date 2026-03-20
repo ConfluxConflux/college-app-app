@@ -4,8 +4,9 @@
 
 {% block content %}
 
-<div style="display:flex; align-items:baseline; gap:0.75em; margin-bottom:2rem;">
-  <h1 class="title mb-0" style="white-space:nowrap;">Application Progress:</h1>
+{# ── Header: college selector + status badge ── #}
+<div style="display:flex; align-items:baseline; gap:0.75em; margin-bottom:1rem;">
+  <h1 class="title mb-0" style="white-space:nowrap;">Application:</h1>
   <div class="select" style="font-size:2rem; font-family:'Libre Baskerville',Georgia,serif; flex:1;">
     <select id="college-select"
             style="font-size:inherit; font-family:inherit; font-weight:bold; height:auto; padding:0.15rem 3.5rem 0.15rem 0.5rem; width:100%;"
@@ -31,10 +32,366 @@
 </div>
 
 {% if selected %}
-<div class="mt-4">
-  {# Content for {{ selected.name }} goes here #}
+
+{# ── Info strip: platform, deadlines, interview, major ── #}
+<div style="display:flex; flex-wrap:wrap; gap:0.4rem; align-items:center; margin-bottom:1.75rem;">
+  {% if platform_display %}
+  <span class="tag is-medium is-dark">{{ platform_display }}</span>
+  {% endif %}
+  {% if selected.ea_deadline %}
+  <span class="tag is-medium" style="background:rgba(255,255,255,0.7);"><strong style="margin-right:0.3rem;">EA</strong>{{ selected.ea_deadline }}</span>
+  {% endif %}
+  {% if selected.ed1_deadline %}
+  <span class="tag is-medium" style="background:rgba(255,255,255,0.7);"><strong style="margin-right:0.3rem;">ED I</strong>{{ selected.ed1_deadline }}</span>
+  {% endif %}
+  {% if selected.ed2_deadline %}
+  <span class="tag is-medium" style="background:rgba(255,255,255,0.7);"><strong style="margin-right:0.3rem;">ED II</strong>{{ selected.ed2_deadline }}</span>
+  {% endif %}
+  {% if selected.rd_deadline %}
+  <span class="tag is-medium" style="background:rgba(255,255,255,0.7);"><strong style="margin-right:0.3rem;">RD</strong>{{ selected.rd_deadline }}</span>
+  {% endif %}
+  {% if selected.interview %}
+  <span class="tag is-medium is-info is-light"><strong style="margin-right:0.3rem;">Interview</strong>{{ selected.interview }}</span>
+  {% endif %}
+  {% if selected.intended_major %}
+  <span class="tag is-medium is-warning is-light">{{ selected.intended_major }}</span>
+  {% endif %}
 </div>
+
+{# ── Progress summary tiles ── #}
+<div class="columns is-variable is-3 mb-5">
+
+  {# Activities tile #}
+  <div class="column is-one-third">
+    <a href="{% url 'activities:home' %}?tab={{ activities_tab }}"
+       class="box is-block" style="text-decoration:none; color:inherit; height:100%;">
+      <p class="app-tile-heading">Activities</p>
+      {% if platform == 'common' %}
+        <p class="app-tile-stat">{{ ca_count }}<span class="app-tile-denom">/10 activities</span></p>
+        <p style="font-size:0.9rem; color:#555; margin-bottom:0.4rem;">{{ honor_count }}<span style="color:#888;">/5 honors</span></p>
+        <span class="tag is-light" style="font-size:0.7rem;">Common App</span>
+      {% elif platform == 'uc' %}
+        <p class="app-tile-stat">{{ uc_count }}<span class="app-tile-denom">/20 entries</span></p>
+        <span class="tag is-light" style="font-size:0.7rem;">UC Application</span>
+      {% elif platform == 'mit' %}
+        <p class="app-tile-stat">{{ mit_count }}<span class="app-tile-denom"> entries</span></p>
+        <span class="tag is-light" style="font-size:0.7rem;">MIT Application</span>
+      {% else %}
+        <p class="app-tile-stat" style="color:#bbb;">—</p>
+        {% if platform_display %}<span class="tag is-light" style="font-size:0.7rem;">{{ platform_display }}</span>{% endif %}
+      {% endif %}
+      <p class="app-tile-link">→ edit in Activities</p>
+    </a>
+  </div>
+
+  {# Essays tile #}
+  <div class="column is-one-third">
+    <a href="{% url 'supplements:home' %}"
+       class="box is-block" style="text-decoration:none; color:inherit; height:100%;">
+      <p class="app-tile-heading">Supplemental Essays</p>
+      {% if essay_total %}
+        <p class="app-tile-stat">{{ essay_done }}<span class="app-tile-denom">/{{ essay_total }} complete</span></p>
+        <div style="display:flex; gap:0.3rem; flex-wrap:wrap; margin-top:0.25rem;">
+          {% if essay_done %}<span class="tag is-success is-light" style="font-size:0.72rem;">{{ essay_done }} done</span>{% endif %}
+          {% if essay_wip %}<span class="tag is-warning is-light" style="font-size:0.72rem;">{{ essay_wip }} WIP</span>{% endif %}
+          {% if essay_maybe %}<span class="tag is-info is-light" style="font-size:0.72rem;">{{ essay_maybe }} maybe</span>{% endif %}
+          {% if essay_blank %}<span class="tag is-light" style="font-size:0.72rem;">{{ essay_blank }} not started</span>{% endif %}
+        </div>
+      {% else %}
+        <p class="app-tile-stat" style="color:#bbb;">—</p>
+        <p style="font-size:0.85rem; color:#aaa;">No essays added yet</p>
+      {% endif %}
+      <p class="app-tile-link">→ edit in Essays</p>
+    </a>
+  </div>
+
+  {# Overall / progress tile #}
+  <div class="column is-one-third">
+    <div class="box" style="height:100%;">
+      <p class="app-tile-heading">Essay Progress</p>
+      {% if essay_total %}
+      <div class="app-progress-bar" style="margin:0.6rem 0 0.3rem;">
+        {% if essay_done_pct %}<div style="width:{{ essay_done_pct }}%; background:#48c78e;"></div>{% endif %}
+        {% if essay_wip_pct %}<div style="width:{{ essay_wip_pct }}%; background:#ffe08a;"></div>{% endif %}
+      </div>
+      <p style="font-size:0.85rem; color:#555;">{{ essay_done_pct }}% done</p>
+      {% else %}
+      <div class="app-progress-bar" style="margin:0.6rem 0 0.3rem;"></div>
+      <p style="font-size:0.85rem; color:#aaa;">No essays yet</p>
+      {% endif %}
+      {% if act_max %}
+      <p style="font-size:0.78rem; color:#aaa; margin-top:0.6rem; border-top:1px solid #eee; padding-top:0.5rem;">
+        Activities filled: {{ act_filled }}/{{ act_max }}
+      </p>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+{# ── Activities section ── #}
+<div id="activities-section" class="box mb-4">
+  <div class="level mb-3">
+    <div class="level-left">
+      <h2 class="subtitle mb-0" style="font-weight:700; font-size:1.1rem;">
+        Activities List
+        {% if platform_display %}
+        <span class="tag is-light ml-2" style="font-size:0.72rem; vertical-align:middle; font-weight:400;">{{ platform_display }}</span>
+        {% endif %}
+      </h2>
+    </div>
+    <div class="level-right">
+      <a href="{% url 'activities:home' %}?tab={{ activities_tab }}" class="is-size-7 has-text-grey">
+        Edit in Activities →
+      </a>
+    </div>
+  </div>
+
+  {% if platform == 'common' %}
+
+    <p class="app-section-label">Activities ({{ ca_count }}/10)</p>
+    {% if ca_activities %}
+    <table class="table is-fullwidth is-narrow mb-4" style="font-size:0.875rem;">
+      <tbody>
+        {% for act in ca_activities %}
+        <tr>
+          <td style="width:130px;">
+            <span class="tag is-light" style="font-size:0.7rem;">{{ act.get_activity_type_display|truncatechars:22 }}</span>
+          </td>
+          <td style="font-weight:600; max-width:200px;">{{ act.organization|truncatechars:40 }}</td>
+          <td style="color:#555;">{{ act.description|truncatechars:70 }}</td>
+          <td style="color:#aaa; font-size:0.8rem; white-space:nowrap; text-align:right;">
+            {% if act.hours_per_week %}{{ act.hours_per_week }}h/wk{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="has-text-grey is-size-7 mb-4">No activities added yet.</p>
+    {% endif %}
+
+    <p class="app-section-label">Honors ({{ honor_count }}/5)</p>
+    {% if ca_honors %}
+    <table class="table is-fullwidth is-narrow" style="font-size:0.875rem;">
+      <tbody>
+        {% for hon in ca_honors %}
+        <tr>
+          <td>{{ hon.title }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="has-text-grey is-size-7">No honors added yet.</p>
+    {% endif %}
+
+  {% elif platform == 'uc' %}
+
+    <p class="app-section-label">Entries ({{ uc_count }}/20)</p>
+    {% if uc_entries %}
+    <table class="table is-fullwidth is-narrow" style="font-size:0.875rem;">
+      <tbody>
+        {% for entry in uc_entries %}
+        <tr>
+          <td style="width:140px;">
+            <span class="tag is-light" style="font-size:0.7rem;">{{ entry.get_category_display|truncatechars:22 }}</span>
+          </td>
+          <td style="font-weight:600;">{{ entry.name|truncatechars:60 }}</td>
+          <td style="color:#aaa; font-size:0.8rem; white-space:nowrap; text-align:right;">
+            {% if entry.hours_per_week %}{{ entry.hours_per_week }}h/wk{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="has-text-grey is-size-7">No entries added yet.</p>
+    {% endif %}
+
+  {% elif platform == 'mit' %}
+
+    {% for group in mit_entries_grouped %}
+    {% if group.entries %}
+    <p class="app-section-label" style="margin-top:0.75rem;">{{ group.label }}s ({{ group.count }}/{{ group.limit }})</p>
+    <table class="table is-fullwidth is-narrow mb-3" style="font-size:0.875rem;">
+      <tbody>
+        {% for entry in group.entries %}
+        <tr>
+          <td style="font-weight:600; max-width:200px;">{{ entry.org_name|truncatechars:40 }}</td>
+          <td style="color:#555;">{{ entry.role_award|truncatechars:50 }}</td>
+          <td style="color:#aaa; font-size:0.8rem; white-space:nowrap; text-align:right;">
+            {{ entry.participation_period|truncatechars:20 }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+    {% endfor %}
+    {% if mit_count == 0 %}
+    <p class="has-text-grey is-size-7">No entries added yet.</p>
+    {% endif %}
+
+  {% else %}
+
+    <div class="notification is-light" style="font-size:0.9rem; margin-bottom:0;">
+      {% if platform_display %}
+      This school uses the <strong>{{ platform_display }}</strong>, which has its own activities format.
+      {% else %}
+      Application platform not set for this school.
+      {% endif %}
+      Track portal details in the Notes section below.
+    </div>
+
+  {% endif %}
+</div>
+
+{# ── Essays section ── #}
+<div id="essays-section" class="box mb-4">
+  <div class="level mb-2">
+    <div class="level-left">
+      <div>
+        <h2 class="subtitle mb-1" style="font-weight:700; font-size:1.1rem;">Supplemental Essays</h2>
+        {% if essay_total %}
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <div class="app-progress-bar" style="width:100px; margin:0;">
+            {% if essay_done_pct %}<div style="width:{{ essay_done_pct }}%; background:#48c78e;"></div>{% endif %}
+            {% if essay_wip_pct %}<div style="width:{{ essay_wip_pct }}%; background:#ffe08a;"></div>{% endif %}
+          </div>
+          <span style="font-size:0.8rem; color:#666;">{{ essay_done }}/{{ essay_total }} done</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="level-right">
+      <a href="{% url 'supplements:home' %}" class="is-size-7 has-text-grey">
+        Edit in Essays →
+      </a>
+    </div>
+  </div>
+
+  {% if essays %}
+  <table class="table is-fullwidth mt-3" style="font-size:0.875rem;">
+    <thead>
+      <tr>
+        <th style="width:95px;">Status</th>
+        <th style="width:110px;">Category</th>
+        <th>Prompt</th>
+        <th style="width:60px; text-align:right;">Limit</th>
+        <th style="width:150px;">Progress</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for essay in essays %}
+      <tr x-data="{ s: '{{ essay.status }}' }"
+          onclick="window.location='{% url 'supplements:home' %}'"
+          style="cursor:pointer;">
+        <td @click.stop>
+          <select x-model="s" name="status"
+                  :class="s === 'done' ? 'essay-status-pill done' : s === 'wip' ? 'essay-status-pill wip' : s === 'maybe' ? 'essay-status-pill maybe' : 'essay-status-pill blank'"
+                  hx-post="{% url 'supplements:essay_status' essay.pk %}"
+                  hx-trigger="change" hx-swap="none">
+            {% for val, label in essay_status_choices %}
+            <option value="{{ val }}" {% if val == essay.status %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </td>
+        <td>
+          {% if essay.category %}
+          <span class="tag is-light" style="font-size:0.72rem;">{{ essay.category.name }}</span>
+          {% else %}
+          <span style="color:#ccc;">—</span>
+          {% endif %}
+        </td>
+        <td style="color:{% if essay.response %}#333{% else %}#aaa{% endif %}; max-width:300px;">
+          {{ essay.prompt|truncatechars:90 }}
+        </td>
+        <td style="text-align:right; white-space:nowrap; color:#888; font-size:0.8rem;">
+          {{ essay.limit_display }}
+        </td>
+        <td>
+          {% if essay.word_limit or essay.char_limit %}
+          <div style="height:5px; border-radius:3px; background:#e8e8e8; overflow:hidden; margin-bottom:3px;">
+            <div style="width:{{ essay.progress_pct }}%; height:100%;
+                        background:{% if essay.status == 'done' %}#48c78e{% elif essay.progress_pct >= 60 %}#ffe08a{% else %}#74b9d8{% endif %};
+                        transition:width 0.3s;"></div>
+          </div>
+          <span style="font-size:0.75rem; color:#888;">{{ essay.count_display }}</span>
+          {% else %}
+          <span style="color:#ccc; font-size:0.8rem;">—</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% else %}
+  <div class="has-text-centered py-5" style="color:#aaa;">
+    <p style="font-size:1rem; margin-bottom:0.4rem;">No essays added yet for <strong style="color:#777;">{{ selected.name }}</strong>.</p>
+    <p style="font-size:0.85rem;">
+      Add supplemental prompts in the <a href="{% url 'supplements:home' %}">Essays tab</a>.
+    </p>
+  </div>
+  {% endif %}
+</div>
+
+{# ── Notes & Info (collapsible) ── #}
+{% if selected.portal_info or selected.interview or selected.toured or selected.applicant_notes or selected.known_students or selected.self_report_sat %}
+<details class="box mb-4">
+  <summary style="cursor:pointer; font-weight:600; font-family:'Libre Baskerville',Georgia,serif;
+                  list-style:none; display:flex; align-items:center; gap:0.5rem;">
+    <span>Notes &amp; Info</span>
+    <span style="font-size:0.8rem; font-weight:400; color:#888;">({{ selected.name }})</span>
+  </summary>
+  <div class="mt-3">
+    <div class="columns is-multiline">
+      {% if selected.portal_info %}
+      <div class="column is-half">
+        <p class="app-section-label">Portal</p>
+        <p style="font-size:0.9rem; white-space:pre-wrap;">{{ selected.portal_info }}</p>
+      </div>
+      {% endif %}
+      {% if selected.interview %}
+      <div class="column is-one-quarter">
+        <p class="app-section-label">Interview</p>
+        <p style="font-size:0.9rem;">{{ selected.interview }}</p>
+      </div>
+      {% endif %}
+      {% if selected.self_report_sat %}
+      <div class="column is-one-quarter">
+        <p class="app-section-label">Self-Report SAT</p>
+        <p style="font-size:0.9rem;">{{ selected.self_report_sat }}</p>
+      </div>
+      {% endif %}
+      {% if selected.toured %}
+      <div class="column is-one-quarter">
+        <p class="app-section-label">Toured</p>
+        <p style="font-size:0.9rem;">{{ selected.toured }}</p>
+      </div>
+      {% endif %}
+      {% if selected.known_students %}
+      <div class="column is-half">
+        <p class="app-section-label">Known Students</p>
+        <p style="font-size:0.9rem;">{{ selected.known_students }}</p>
+      </div>
+      {% endif %}
+      {% if selected.applicant_notes %}
+      <div class="column is-full">
+        <p class="app-section-label">Notes</p>
+        <p style="font-size:0.9rem; white-space:pre-wrap;">{{ selected.applicant_notes }}</p>
+      </div>
+      {% endif %}
+    </div>
+    <p style="font-size:0.75rem; color:#aaa; margin-top:0.5rem;">
+      <a href="{% url 'colleges:list' %}">Edit in Colleges →</a>
+    </p>
+  </div>
+</details>
 {% endif %}
+
+{% endif %}{# end if selected #}
 
 {% endblock %}
 

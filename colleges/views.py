@@ -1,4 +1,5 @@
 import json
+from collections import defaultdict
 
 from django.db.models import Case, When, Value, IntegerField
 from django.http import HttpResponse, JsonResponse
@@ -7,6 +8,9 @@ from django.views.decorators.http import require_POST, require_http_methods
 
 from .forms import CollegeForm
 from .models import College
+from activities.models import UCEntry, CommonAppActivity, CommonAppHonor, MITEntry
+from core.models import Applicant
+from supplements.models import SupplementEssay
 
 
 # Always-visible columns
@@ -302,7 +306,7 @@ def applications(request):
         except (College.DoesNotExist, ValueError):
             pass
 
-    # Status choices in College List sort order (likely/unlikely hidden from users)
+    # Status choices for the status badge dropdown
     status_choices = [
         ('applying', 'Applying'),
         ('considering', 'Considering'),
@@ -316,9 +320,133 @@ def applications(request):
         ('withdrawn', 'Withdrawn'),
     ]
 
+    # Per-college dashboard data (only computed when a college is selected)
+    essays = []
+    essay_done = essay_wip = essay_maybe = essay_blank = essay_total = 0
+    essay_done_pct = essay_wip_pct = 0
+
+    platform = ''
+    platform_display = ''
+    activities_tab = 'uc'
+    ca_activities = []
+    ca_honors = []
+    ca_count = honor_count = 0
+    uc_entries = []
+    uc_count = 0
+    mit_entries_grouped = []
+    mit_count = 0
+    act_filled = act_max = 0
+
+    if selected:
+        # Essays for this college
+        essays = list(
+            SupplementEssay.objects.filter(college=selected)
+            .select_related('category')
+            .order_by('sort_order')
+        )
+        essay_total = len(essays)
+        essay_done = sum(1 for e in essays if e.status == 'done')
+        essay_wip = sum(1 for e in essays if e.status == 'wip')
+        essay_maybe = sum(1 for e in essays if e.status == 'maybe')
+        essay_blank = essay_total - essay_done - essay_wip - essay_maybe
+
+        if essay_total > 0:
+            essay_done_pct = int(essay_done / essay_total * 100)
+            essay_wip_pct = int(essay_wip / essay_total * 100)
+
+        # Augment each essay with computed display fields
+        for essay in essays:
+            if essay.word_limit and essay.word_limit > 0:
+                essay.progress_pct = min(int(essay.word_count / essay.word_limit * 100), 100)
+                essay.limit_display = f"{essay.word_limit}w"
+                essay.count_display = f"{essay.word_count}/{essay.word_limit}"
+            elif essay.char_limit and essay.char_limit > 0:
+                essay.progress_pct = min(int(essay.char_count / essay.char_limit * 100), 100)
+                essay.limit_display = f"{essay.char_limit}ch"
+                essay.count_display = f"{essay.char_count}/{essay.char_limit}"
+            else:
+                essay.progress_pct = 0
+                essay.limit_display = ""
+                essay.count_display = str(essay.word_count) if essay.response else ""
+
+        # Platform-aware activities data
+        platform = selected.app_platform
+        platform_display = dict(College.APP_PLATFORM_CHOICES).get(platform, '') if platform else ''
+
+        try:
+            applicant = Applicant.objects.get(pk=1)
+        except Applicant.DoesNotExist:
+            applicant = None
+
+        if applicant:
+            if platform == 'common':
+                ca_activities = list(
+                    CommonAppActivity.objects.filter(applicant=applicant).order_by('order')
+                )
+                ca_honors = list(
+                    CommonAppHonor.objects.filter(applicant=applicant).order_by('order')
+                )
+                ca_count = len(ca_activities)
+                honor_count = len(ca_honors)
+                act_filled = ca_count + honor_count
+                act_max = 15
+                activities_tab = 'common_app'
+            elif platform == 'uc':
+                uc_entries = list(
+                    UCEntry.objects.filter(applicant=applicant).order_by('order')
+                )
+                uc_count = len(uc_entries)
+                act_filled = uc_count
+                act_max = 20
+                activities_tab = 'uc'
+            elif platform == 'mit':
+                mit_qs = list(MITEntry.objects.filter(applicant=applicant).order_by('order'))
+                mit_count = len(mit_qs)
+                cat_map = defaultdict(list)
+                for entry in mit_qs:
+                    cat_map[entry.category].append(entry)
+                cat_labels = dict(MITEntry.CATEGORY_CHOICES)
+                mit_entries_grouped = [
+                    {
+                        'category': cat,
+                        'label': cat_labels.get(cat, cat),
+                        'limit': MITEntry.CATEGORY_LIMITS.get(cat, 0),
+                        'entries': cat_map[cat],
+                        'count': len(cat_map[cat]),
+                    }
+                    for cat, _ in MITEntry.CATEGORY_CHOICES
+                ]
+                act_filled = mit_count
+                act_max = sum(MITEntry.CATEGORY_LIMITS.values())
+                activities_tab = 'mit'
+
     return render(request, 'colleges/applications.html', {
         'colleges': colleges,
         'selected': selected,
         'status_choices': status_choices,
+        # essays
+        'essays': essays,
+        'essay_status_choices': SupplementEssay.STATUS_CHOICES,
+        'essay_done': essay_done,
+        'essay_wip': essay_wip,
+        'essay_maybe': essay_maybe,
+        'essay_blank': essay_blank,
+        'essay_total': essay_total,
+        'essay_done_pct': essay_done_pct,
+        'essay_wip_pct': essay_wip_pct,
+        # activities
+        'platform': platform,
+        'platform_display': platform_display,
+        'activities_tab': activities_tab,
+        'ca_activities': ca_activities,
+        'ca_honors': ca_honors,
+        'ca_count': ca_count,
+        'honor_count': honor_count,
+        'uc_entries': uc_entries,
+        'uc_count': uc_count,
+        'mit_entries_grouped': mit_entries_grouped,
+        'mit_count': mit_count,
+        'act_filled': act_filled,
+        'act_max': act_max,
     })
 

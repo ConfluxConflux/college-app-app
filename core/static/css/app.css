@@ -140,6 +140,74 @@ body {
 .table tbody tr.uc-placeholder { background-color: rgba(248,248,248,0.5) !important; }
 .uc-placeholder td { color: #ccc !important; }
 
+/* ── Applications dashboard ── */
+
+/* Progress tile headings */
+.app-tile-heading {
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 0.4rem;
+}
+
+/* Big stat number in tiles */
+.app-tile-stat {
+  font-size: 1.6rem;
+  font-weight: 700;
+  font-family: 'Libre Baskerville', Georgia, serif;
+  line-height: 1.1;
+  margin-bottom: 0.3rem;
+}
+.app-tile-denom {
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: #888;
+}
+
+/* "→ edit in ..." link at tile bottom */
+.app-tile-link {
+  font-size: 0.72rem;
+  color: #aaa;
+  margin-top: 0.6rem;
+}
+
+/* Segmented progress bar (used in tiles and essay section header) */
+.app-progress-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: #e8e8e8;
+  overflow: hidden;
+  display: flex;
+}
+
+/* Section sub-labels (Activities/Honors sub-headers) */
+.app-section-label {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #999;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+/* Essay status pill select on Applications dashboard */
+.essay-status-pill {
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(0,0,0,0.1);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  text-align: center;
+}
+.essay-status-pill.done  { background-color: #c6f0dc; color: #1a7a4a; }
+.essay-status-pill.wip   { background-color: #fef3cd; color: #926800; }
+.essay-status-pill.maybe { background-color: #d0e8f8; color: #1a4f7a; }
+.essay-status-pill.blank { background-color: #f0f0f0; color: #888; }
+
 /* Drag handle */
 .drag-handle {
   cursor: grab;
