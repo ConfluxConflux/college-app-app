@@ -42,7 +42,7 @@ EDITABLE_FIELDS = {f[0] for f in ALL_TABLE_FIELDS}
 VIEWS = {
     'applications': {
         'label': 'Your Applications',
-        'statuses': ['applying', 'likely', 'considering'],
+        'statuses': ['applying', 'likely', 'considering', 'unlikely'],  # likely/unlikely kept for legacy data
     },
     'all': {
         'label': 'All Colleges',
@@ -119,12 +119,13 @@ def college_list(request):
     if status_filter:
         colleges = colleges.filter(apply_status=status_filter)
 
-    # Status choices for the filter dropdown — limit to current view's statuses
+    # Status choices for the filter dropdown — limit to current view's statuses, exclude hidden statuses
+    HIDDEN_STATUSES = {'likely', 'unlikely'}
     all_choices = dict(College.APPLY_STATUS_CHOICES)
     if view_config['statuses']:
-        view_status_choices = [(v, all_choices[v]) for v in view_config['statuses'] if v in all_choices]
+        view_status_choices = [(v, all_choices[v]) for v in view_config['statuses'] if v in all_choices and v not in HIDDEN_STATUSES]
     else:
-        view_status_choices = College.APPLY_STATUS_CHOICES
+        view_status_choices = [(v, l) for v, l in College.APPLY_STATUS_CHOICES if v not in HIDDEN_STATUSES]
 
     context = {
         'colleges': colleges,
@@ -183,9 +184,11 @@ def college_edit_cell(request, pk, field):
     field_label = ALL_TABLE_FIELDS_DICT.get(field, field)
 
     if field == 'apply_status':
+        hidden = {'likely', 'unlikely'}
+        choices = [(v, l) for v, l in College.APPLY_STATUS_CHOICES if v not in hidden]
         return render(request, 'colleges/_cell_edit_select.html', {
             'college': college, 'field': field, 'field_label': field_label,
-            'current_value': current_value, 'choices': College.APPLY_STATUS_CHOICES,
+            'current_value': current_value, 'choices': choices,
             'table_fields': ALL_TABLE_FIELDS,
         })
 
@@ -297,12 +300,10 @@ def applications(request):
         except (College.DoesNotExist, ValueError):
             pass
 
-    # Status choices in College List sort order
+    # Status choices in College List sort order (likely/unlikely hidden from users)
     status_choices = [
         ('applying', 'Applying'),
-        ('likely', 'Likely'),
         ('considering', 'Considering'),
-        ('unlikely', 'Unlikely'),
         ('not_applying', 'Not Applying'),
         ('applied', 'Submitted'),
         ('deferred', 'Deferred'),
