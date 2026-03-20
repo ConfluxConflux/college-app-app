@@ -29,19 +29,23 @@
           p.style.display = 'none';
         });
         if (!isOpen) {
-          // Render off-screen to measure, then position
+          // Render off-screen to measure height (width measured after positioning)
           popup.style.left = '-9999px';
           popup.style.top = '-9999px';
           popup.style.display = 'block';
           const rect = icon.getBoundingClientRect();
-          const pw = popup.offsetWidth;
           const ph = popup.offsetHeight;
           const vw = window.innerWidth;
           const vh = window.innerHeight;
           const margin = 8;
-          let left = rect.left + rect.width / 2 - pw / 2;
+          // Anchor left edge to icon left — can never overflow left this way.
+          // Shift left only if right edge overflows viewport.
+          let left = rect.left;
+          popup.style.left = left + 'px';
+          const pw = popup.offsetWidth; // measure after positioning so width is real
+          if (left + pw > vw - margin) left = vw - pw - margin;
+          left = Math.max(margin, left);
           let top = rect.top - ph - margin;
-          left = Math.min(vw - pw - margin, Math.max(margin, left));
           if (top < margin) top = rect.bottom + margin;
           top = Math.min(vh - ph - margin, Math.max(margin, top));
           popup.style.left = left + 'px';
