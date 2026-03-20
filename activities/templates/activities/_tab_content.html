@@ -525,3 +525,59 @@
     <p>Slot limits: Jobs (5), Activities (4), Summer activities (6), Scholastic distinctions (5), Non-scholastic distinctions (5)</p>
   </div>
 </div>
+
+<!-- Stanford -->
+<div x-show="tab === 'stanford'">
+  <div style="display:flex; align-items:flex-start; gap:3rem; margin-top:1rem">
+
+    <!-- Stanford logo -->
+    <div style="flex-shrink:0; text-align:center">
+      <svg viewBox="0 0 110 140" width="110" height="140" xmlns="http://www.w3.org/2000/svg">
+
+        <!-- Block S, drawn as a thick rounded stroke -->
+        <path
+          fill="none"
+          stroke="#8C1515"
+          stroke-width="15"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          d="M 78,20
+             C 78,9  65,4  50,4
+             C 35,4  16,11 16,26
+             C 16,41 34,48 50,55
+             C 66,62 84,70 84,85
+             C 84,100 66,106 50,106
+             C 34,106 22,100 22,89"
+        />
+
+        <!-- "STANFORD" wordmark -->
+        <text
+          x="55" y="128"
+          text-anchor="middle"
+          fill="#8C1515"
+          font-family="Georgia, 'Times New Roman', serif"
+          font-size="11.5"
+          font-weight="bold"
+          letter-spacing="3"
+        >STANFORD</text>
+
+        <!-- Thin rule between S and wordmark -->
+        <line x1="12" y1="116" x2="98" y2="116" stroke="#8C1515" stroke-width="0.8" opacity="0.4"/>
+      </svg>
+    </div>
+
+    <!-- Placeholder content -->
+    <div style="padding-top:0.5rem">
+      <h2 class="title is-4" style="color:#8C1515">Stanford Activities</h2>
+      <p class="has-text-grey mb-4" style="max-width:540px">
+        Stanford uses the Common App — activities are submitted via the <strong>Common App</strong> tab.
+        Stanford-specific additional questions and essays live in the <strong>Essays</strong> section.
+      </p>
+      <p class="has-text-grey is-size-7" style="max-width:540px">
+        This tab is a placeholder. Future versions could include Stanford-specific
+        formatting previews, word-count summaries for Stanford's additional short answers, etc.
+      </p>
+    </div>
+
+  </div>
+</div>
