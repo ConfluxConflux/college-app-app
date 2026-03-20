@@ -38,18 +38,28 @@ body {
 }
 
 
-/* Status colors for college list rows */
-.status-applying { background-color: #ddeeff !important; }
-.status-likely { background-color: #eff5fb !important; }
+/* Status colors — applied to Tabulator rows, pill selects, and badges */
+.status-applying    { background-color: #ddeeff !important; }
+.status-likely      { background-color: #eff5fb !important; }
 .status-considering { background-color: #ede8f7 !important; }
-.status-unlikely { background-color: #feecf0 !important; }
-.status-not_applying { background-color: #f5f5f5 !important; }
-.status-applied { background-color: #eff1fa !important; }
-.status-accepted { background-color: #dbf5e8 !important; }
-.status-deferred { background-color: #fff3d6 !important; }
-.status-waitlisted { background-color: #fff3d6 !important; }
-.status-rejected { background-color: #fde0e6 !important; }
-.status-enrolled { background-color: #ebf0f7 !important; }
+.status-unlikely    { background-color: #feecf0 !important; }
+.status-not_applying{ background-color: #f5f5f5 !important; }
+.status-applied     { background-color: #eff1fa !important; }
+.status-accepted    { background-color: #dbf5e8 !important; }
+.status-deferred    { background-color: #fff3d6 !important; }
+.status-waitlisted  { background-color: #fff3d6 !important; }
+.status-rejected    { background-color: #fde0e6 !important; }
+.status-enrolled    { background-color: #ebf0f7 !important; }
+.status-withdrawn   { background-color: #e8ddd4 !important; }
+
+/* Status badge pill (inside Tabulator status cell) */
+.status-badge {
+  display: inline-block;
+  padding: 0.2em 0.7em;
+  border-radius: 999px;
+  font-size: 0.85em;
+  font-weight: 600;
+}
 
 /* Active navbar item */
 .navbar-item.is-active {

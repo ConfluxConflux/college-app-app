@@ -21,7 +21,7 @@
     <select x-model="s" :class="'status-' + s" name="value"
             hx-post="{% url 'colleges:edit_cell' selected.pk 'apply_status' %}"
             hx-trigger="change" hx-swap="none"
-            style="font-size:1.25rem; font-weight:600; padding:0.45em 2em 0.45em 1em; border-radius:999px; border:1px solid rgba(0,0,0,0.12); cursor:pointer; height:auto;">
+            style="font-size:1.25rem; font-weight:600; padding:0.45em 2em 0.45em 1em; border-radius:999px; border:1px solid rgba(0,0,0,0.12); cursor:pointer; height:auto; -webkit-appearance:none; appearance:none;">
       {% for val, label in status_choices %}
       <option value="{{ val }}" {% if val == selected.apply_status %}selected{% endif %}>{{ label }}</option>
       {% endfor %}

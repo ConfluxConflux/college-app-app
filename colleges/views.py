@@ -50,7 +50,7 @@ VIEWS = {
     },
     'submitted': {
         'label': 'Submitted',
-        'statuses': ['applied', 'deferred', 'waitlisted', 'rejected', 'enrolled'],
+        'statuses': ['applied', 'deferred', 'waitlisted', 'rejected', 'enrolled', 'withdrawn'],
     },
 }
 
@@ -67,7 +67,8 @@ APP_PROGRESS_STATUS_ORDER = Case(
     When(apply_status='rejected', then=Value(9)),
     When(apply_status='enrolled', then=Value(10)),
     When(apply_status='not_applying', then=Value(11)),
-    default=Value(12),
+    When(apply_status='withdrawn', then=Value(12)),
+    default=Value(13),
     output_field=IntegerField(),
 )
 
@@ -83,7 +84,8 @@ STATUS_ORDER = Case(
     When(apply_status='waitlisted', then=Value(8)),
     When(apply_status='rejected', then=Value(9)),
     When(apply_status='enrolled', then=Value(10)),
-    default=Value(11),
+    When(apply_status='withdrawn', then=Value(11)),
+    default=Value(12),
     output_field=IntegerField(),
 )
 
@@ -308,9 +310,10 @@ def applications(request):
         ('applied', 'Submitted'),
         ('deferred', 'Deferred'),
         ('waitlisted', 'Waitlisted'),
+        ('accepted', 'Accepted'),
         ('rejected', 'Rejected'),
         ('enrolled', 'Enrolled'),
-        ('accepted', 'Accepted'),
+        ('withdrawn', 'Withdrawn'),
     ]
 
     return render(request, 'colleges/applications.html', {

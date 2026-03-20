@@ -14,6 +14,7 @@ class College(models.Model):
         ('waitlisted', 'Waitlisted'),
         ('rejected', 'Rejected'),
         ('enrolled', 'Enrolled'),
+        ('withdrawn', 'Withdrawn'),
     ]
 
     APP_PLATFORM_CHOICES = [

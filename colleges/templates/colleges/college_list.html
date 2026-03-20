@@ -107,11 +107,12 @@
     'considering': 'Considering',
     'not_applying':'Not Applying',
     'applied':     'Submitted',
-    'accepted':    'Accepted',
     'deferred':    'Deferred',
     'waitlisted':  'Waitlisted',
+    'accepted':    'Accepted',
     'rejected':    'Rejected',
     'enrolled':    'Enrolled',
+    'withdrawn':   'Withdrawn',
   };
 
   var STATUS_OPTIONS = Object.entries(STATUS_LABELS).map(function(e) {
@@ -186,6 +187,12 @@
     resizableColumns: true,
     height: 'calc(100vh - 340px)',
     placeholder: 'No colleges match your filters.',
+    rowFormatter: function(row) {
+      var status = row.getData().apply_status;
+      var el = row.getElement();
+      el.className = el.className.replace(/\bstatus-\S+/g, '');
+      if (status) el.classList.add('status-' + status);
+    },
     cellEdited: function(cell) {
       var row = cell.getRow().getData();
       var field = cell.getField();
