@@ -209,7 +209,7 @@ def college_add(request):
             college.save()
             return redirect('colleges:list')
     else:
-        form = CollegeForm()
+        form = CollegeForm(initial={'apply_status': 'not_applying'})
 
     return render(request, 'colleges/college_add.html', {'form': form})
 
