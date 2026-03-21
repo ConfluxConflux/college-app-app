@@ -695,13 +695,10 @@
 <div x-show="tab === 'estimator'">
 <div x-data="{
   rows: [
-    {id:1, grade:'9', weeks:'', hrs:'', notes:''},
-    {id:2, grade:'9', weeks:'', hrs:'', notes:''},
-    {id:3, grade:'10', weeks:'', hrs:'', notes:''},
-    {id:4, grade:'11', weeks:'', hrs:'', notes:''},
-    {id:5, grade:'12', weeks:'', hrs:'', notes:''}
+    {id:1, grade:'', weeks:'', hrs:'', notes:''},
+    {id:2, grade:'', weeks:'', hrs:'', notes:''}
   ],
-  nid: 6,
+  nid: 3,
   get filled() { return this.rows.filter(r => parseFloat(r.weeks) > 0 && r.hrs !== '') },
   get totalWeeks() { return this.filled.reduce((s,r) => s + (parseFloat(r.weeks)||0), 0) },
   get totalHours() { return this.filled.reduce((s,r) => s + (parseFloat(r.weeks)||0) * (parseFloat(r.hrs)||0), 0) },
