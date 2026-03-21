@@ -216,6 +216,19 @@ def uc_slot_add(request, slot):
 
 
 @require_POST
+def uc_set_time(request, pk):
+    """Set hours_per_week and weeks_per_year together (from estimator modal)."""
+    entry = get_object_or_404(UCEntry, pk=pk)
+    entry.hours_per_week = request.POST.get('hours_per_week', '').strip()
+    entry.weeks_per_year = request.POST.get('weeks_per_year', '').strip()
+    entry.save()
+    return render(request, 'activities/_uc_row.html', {
+        'entry': entry,
+        'uc_category_choices': UCEntry.CATEGORY_CHOICES,
+    })
+
+
+@require_POST
 def uc_reorder(request):
     applicant = Applicant.objects.get(pk=1)
     data = json.loads(request.body)

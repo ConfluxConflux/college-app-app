@@ -73,7 +73,12 @@
   {% if entry.category != 'award' %}
   <td style="width:70px; cursor:pointer" x-data="{ e:false, v:'{{ entry.hours_per_week|escapejs }}' }"
       @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
-    <span x-show="!e" x-text="v"></span>
+    <span x-show="!e" style="display:flex; align-items:center; gap:3px; min-height:1.2em">
+      <span x-text="v || '—'"></span>
+      <button x-show="!v" class="est-launch-btn"
+        @click.stop="$dispatch('open-estimator', {pk: {{ entry.pk }}, rowId: 'uc-{{ entry.pk }}'})"
+        title="Estimate from time log">≈</button>
+    </span>
     <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v" style="width:55px"
       hx-post="{% url 'activities:uc_cell' entry.pk 'hours_per_week' %}" hx-trigger="blur" hx-swap="none"
       @blur="e=false" @click.stop>
@@ -86,7 +91,12 @@
   {% if entry.category != 'award' %}
   <td style="width:70px; cursor:pointer" x-data="{ e:false, v:'{{ entry.weeks_per_year|escapejs }}' }"
       @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
-    <span x-show="!e" x-text="v"></span>
+    <span x-show="!e" style="display:flex; align-items:center; gap:3px; min-height:1.2em">
+      <span x-text="v || '—'"></span>
+      <button x-show="!v" class="est-launch-btn"
+        @click.stop="$dispatch('open-estimator', {pk: {{ entry.pk }}, rowId: 'uc-{{ entry.pk }}'})"
+        title="Estimate from time log">≈</button>
+    </span>
     <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v" style="width:55px"
       hx-post="{% url 'activities:uc_cell' entry.pk 'weeks_per_year' %}" hx-trigger="blur" hx-swap="none"
       @blur="e=false" @click.stop>

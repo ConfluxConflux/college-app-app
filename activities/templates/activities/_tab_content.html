@@ -708,6 +708,7 @@
   get suggestHrs() { return Math.round(this.avgHrs) },
   get suggestWks() { return Math.round(this.avgWks) },
   get pct() { return Math.min(this.totalWeeks / 208 * 100, 100) },
+  showDetails: false,
   addRow() { this.rows.push({id: this.nid++, grade: '', weeks: '', hrs: '', notes: ''}) },
   del(id) { if (this.rows.length > 1) this.rows = this.rows.filter(r => r.id !== id) },
   fmt(n, d) { return n.toFixed(d) },
@@ -784,35 +785,8 @@
         <template x-if="hasData">
           <div>
 
-            <div class="estimator-prog-label">
-              <span class="has-text-grey is-size-7">Active weeks: </span>
-              <span class="is-size-7 has-text-weight-semibold" x-text="totalWeeks"></span>
-              <span class="has-text-grey is-size-7"> / 208 in high school</span>
-            </div>
-            <div class="estimator-prog-track">
-              <div class="estimator-prog-fill" :style="'width:' + pct + '%'"></div>
-            </div>
-
-            <div class="estimator-stats mt-4">
-              <div class="estimator-stat">
-                <span class="estimator-stat-label">Avg hrs/week <span class="has-text-grey" style="font-size:0.65rem">(while active)</span></span>
-                <span class="estimator-stat-val" x-text="fmt(avgHrs, 1) + ' hrs'"></span>
-              </div>
-              <div class="estimator-stat">
-                <span class="estimator-stat-label">Avg wks/year <span class="has-text-grey" style="font-size:0.65rem">(4-yr span)</span></span>
-                <span class="estimator-stat-val" x-text="fmt(avgWks, 1) + ' wks'"></span>
-              </div>
-              <div class="estimator-stat">
-                <span class="estimator-stat-label">Total hours invested</span>
-                <span class="estimator-stat-val" x-text="fmt(totalHours, 0) + ' hrs'"></span>
-              </div>
-            </div>
-
-            <hr style="margin:0.9rem 0; border-color:#eee; border-top:none">
-
-            <p class="is-size-7 has-text-grey has-text-weight-semibold mb-3">Suggested values to submit:</p>
+            <!-- Suggested values — always visible -->
             <div class="estimator-suggest-row">
-
               <div class="estimator-suggest-box">
                 <div class="estimator-suggest-num" x-text="suggestHrs"></div>
                 <div class="estimator-suggest-lbl">hrs / week</div>
@@ -821,7 +795,6 @@
                   <span x-show="copied === 'hrs'" style="color:#86efac">&#10003; Copied</span>
                 </button>
               </div>
-
               <div class="estimator-suggest-box">
                 <div class="estimator-suggest-num" x-text="suggestWks"></div>
                 <div class="estimator-suggest-lbl">wks / year</div>
@@ -830,7 +803,37 @@
                   <span x-show="copied === 'wks'" style="color:#86efac">&#10003; Copied</span>
                 </button>
               </div>
+            </div>
 
+            <!-- Details toggle -->
+            <button class="est-details-toggle mt-3" @click="showDetails = !showDetails">
+              <span x-text="showDetails ? '▲ Hide computation' : '▼ Show computation'"></span>
+            </button>
+
+            <!-- Collapsible details -->
+            <div x-show="showDetails" style="margin-top:0.75rem">
+              <div class="estimator-prog-label">
+                <span class="has-text-grey is-size-7">Active weeks: </span>
+                <span class="is-size-7 has-text-weight-semibold" x-text="totalWeeks"></span>
+                <span class="has-text-grey is-size-7"> / 208 in high school</span>
+              </div>
+              <div class="estimator-prog-track">
+                <div class="estimator-prog-fill" :style="'width:' + pct + '%'"></div>
+              </div>
+              <div class="estimator-stats mt-3">
+                <div class="estimator-stat">
+                  <span class="estimator-stat-label">Avg hrs/week <span class="has-text-grey" style="font-size:0.65rem">(while active)</span></span>
+                  <span class="estimator-stat-val" x-text="fmt(avgHrs, 1) + ' hrs'"></span>
+                </div>
+                <div class="estimator-stat">
+                  <span class="estimator-stat-label">Avg wks/year <span class="has-text-grey" style="font-size:0.65rem">(4-yr span)</span></span>
+                  <span class="estimator-stat-val" x-text="fmt(avgWks, 1) + ' wks'"></span>
+                </div>
+                <div class="estimator-stat">
+                  <span class="estimator-stat-label">Total hours invested</span>
+                  <span class="estimator-stat-val" x-text="fmt(totalHours, 0) + ' hrs'"></span>
+                </div>
+              </div>
             </div>
 
             <p class="is-size-7 has-text-grey mt-3" style="line-height:1.5">

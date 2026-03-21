@@ -139,4 +139,135 @@
 
   {% include "activities/_tab_content.html" %}
 </div>
+
+<!-- Global estimator modal (opened by ≈ buttons in UC rows) -->
+<div x-data="{
+  open: false, pk: null, rowId: null,
+  rows: [{id:1,grade:'',weeks:'',hrs:'',notes:''},{id:2,grade:'',weeks:'',hrs:'',notes:''}],
+  nid: 3, showDetails: false,
+  get filled() { return this.rows.filter(r => parseFloat(r.weeks)>0 && r.hrs!=='') },
+  get totalWeeks() { return this.filled.reduce((s,r)=>s+(parseFloat(r.weeks)||0),0) },
+  get totalHours() { return this.filled.reduce((s,r)=>s+(parseFloat(r.weeks)||0)*(parseFloat(r.hrs)||0),0) },
+  get hasData() { return this.totalWeeks>0 },
+  get avgHrs() { return this.hasData ? this.totalHours/this.totalWeeks : 0 },
+  get avgWks() { return this.totalWeeks/4 },
+  get suggestHrs() { return Math.round(this.avgHrs) },
+  get suggestWks() { return Math.round(this.avgWks) },
+  get pct() { return Math.min(this.totalWeeks/208*100,100) },
+  fmt(n,d) { return n.toFixed(d) },
+  addRow() { this.rows.push({id:this.nid++,grade:'',weeks:'',hrs:'',notes:''}) },
+  del(id) { if(this.rows.length>1) this.rows=this.rows.filter(r=>r.id!==id) },
+  openModal(pk, rowId) {
+    this.pk=pk; this.rowId=rowId;
+    this.rows=[{id:1,grade:'',weeks:'',hrs:'',notes:''},{id:2,grade:'',weeks:'',hrs:'',notes:''}];
+    this.nid=3; this.showDetails=false; this.open=true;
+  },
+  accept() {
+    if(!this.hasData) return;
+    htmx.ajax('POST', '/activities/uc/'+this.pk+'/set-time/', {
+      target: '#'+this.rowId, swap: 'outerHTML',
+      values: {hours_per_week: String(this.suggestHrs), weeks_per_year: String(this.suggestWks)}
+    });
+    this.open=false;
+  }
+}" @open-estimator.window="openModal($event.detail.pk, $event.detail.rowId)">
+
+  <template x-if="open">
+    <div class="est-modal-backdrop" @click.self="open=false">
+      <div class="est-modal-box">
+
+        <div class="est-modal-header">
+          <span>Hours/Week Estimator</span>
+          <button class="est-modal-close" @click="open=false">&times;</button>
+        </div>
+
+        <div class="est-modal-body">
+          <p class="is-size-7 has-text-grey mb-3">
+            Log time chunks for this activity. The calculator suggests values to enter on the application.
+          </p>
+
+          <table class="table is-narrow estimator-table" style="margin-bottom:0.5rem">
+            <thead>
+              <tr>
+                <th class="estimator-grade-th">9th</th>
+                <th class="estimator-grade-th">10th</th>
+                <th class="estimator-grade-th">11th</th>
+                <th class="estimator-grade-th">12th</th>
+                <th style="width:75px; text-align:right">Weeks</th>
+                <th style="width:85px; text-align:right">Hrs/wk</th>
+                <th>Notes</th>
+                <th style="width:28px"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <template x-for="row in rows" :key="row.id">
+                <tr class="estimator-row">
+                  <td class="estimator-td estimator-radio-td"><input type="radio" :name="'mg-'+row.id" x-model="row.grade" value="9"></td>
+                  <td class="estimator-td estimator-radio-td"><input type="radio" :name="'mg-'+row.id" x-model="row.grade" value="10"></td>
+                  <td class="estimator-td estimator-radio-td"><input type="radio" :name="'mg-'+row.id" x-model="row.grade" value="11"></td>
+                  <td class="estimator-td estimator-radio-td"><input type="radio" :name="'mg-'+row.id" x-model="row.grade" value="12"></td>
+                  <td class="estimator-td"><input class="estimator-input estimator-num" type="number" x-model="row.weeks" min="0" max="52" step="1" placeholder="—"></td>
+                  <td class="estimator-td"><input class="estimator-input estimator-num" type="number" x-model="row.hrs" min="0" step="0.5" placeholder="—"></td>
+                  <td class="estimator-td"><input class="estimator-input" type="text" x-model="row.notes" placeholder="e.g. fall season"></td>
+                  <td class="estimator-td" style="text-align:center"><button class="estimator-del" @click="del(row.id)">&times;</button></td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+
+          <button class="button is-small is-light mb-4" @click="addRow()">+ Add period</button>
+
+          <template x-if="hasData">
+            <div>
+              <div class="estimator-suggest-row mb-2">
+                <div class="estimator-suggest-box">
+                  <div class="estimator-suggest-num" x-text="suggestHrs"></div>
+                  <div class="estimator-suggest-lbl">hrs / week</div>
+                </div>
+                <div class="estimator-suggest-box">
+                  <div class="estimator-suggest-num" x-text="suggestWks"></div>
+                  <div class="estimator-suggest-lbl">wks / year</div>
+                </div>
+              </div>
+              <button class="est-details-toggle" @click="showDetails=!showDetails">
+                <span x-text="showDetails ? '▲ Hide computation' : '▼ Show computation'"></span>
+              </button>
+              <div x-show="showDetails" style="margin-top:0.6rem">
+                <div class="estimator-prog-label">
+                  <span class="has-text-grey is-size-7">Active weeks: </span>
+                  <span class="is-size-7 has-text-weight-semibold" x-text="totalWeeks"></span>
+                  <span class="has-text-grey is-size-7"> / 208</span>
+                </div>
+                <div class="estimator-prog-track"><div class="estimator-prog-fill" :style="'width:'+pct+'%'"></div></div>
+                <div class="estimator-stats mt-2">
+                  <div class="estimator-stat">
+                    <span class="estimator-stat-label">Avg hrs/week (while active)</span>
+                    <span class="estimator-stat-val" x-text="fmt(avgHrs,1)+' hrs'"></span>
+                  </div>
+                  <div class="estimator-stat">
+                    <span class="estimator-stat-label">Avg wks/year (4-yr span)</span>
+                    <span class="estimator-stat-val" x-text="fmt(avgWks,1)+' wks'"></span>
+                  </div>
+                  <div class="estimator-stat">
+                    <span class="estimator-stat-label">Total hours invested</span>
+                    <span class="estimator-stat-val" x-text="fmt(totalHours,0)+' hrs'"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <div class="est-modal-footer">
+          <button class="button is-light is-small" @click="open=false">Cancel</button>
+          <button class="button is-primary is-small" :disabled="!hasData" @click="accept()">
+            <template x-if="!hasData"><span>Apply</span></template>
+            <template x-if="hasData"><span>Apply &mdash; <span x-text="suggestHrs"></span> hrs/wk, <span x-text="suggestWks"></span> wks/yr</span></template>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </template>
+</div>
 {% endblock %}

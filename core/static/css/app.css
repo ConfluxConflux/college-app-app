@@ -891,3 +891,90 @@ body.focus-mode {
   font-family: inherit;
 }
 .estimator-copy-btn:hover { background: #1d4fd8; }
+
+/* Details toggle link */
+.est-details-toggle {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 0.72rem;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  transition: color 0.1s;
+}
+.est-details-toggle:hover { color: #555; }
+
+/* ≈ launch button in UC row cells */
+.est-launch-btn {
+  background: none;
+  border: none;
+  color: #3b82f6;
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0 1px;
+  line-height: 1;
+  opacity: 0.55;
+  transition: opacity 0.12s;
+  font-family: inherit;
+}
+.est-launch-btn:hover { opacity: 1; }
+
+/* Estimator modal */
+.est-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.est-modal-box {
+  background: white;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.22);
+  overflow: hidden;
+}
+.est-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1e2a3b;
+  color: #e8edf5;
+  padding: 0.7rem 1rem;
+  font-weight: 700;
+  font-size: 0.88rem;
+  flex-shrink: 0;
+}
+.est-modal-close {
+  background: none;
+  border: none;
+  color: #e8edf5;
+  font-size: 1.3rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  opacity: 0.7;
+  transition: opacity 0.1s;
+}
+.est-modal-close:hover { opacity: 1; }
+.est-modal-body {
+  padding: 1.1rem 1.2rem;
+  overflow-y: auto;
+  flex: 1;
+}
+.est-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  padding: 0.75rem 1.2rem;
+  border-top: 1px solid #eee;
+  flex-shrink: 0;
+}
