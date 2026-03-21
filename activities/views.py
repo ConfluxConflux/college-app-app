@@ -70,9 +70,15 @@ def activities_home(request):
     while len(honor_slots) < 5:
         honor_slots.append(None)
 
+    core_activities_list = _prefetch_core_activities(applicant)
+    linked_uc_pks = {c.uc_entry.pk for c in core_activities_list if c.uc_entry}
+    linked_ca_pks = {c.ca_entry.pk for c in core_activities_list if c.ca_entry}
+    mit_entries_list = list(MITEntry.objects.filter(applicant=applicant).select_related('core_activity').order_by('category', 'order'))
+    linked_mit_pks = {c.mit_entry.pk for c in core_activities_list if c.mit_entry}
+
     context = {
         'tab': tab,
-        'core_activities': _prefetch_core_activities(applicant),
+        'core_activities': core_activities_list,
         'core_activity_count': CoreActivity.objects.filter(applicant=applicant).count(),
         'uc_slots': uc_slots,
         'uc_overflow': uc_overflow,
@@ -84,10 +90,13 @@ def activities_home(request):
         'ca_type_choices': CommonAppActivity.ACTIVITY_TYPE_CHOICES,
         'honor_slots': honor_slots,
         'honor_count': len(honors_list),
-        'mit_entries': MITEntry.objects.filter(applicant=applicant).select_related('core_activity'),
+        'mit_entries': mit_entries_list,
         'mit_count': MITEntry.objects.filter(applicant=applicant).count(),
         'mit_category_choices': MITEntry.CATEGORY_CHOICES,
         'mit_category_limits': MITEntry.CATEGORY_LIMITS,
+        'orphaned_uc': [e for e in uc_entries_list if e.pk not in linked_uc_pks],
+        'orphaned_ca': [e for e in ca_entries_list if e.pk not in linked_ca_pks],
+        'orphaned_mit': [e for e in mit_entries_list if e.pk not in linked_mit_pks],
     }
     if request.headers.get('HX-Request'):
         return render(request, 'activities/_tab_content.html', context)

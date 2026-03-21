@@ -125,6 +125,9 @@
       <li :class="tab === 'mit' && 'is-active'">
         <a x-on:click="tab = 'mit'">MIT <span class="tag is-rounded ml-1" :class="tab === 'mit' ? 'is-primary' : 'is-light'">{{ mit_count }}</span></a>
       </li>
+      <li :class="tab === 'compare' && 'is-active'">
+        <a x-on:click="tab = 'compare'">Compare</a>
+      </li>
       <li :class="tab === 'centralized' && 'is-active'">
         <a x-on:click="tab = 'centralized'">Brainstorm <span class="tag is-rounded ml-1" :class="tab === 'centralized' ? 'is-primary' : 'is-light'">{{ core_activity_count }}</span></a>
       </li>

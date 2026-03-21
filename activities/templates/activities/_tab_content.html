@@ -525,3 +525,168 @@
     <p>Slot limits: Jobs (5), Activities (4), Summer activities (6), Scholastic distinctions (5), Non-scholastic distinctions (5)</p>
   </div>
 </div>
+
+<!-- Compare view -->
+<div x-show="tab === 'compare'">
+  <p class="has-text-grey mb-4 is-size-7" style="max-width:680px">
+    Activities grouped by their Brainstorm hub entry. Each row group shows how the same activity appears across UC, Common App, and MIT. Entries not linked to a hub are shown at the bottom.
+  </p>
+
+  <div class="table-container">
+    <table class="table is-bordered is-narrow compare-table">
+      <colgroup>
+        <col class="compare-col-platform">
+        <col class="compare-col-name">
+        <col class="compare-col-role">
+        <col class="compare-col-type">
+        <col class="compare-col-bg">
+        <col class="compare-col-desc">
+        <col class="compare-col-grades">
+        <col class="compare-col-timing">
+        <col class="compare-col-hrs">
+        <col class="compare-col-wks">
+        <col class="compare-col-edit">
+      </colgroup>
+      <thead>
+        <tr class="compare-thead">
+          <th>Platform</th>
+          <th>Name / Org</th>
+          <th>Role / Position</th>
+          <th>Type</th>
+          <th>Background <span class="compare-limit">UC 250ch</span></th>
+          <th>Description <span class="compare-limit">UC 350 · CA 150 · MIT 40w</span></th>
+          <th>Grades</th>
+          <th>Timing</th>
+          <th>Hrs/wk</th>
+          <th>Wks/yr</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+
+        {% for hub in core_activities %}
+          {% if hub.uc_entry or hub.ca_entry or hub.mit_entry %}
+
+          {# Group header row #}
+          <tr class="compare-group-header">
+            <td colspan="11">
+              <span class="compare-group-name">{{ hub.name }}</span>
+              {% if hub.uc_entry %}<span class="tag is-info is-light is-small compare-group-tag">UC</span>{% endif %}
+              {% if hub.ca_entry %}<span class="tag is-success is-light is-small compare-group-tag">CA</span>{% endif %}
+              {% if hub.mit_entry %}<span class="tag is-warning is-light is-small compare-group-tag">MIT</span>{% endif %}
+            </td>
+          </tr>
+
+          {% if hub.uc_entry %}{% with e=hub.uc_entry %}
+          <tr class="compare-row compare-row-uc">
+            <td><span class="tag is-info is-light compare-platform-tag">UC</span></td>
+            <td class="compare-cell">{{ e.name }}</td>
+            <td class="compare-cell compare-muted">—</td>
+            <td class="compare-cell">{{ e.get_category_display }}</td>
+            <td class="compare-cell compare-text">{{ e.background }}{% if e.background %}<span class="compare-cc">{{ e.background|length }}/250</span>{% endif %}</td>
+            <td class="compare-cell compare-text">{{ e.description }}{% if e.description %}<span class="compare-cc">{{ e.description|length }}/350</span>{% endif %}</td>
+            <td class="compare-cell compare-grades">{% if e.grade_9 %}9 {% endif %}{% if e.grade_10 %}10 {% endif %}{% if e.grade_11 %}11 {% endif %}{% if e.grade_12 %}12{% endif %}</td>
+            <td class="compare-cell compare-muted">—</td>
+            <td class="compare-cell">{{ e.hours_per_week|default:"—" }}</td>
+            <td class="compare-cell">{{ e.weeks_per_year|default:"—" }}</td>
+            <td class="compare-cell"><a href="{% url 'activities:uc_edit' e.pk %}" class="compare-edit">edit</a></td>
+          </tr>
+          {% endwith %}{% endif %}
+
+          {% if hub.ca_entry %}{% with a=hub.ca_entry %}
+          <tr class="compare-row compare-row-ca">
+            <td><span class="tag is-success is-light compare-platform-tag">CA</span></td>
+            <td class="compare-cell">{{ a.organization }}</td>
+            <td class="compare-cell">{{ a.position }}{% if a.position %}<span class="compare-cc">{{ a.position|length }}/50</span>{% endif %}</td>
+            <td class="compare-cell">{{ a.get_activity_type_display }}</td>
+            <td class="compare-cell compare-muted">—</td>
+            <td class="compare-cell compare-text">{{ a.description }}{% if a.description %}<span class="compare-cc">{{ a.description|length }}/150</span>{% endif %}</td>
+            <td class="compare-cell compare-grades">{% if a.grade_9 %}9 {% endif %}{% if a.grade_10 %}10 {% endif %}{% if a.grade_11 %}11 {% endif %}{% if a.grade_12 %}12{% endif %}</td>
+            <td class="compare-cell compare-timing">{% if a.timing_school %}School yr{% endif %}{% if a.timing_breaks %}{% if a.timing_school %} · {% endif %}Breaks{% endif %}{% if a.timing_all_year %}{% if a.timing_school or a.timing_breaks %} · {% endif %}All yr{% endif %}{% if not a.timing_school and not a.timing_breaks and not a.timing_all_year %}—{% endif %}</td>
+            <td class="compare-cell">{{ a.hours_per_week|default:"—" }}</td>
+            <td class="compare-cell">{{ a.weeks_per_year|default:"—" }}</td>
+            <td class="compare-cell"><a href="{% url 'activities:ca_edit' a.pk %}" class="compare-edit">edit</a></td>
+          </tr>
+          {% endwith %}{% endif %}
+
+          {% if hub.mit_entry %}{% with m=hub.mit_entry %}
+          <tr class="compare-row compare-row-mit">
+            <td><span class="tag is-warning is-light compare-platform-tag">MIT</span></td>
+            <td class="compare-cell">{{ m.org_name }}</td>
+            <td class="compare-cell">{{ m.role_award }}</td>
+            <td class="compare-cell">{{ m.get_category_display }}</td>
+            <td class="compare-cell compare-muted">—</td>
+            <td class="compare-cell compare-text">{{ m.description }}</td>
+            <td class="compare-cell compare-muted">—</td>
+            <td class="compare-cell compare-timing">{{ m.participation_period|default:"—" }}</td>
+            <td class="compare-cell">{{ m.hours_per_week|default:"—" }}</td>
+            <td class="compare-cell">{{ m.weeks_per_year|default:"—" }}</td>
+            <td class="compare-cell"><a href="{% url 'activities:mit_edit' m.pk %}" class="compare-edit">edit</a></td>
+          </tr>
+          {% endwith %}{% endif %}
+
+          {% endif %}
+        {% empty %}
+        <tr>
+          <td colspan="11" class="has-text-centered has-text-grey py-5">
+            No hub entries yet. Add activities in the <strong>Brainstorm</strong> tab and link them to UC/CA/MIT entries.
+          </td>
+        </tr>
+        {% endfor %}
+
+        {# Orphaned entries — not linked to any hub #}
+        {% if orphaned_uc or orphaned_ca or orphaned_mit %}
+        <tr class="compare-orphan-header">
+          <td colspan="11">Unlinked entries <span class="has-text-grey is-size-7">(not connected to a Brainstorm hub activity)</span></td>
+        </tr>
+        {% for e in orphaned_uc %}
+        <tr class="compare-row compare-row-uc compare-row-orphan">
+          <td><span class="tag is-info is-light compare-platform-tag">UC</span></td>
+          <td class="compare-cell">{{ e.name }}</td>
+          <td class="compare-cell compare-muted">—</td>
+          <td class="compare-cell">{{ e.get_category_display }}</td>
+          <td class="compare-cell compare-text">{{ e.background }}</td>
+          <td class="compare-cell compare-text">{{ e.description }}</td>
+          <td class="compare-cell compare-grades">{% if e.grade_9 %}9 {% endif %}{% if e.grade_10 %}10 {% endif %}{% if e.grade_11 %}11 {% endif %}{% if e.grade_12 %}12{% endif %}</td>
+          <td class="compare-cell compare-muted">—</td>
+          <td class="compare-cell">{{ e.hours_per_week|default:"—" }}</td>
+          <td class="compare-cell">{{ e.weeks_per_year|default:"—" }}</td>
+          <td class="compare-cell"><a href="{% url 'activities:uc_edit' e.pk %}" class="compare-edit">edit</a></td>
+        </tr>
+        {% endfor %}
+        {% for a in orphaned_ca %}
+        <tr class="compare-row compare-row-ca compare-row-orphan">
+          <td><span class="tag is-success is-light compare-platform-tag">CA</span></td>
+          <td class="compare-cell">{{ a.organization }}</td>
+          <td class="compare-cell">{{ a.position }}</td>
+          <td class="compare-cell">{{ a.get_activity_type_display }}</td>
+          <td class="compare-cell compare-muted">—</td>
+          <td class="compare-cell compare-text">{{ a.description }}</td>
+          <td class="compare-cell compare-grades">{% if a.grade_9 %}9 {% endif %}{% if a.grade_10 %}10 {% endif %}{% if a.grade_11 %}11 {% endif %}{% if a.grade_12 %}12{% endif %}</td>
+          <td class="compare-cell compare-timing">{% if a.timing_school %}School yr{% endif %}{% if a.timing_breaks %}{% if a.timing_school %} · {% endif %}Breaks{% endif %}{% if a.timing_all_year %}{% if a.timing_school or a.timing_breaks %} · {% endif %}All yr{% endif %}{% if not a.timing_school and not a.timing_breaks and not a.timing_all_year %}—{% endif %}</td>
+          <td class="compare-cell">{{ a.hours_per_week|default:"—" }}</td>
+          <td class="compare-cell">{{ a.weeks_per_year|default:"—" }}</td>
+          <td class="compare-cell"><a href="{% url 'activities:ca_edit' a.pk %}" class="compare-edit">edit</a></td>
+        </tr>
+        {% endfor %}
+        {% for m in orphaned_mit %}
+        <tr class="compare-row compare-row-mit compare-row-orphan">
+          <td><span class="tag is-warning is-light compare-platform-tag">MIT</span></td>
+          <td class="compare-cell">{{ m.org_name }}</td>
+          <td class="compare-cell">{{ m.role_award }}</td>
+          <td class="compare-cell">{{ m.get_category_display }}</td>
+          <td class="compare-cell compare-muted">—</td>
+          <td class="compare-cell compare-text">{{ m.description }}</td>
+          <td class="compare-cell compare-muted">—</td>
+          <td class="compare-cell compare-timing">{{ m.participation_period|default:"—" }}</td>
+          <td class="compare-cell">{{ m.hours_per_week|default:"—" }}</td>
+          <td class="compare-cell">{{ m.weeks_per_year|default:"—" }}</td>
+          <td class="compare-cell"><a href="{% url 'activities:mit_edit' m.pk %}" class="compare-edit">edit</a></td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+
+      </tbody>
+    </table>
+  </div>
+</div>
