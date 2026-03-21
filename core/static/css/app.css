@@ -758,6 +758,23 @@ body.focus-mode {
   border-bottom: 2px solid #ddd !important;
   padding: 0.5rem 0.6rem;
 }
+.estimator-grade-th {
+  width: 44px;
+  text-align: center;
+  color: #3b82f6 !important;
+  font-size: 0.78rem !important;
+  letter-spacing: 0.02em;
+}
+.estimator-radio-td {
+  text-align: center;
+  vertical-align: middle !important;
+}
+.estimator-radio-td input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #3b82f6;
+}
 .estimator-td {
   padding: 0.3rem 0.45rem !important;
   vertical-align: middle !important;

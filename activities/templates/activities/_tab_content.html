@@ -695,11 +695,11 @@
 <div x-show="tab === 'estimator'">
 <div x-data="{
   rows: [
-    {id:1, period:'9th grade (fall)', weeks:'', hrs:'', notes:''},
-    {id:2, period:'9th grade (spring)', weeks:'', hrs:'', notes:''},
-    {id:3, period:'10th grade', weeks:'', hrs:'', notes:''},
-    {id:4, period:'11th grade', weeks:'', hrs:'', notes:''},
-    {id:5, period:'12th grade', weeks:'', hrs:'', notes:''}
+    {id:1, grade:'9', weeks:'', hrs:'', notes:''},
+    {id:2, grade:'9', weeks:'', hrs:'', notes:''},
+    {id:3, grade:'10', weeks:'', hrs:'', notes:''},
+    {id:4, grade:'11', weeks:'', hrs:'', notes:''},
+    {id:5, grade:'12', weeks:'', hrs:'', notes:''}
   ],
   nid: 6,
   get filled() { return this.rows.filter(r => parseFloat(r.weeks) > 0 && r.hrs !== '') },
@@ -711,7 +711,7 @@
   get suggestHrs() { return Math.round(this.avgHrs) },
   get suggestWks() { return Math.round(this.avgWks) },
   get pct() { return Math.min(this.totalWeeks / 208 * 100, 100) },
-  addRow() { this.rows.push({id: this.nid++, period: '', weeks: '', hrs: '', notes: ''}) },
+  addRow() { this.rows.push({id: this.nid++, grade: '', weeks: '', hrs: '', notes: ''}) },
   del(id) { if (this.rows.length > 1) this.rows = this.rows.filter(r => r.id !== id) },
   fmt(n, d) { return n.toFixed(d) },
   copied: '',
@@ -725,15 +725,6 @@
     the two numbers UC, Common App, and MIT ask for.
   </p>
 
-  <datalist id="estimator-periods">
-    <option value="9th grade"><option value="9th grade (fall)"><option value="9th grade (spring)">
-    <option value="10th grade"><option value="10th grade (fall)"><option value="10th grade (spring)">
-    <option value="11th grade"><option value="11th grade (fall)"><option value="11th grade (spring)">
-    <option value="12th grade"><option value="12th grade (fall)"><option value="12th grade (spring)">
-    <option value="Summer before 9th"><option value="Summer before 10th">
-    <option value="Summer before 11th"><option value="Summer before 12th">
-  </datalist>
-
   <div class="estimator-layout">
 
     <!-- Input table -->
@@ -741,9 +732,12 @@
       <table class="table is-narrow estimator-table">
         <thead>
           <tr>
-            <th style="width:175px">Period</th>
-            <th style="width:85px; text-align:right">Weeks</th>
-            <th style="width:95px; text-align:right">Hrs / week</th>
+            <th class="estimator-grade-th">9th</th>
+            <th class="estimator-grade-th">10th</th>
+            <th class="estimator-grade-th">11th</th>
+            <th class="estimator-grade-th">12th</th>
+            <th style="width:80px; text-align:right">Weeks</th>
+            <th style="width:90px; text-align:right">Hrs / week</th>
             <th>Notes</th>
             <th style="width:30px"></th>
           </tr>
@@ -751,9 +745,10 @@
         <tbody>
           <template x-for="row in rows" :key="row.id">
             <tr class="estimator-row">
-              <td class="estimator-td">
-                <input class="estimator-input" type="text" x-model="row.period" list="estimator-periods" placeholder="e.g. 9th grade (fall)">
-              </td>
+              <td class="estimator-td estimator-radio-td"><input type="radio" :name="'grade-' + row.id" x-model="row.grade" value="9"></td>
+              <td class="estimator-td estimator-radio-td"><input type="radio" :name="'grade-' + row.id" x-model="row.grade" value="10"></td>
+              <td class="estimator-td estimator-radio-td"><input type="radio" :name="'grade-' + row.id" x-model="row.grade" value="11"></td>
+              <td class="estimator-td estimator-radio-td"><input type="radio" :name="'grade-' + row.id" x-model="row.grade" value="12"></td>
               <td class="estimator-td">
                 <input class="estimator-input estimator-num" type="number" x-model="row.weeks" min="0" max="52" step="1" placeholder="—">
               </td>
