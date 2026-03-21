@@ -740,3 +740,138 @@ body.focus-mode {
   text-decoration: none;
 }
 .compare-edit:hover { color: #333; }
+
+/* ── Hrs/Wk Estimator tab ── */
+.estimator-layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* Table */
+.estimator-table thead th {
+  background: #f8f8fc;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #555;
+  border-bottom: 2px solid #ddd !important;
+  padding: 0.5rem 0.6rem;
+}
+.estimator-td {
+  padding: 0.3rem 0.45rem !important;
+  vertical-align: middle !important;
+  border-color: #f0f0f0 !important;
+}
+.estimator-row:hover td { background: #fafafe; }
+.estimator-input {
+  width: 100%;
+  border: none;
+  border-bottom: 1.5px solid #e2e2e2;
+  border-radius: 0;
+  background: transparent;
+  padding: 0.25rem 0.2rem;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.15s;
+  font-family: inherit;
+  color: inherit;
+}
+.estimator-input:focus { border-bottom-color: #3b82f6; }
+.estimator-input::placeholder { color: #ccc; }
+.estimator-num { text-align: right; }
+.estimator-del {
+  background: none;
+  border: none;
+  color: #d0d0d0;
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  padding: 0 2px;
+  transition: color 0.1s;
+}
+.estimator-del:hover { color: #f14668; }
+
+/* Result card */
+.estimator-card {
+  background: white;
+  border: 1px solid #e4e4ec;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+}
+.estimator-card-header {
+  background: #1e2a3b;
+  color: #e8edf5;
+  font-weight: 700;
+  font-size: 0.75rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  padding: 0.65rem 1rem;
+}
+.estimator-card-body { padding: 1rem; }
+
+/* Progress bar */
+.estimator-prog-label { margin-bottom: 0.35rem; }
+.estimator-prog-track {
+  height: 7px;
+  background: #eee;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.estimator-prog-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #34d399 0%, #3b82f6 100%);
+  border-radius: 4px;
+  transition: width 0.25s ease;
+  min-width: 4px;
+}
+
+/* Stats */
+.estimator-stats { margin-bottom: 0; }
+.estimator-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.32rem 0;
+  border-bottom: 1px solid #f4f4f4;
+}
+.estimator-stat:last-child { border-bottom: none; }
+.estimator-stat-label { font-size: 0.76rem; color: #777; }
+.estimator-stat-val { font-weight: 700; font-size: 0.88rem; color: #1e2a3b; }
+
+/* Suggested values */
+.estimator-suggest-row { display: flex; gap: 0.7rem; }
+.estimator-suggest-box {
+  flex: 1;
+  text-align: center;
+  background: #f5f8ff;
+  border: 1.5px solid #c5d3f5;
+  border-radius: 9px;
+  padding: 0.8rem 0.5rem 0.6rem;
+}
+.estimator-suggest-num {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #2563eb;
+  line-height: 1;
+}
+.estimator-suggest-lbl {
+  font-size: 0.68rem;
+  color: #999;
+  margin: 0.25rem 0 0.55rem;
+}
+.estimator-copy-btn {
+  display: block;
+  width: 100%;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 0.3rem 0;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.12s;
+  font-family: inherit;
+}
+.estimator-copy-btn:hover { background: #1d4fd8; }
