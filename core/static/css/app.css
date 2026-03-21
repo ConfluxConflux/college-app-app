@@ -743,10 +743,9 @@ body.focus-mode {
 
 /* ── Hrs/Wk Estimator tab ── */
 .estimator-layout {
-  display: grid;
-  grid-template-columns: 1fr 280px;
-  gap: 2rem;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 /* Table */
