@@ -49,10 +49,11 @@ def _prefetch_core_activities(applicant):
     return qs
 
 
-def activities_home(request):
-    tab = request.GET.get('tab', 'uc')
-    if tab == 'honors':
-        tab = 'common_app'
+def redirect_to_uc(request):
+    return redirect('activities:home_uc')
+
+
+def activities_home(request, tab='uc'):
     applicant = Applicant.objects.get(pk=1)
     uc_entries_list = list(UCEntry.objects.filter(applicant=applicant).order_by('order').select_related('core_activity'))
     uc_slots = uc_entries_list[:20]
@@ -124,12 +125,12 @@ def uc_add(request):
             entry = form.save(commit=False)
             entry.order = UCEntry.objects.count()
             entry.save()
-            return redirect('activities:home')
+            return redirect('activities:home_uc')
     else:
         form = UCEntryForm()
     return render(request, 'activities/entry_form.html', {
         'form': form, 'title': 'Add UC Activity/Award',
-        'back_url': 'activities:home', 'back_tab': 'uc',
+        'back_href': reverse('activities:home_uc'), 'back_tab': 'uc',
         'char_fields': {'background': 250, 'description': 350},
     })
 
@@ -140,7 +141,7 @@ def uc_edit(request, pk):
         form = UCEntryForm(request.POST, instance=entry)
         if form.is_valid():
             form.save()
-            return redirect('activities:home')
+            return redirect('activities:home_uc')
     else:
         form = UCEntryForm(instance=entry)
 
@@ -148,7 +149,7 @@ def uc_edit(request, pk):
 
     return render(request, 'activities/entry_form.html', {
         'form': form, 'title': f'Edit UC: {entry.name}',
-        'back_url': 'activities:home', 'back_tab': 'uc',
+        'back_href': reverse('activities:home_uc'), 'back_tab': 'uc',
         'entry': entry, 'linked': linked,
         'char_fields': {'background': 250, 'description': 350},
     })
@@ -193,7 +194,7 @@ def uc_delete(request, pk):
     get_object_or_404(UCEntry, pk=pk).delete()
     if request.headers.get('HX-Request'):
         return HttpResponse('')
-    return redirect('activities:home')
+    return redirect('activities:home_uc')
 
 
 @require_POST
@@ -246,12 +247,12 @@ def ca_add(request):
             entry = form.save(commit=False)
             entry.order = CommonAppActivity.objects.count()
             entry.save()
-            return redirect('/activities/?tab=common_app')
+            return redirect('activities:home_common')
     else:
         form = CommonAppActivityForm()
     return render(request, 'activities/entry_form.html', {
         'form': form, 'title': 'Add Common App Activity',
-        'back_url': 'activities:home', 'back_tab': 'common_app',
+        'back_href': reverse('activities:home_common'), 'back_tab': 'common_app',
         'char_fields': {'position': 50, 'organization': 100, 'description': 150},
     })
 
@@ -262,7 +263,7 @@ def ca_edit(request, pk):
         form = CommonAppActivityForm(request.POST, instance=entry)
         if form.is_valid():
             form.save()
-            return redirect('/activities/?tab=common_app')
+            return redirect('activities:home_common')
     else:
         form = CommonAppActivityForm(instance=entry)
 
@@ -270,7 +271,7 @@ def ca_edit(request, pk):
 
     return render(request, 'activities/entry_form.html', {
         'form': form, 'title': f'Edit: {entry.organization or entry.position}',
-        'back_url': 'activities:home', 'back_tab': 'common_app',
+        'back_href': reverse('activities:home_common'), 'back_tab': 'common_app',
         'entry': entry, 'linked': linked,
         'char_fields': {'position': 50, 'organization': 100, 'description': 150},
     })
@@ -343,7 +344,7 @@ def ca_delete(request, pk):
     get_object_or_404(CommonAppActivity, pk=pk).delete()
     if request.headers.get('HX-Request'):
         return HttpResponse('')
-    return redirect('/activities/?tab=common_app')
+    return redirect('activities:home_common')
 
 
 # ── Common App Honor CRUD ──
@@ -362,12 +363,12 @@ def honor_add(request):
             entry = form.save(commit=False)
             entry.order = CommonAppHonor.objects.count()
             entry.save()
-            return redirect('/activities/?tab=honors')
+            return redirect('activities:home_common')
     else:
         form = CommonAppHonorForm()
     return render(request, 'activities/entry_form.html', {
         'form': form, 'title': 'Add Common App Honor',
-        'back_url': 'activities:home', 'back_tab': 'honors',
+        'back_href': reverse('activities:home_common'), 'back_tab': 'honors',
         'char_fields': {},
     })
 
@@ -378,7 +379,7 @@ def honor_edit(request, pk):
         form = CommonAppHonorForm(request.POST, instance=entry)
         if form.is_valid():
             form.save()
-            return redirect('/activities/?tab=honors')
+            return redirect('activities:home_common')
     else:
         form = CommonAppHonorForm(instance=entry)
 
@@ -386,7 +387,7 @@ def honor_edit(request, pk):
 
     return render(request, 'activities/entry_form.html', {
         'form': form, 'title': f'Edit Honor: {entry.title}',
-        'back_url': 'activities:home', 'back_tab': 'honors',
+        'back_href': reverse('activities:home_common'), 'back_tab': 'honors',
         'entry': entry, 'linked': linked,
         'char_fields': {},
     })
@@ -420,7 +421,7 @@ def honor_delete(request, pk):
     get_object_or_404(CommonAppHonor, pk=pk).delete()
     if request.headers.get('HX-Request'):
         return HttpResponse('')
-    return redirect('/activities/?tab=honors')
+    return redirect('activities:home_common')
 
 
 # ── MIT Entry CRUD ──
@@ -432,12 +433,12 @@ def mit_add(request):
             entry = form.save(commit=False)
             entry.order = MITEntry.objects.filter(category=entry.category).count()
             entry.save()
-            return redirect('/activities/?tab=mit')
+            return redirect('activities:home_mit')
     else:
         form = MITEntryForm()
     return render(request, 'activities/entry_form.html', {
         'form': form, 'title': 'Add MIT Entry',
-        'back_url': 'activities:home', 'back_tab': 'mit',
+        'back_href': reverse('activities:home_mit'), 'back_tab': 'mit',
         'char_fields': {},
         'word_fields': {'description': 40},
     })
@@ -449,7 +450,7 @@ def mit_edit(request, pk):
         form = MITEntryForm(request.POST, instance=entry)
         if form.is_valid():
             form.save()
-            return redirect('/activities/?tab=mit')
+            return redirect('activities:home_mit')
     else:
         form = MITEntryForm(instance=entry)
 
@@ -457,7 +458,7 @@ def mit_edit(request, pk):
 
     return render(request, 'activities/entry_form.html', {
         'form': form, 'title': f'Edit MIT: {entry.org_name}',
-        'back_url': 'activities:home', 'back_tab': 'mit',
+        'back_href': reverse('activities:home_mit'), 'back_tab': 'mit',
         'entry': entry, 'linked': linked,
         'char_fields': {},
         'word_fields': {'description': 40},
@@ -487,7 +488,7 @@ def mit_delete(request, pk):
     get_object_or_404(MITEntry, pk=pk).delete()
     if request.headers.get('HX-Request'):
         return HttpResponse('')
-    return redirect('/activities/?tab=mit')
+    return redirect('activities:home_mit')
 
 
 # ── Exports ──

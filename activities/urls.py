@@ -4,7 +4,13 @@ from . import views
 app_name = 'activities'
 
 urlpatterns = [
-    path('', views.activities_home, name='home'),
+    path('', views.redirect_to_uc, name='home'),
+    path('uc/', views.activities_home, {'tab': 'uc'}, name='home_uc'),
+    path('common/', views.activities_home, {'tab': 'common_app'}, name='home_common'),
+    path('mit/', views.activities_home, {'tab': 'mit'}, name='home_mit'),
+    path('compare/', views.activities_home, {'tab': 'compare'}, name='home_compare'),
+    path('brainstorm/', views.activities_home, {'tab': 'centralized'}, name='home_brainstorm'),
+    path('estimator/', views.activities_home, {'tab': 'estimator'}, name='home_estimator'),
     # UC
     path('uc/<int:pk>/set-time/', views.uc_set_time, name='uc_set_time'),
     path('uc/reorder/', views.uc_reorder, name='uc_reorder'),

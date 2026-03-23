@@ -116,23 +116,23 @@
 <div x-data="{ tab: '{{ tab }}' }">
   <div class="tabs is-boxed is-medium">
     <ul>
-      <li :class="tab === 'uc' && 'is-active'">
-        <a x-on:click="tab = 'uc'">UC <span class="tag is-rounded ml-1" :class="tab === 'uc' ? 'is-primary' : 'is-light'">{{ uc_count }}/20</span></a>
+      <li {% if tab == 'uc' %}class="is-active"{% endif %}>
+        <a href="{% url 'activities:home_uc' %}">UC <span class="tag is-rounded ml-1 {% if tab == 'uc' %}is-primary{% else %}is-light{% endif %}">{{ uc_count }}/20</span></a>
       </li>
-      <li :class="tab === 'common_app' && 'is-active'">
-        <a x-on:click="tab = 'common_app'">Common App <span class="tag is-rounded ml-1" :class="tab === 'common_app' ? 'is-primary' : 'is-light'">{{ ca_count }}/10 · {{ honor_count }}/5</span></a>
+      <li {% if tab == 'common_app' %}class="is-active"{% endif %}>
+        <a href="{% url 'activities:home_common' %}">Common App <span class="tag is-rounded ml-1 {% if tab == 'common_app' %}is-primary{% else %}is-light{% endif %}">{{ ca_count }}/10 · {{ honor_count }}/5</span></a>
       </li>
-      <li :class="tab === 'mit' && 'is-active'">
-        <a x-on:click="tab = 'mit'">MIT <span class="tag is-rounded ml-1" :class="tab === 'mit' ? 'is-primary' : 'is-light'">{{ mit_count }}</span></a>
+      <li {% if tab == 'mit' %}class="is-active"{% endif %}>
+        <a href="{% url 'activities:home_mit' %}">MIT <span class="tag is-rounded ml-1 {% if tab == 'mit' %}is-primary{% else %}is-light{% endif %}">{{ mit_count }}</span></a>
       </li>
-      <li :class="tab === 'compare' && 'is-active'">
-        <a x-on:click="tab = 'compare'">Compare</a>
+      <li {% if tab == 'compare' %}class="is-active"{% endif %}>
+        <a href="{% url 'activities:home_compare' %}">Compare</a>
       </li>
-      <li :class="tab === 'estimator' && 'is-active'">
-        <a x-on:click="tab = 'estimator'">Estimator</a>
+      <li {% if tab == 'estimator' %}class="is-active"{% endif %}>
+        <a href="{% url 'activities:home_estimator' %}">Estimator</a>
       </li>
-      <li :class="tab === 'centralized' && 'is-active'">
-        <a x-on:click="tab = 'centralized'">Brainstorm <span class="tag is-rounded ml-1" :class="tab === 'centralized' ? 'is-primary' : 'is-light'">{{ core_activity_count }}</span></a>
+      <li {% if tab == 'centralized' %}class="is-active"{% endif %}>
+        <a href="{% url 'activities:home_brainstorm' %}">Brainstorm <span class="tag is-rounded ml-1 {% if tab == 'centralized' %}is-primary{% else %}is-light{% endif %}">{{ core_activity_count }}</span></a>
       </li>
     </ul>
   </div>

@@ -65,7 +65,7 @@
 
   {# Activities tile #}
   <div class="column is-one-third">
-    <a href="{% url 'activities:home' %}?tab={{ activities_tab }}"
+    <a href="/activities/{{ activities_tab }}/"
        class="box is-block" style="text-decoration:none; color:inherit; height:100%;">
       <p class="app-tile-heading">Activities</p>
       {% if platform == 'common' %}
@@ -143,7 +143,7 @@
       </h2>
     </div>
     <div class="level-right">
-      <a href="{% url 'activities:home' %}?tab={{ activities_tab }}" class="is-size-7 has-text-grey">
+      <a href="/activities/{{ activities_tab }}/" class="is-size-7 has-text-grey">
         Edit in Activities →
       </a>
     </div>

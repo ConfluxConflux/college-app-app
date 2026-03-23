@@ -390,7 +390,7 @@ def applications(request):
                 honor_count = len(ca_honors)
                 act_filled = ca_count + honor_count
                 act_max = 15
-                activities_tab = 'common_app'
+                activities_tab = 'common'
             elif platform == 'uc':
                 uc_entries = list(
                     UCEntry.objects.filter(applicant=applicant).order_by('order')
