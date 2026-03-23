@@ -154,10 +154,17 @@
   fmt(n,d) { return n.toFixed(d) },
   addRow() { this.rows.push({id:this.nid++,grade:'',weeks:'',hrs:'',notes:''}) },
   del(id) { if(this.rows.length>1) this.rows=this.rows.filter(r=>r.id!==id) },
-  openModal(pk, rowId) {
+  openModal(pk, rowId, grades) {
     this.pk=pk; this.rowId=rowId;
-    this.rows=[{id:1,grade:'',weeks:'',hrs:'',notes:''},{id:2,grade:'',weeks:'',hrs:'',notes:''}];
-    this.nid=3; this.showDetails=false; this.open=true;
+    const gs = (grades && grades.length) ? grades : [];
+    if (gs.length > 0) {
+      this.rows = gs.map((g, i) => ({id: i+1, grade: String(g), weeks: '', hrs: '', notes: ''}));
+      this.nid = gs.length + 1;
+    } else {
+      this.rows=[{id:1,grade:'',weeks:'',hrs:'',notes:''},{id:2,grade:'',weeks:'',hrs:'',notes:''}];
+      this.nid=3;
+    }
+    this.showDetails=false; this.open=true;
   },
   accept() {
     if(!this.hasData) return;
@@ -167,7 +174,7 @@
     });
     this.open=false;
   }
-}" @open-estimator.window="openModal($event.detail.pk, $event.detail.rowId)">
+}" @open-estimator.window="openModal($event.detail.pk, $event.detail.rowId, $event.detail.grades)">
 
   <template x-if="open">
     <div class="est-modal-backdrop" @click.self="open=false">
