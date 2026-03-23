@@ -53,6 +53,10 @@ def redirect_to_uc(request):
     return redirect('activities:home_uc')
 
 
+def estimator_standalone(request):
+    return render(request, 'activities/estimator.html')
+
+
 def activities_home(request, tab='uc'):
     applicant = Applicant.objects.get(pk=1)
     uc_entries_list = list(UCEntry.objects.filter(applicant=applicant).order_by('order').select_related('core_activity'))
