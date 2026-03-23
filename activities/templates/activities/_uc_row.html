@@ -73,15 +73,13 @@
   {% if entry.category != 'award' %}
   <td style="width:70px; cursor:pointer" x-data="{ e:false, v:'{{ entry.hours_per_week|escapejs }}' }"
       @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
-    <span x-show="!e" style="display:flex; align-items:center; gap:3px; min-height:1.2em">
-      <span x-text="v || '—'"></span>
-      <button x-show="!v" class="est-launch-btn"
-        @click.stop="$dispatch('open-estimator', {pk: {{ entry.pk }}, rowId: 'uc-{{ entry.pk }}'})"
-        title="Estimate from time log">≈</button>
-    </span>
-    <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v" style="width:55px"
-      hx-post="{% url 'activities:uc_cell' entry.pk 'hours_per_week' %}" hx-trigger="blur" hx-swap="none"
-      @blur="e=false" @click.stop>
+    <span x-show="!e" class="is-size-7" x-text="v || '—'"></span>
+    <div x-show="e" @click.stop style="display:flex; flex-direction:column; gap:4px; align-items:flex-start;">
+      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" style="width:55px"
+        hx-post="{% url 'activities:uc_cell' entry.pk 'hours_per_week' %}" hx-trigger="blur" hx-swap="none"
+        @blur="e=false" @click.stop>
+      <button style="background:none;border:1px solid #93c5fd;color:#3b82f6;cursor:pointer;font-size:0.7rem;padding:1px 5px;border-radius:3px;font-family:inherit;line-height:1.4;" @mousedown.prevent @click.stop="$dispatch('open-estimator', {pk: {{ entry.pk }}, rowId: 'uc-{{ entry.pk }}'})">WIDGET</button>
+    </div>
   </td>
   {% else %}
   <td class="cell-na" style="width:70px">—</td>
@@ -91,15 +89,13 @@
   {% if entry.category != 'award' %}
   <td style="width:70px; cursor:pointer" x-data="{ e:false, v:'{{ entry.weeks_per_year|escapejs }}' }"
       @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
-    <span x-show="!e" style="display:flex; align-items:center; gap:3px; min-height:1.2em">
-      <span x-text="v || '—'"></span>
-      <button x-show="!v" class="est-launch-btn"
-        @click.stop="$dispatch('open-estimator', {pk: {{ entry.pk }}, rowId: 'uc-{{ entry.pk }}'})"
-        title="Estimate from time log">≈</button>
-    </span>
-    <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v" style="width:55px"
-      hx-post="{% url 'activities:uc_cell' entry.pk 'weeks_per_year' %}" hx-trigger="blur" hx-swap="none"
-      @blur="e=false" @click.stop>
+    <span x-show="!e" class="is-size-7" x-text="v || '—'"></span>
+    <div x-show="e" @click.stop style="display:flex; flex-direction:column; gap:4px; align-items:flex-start;">
+      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" style="width:55px"
+        hx-post="{% url 'activities:uc_cell' entry.pk 'weeks_per_year' %}" hx-trigger="blur" hx-swap="none"
+        @blur="e=false" @click.stop>
+      <button style="background:none;border:1px solid #93c5fd;color:#3b82f6;cursor:pointer;font-size:0.7rem;padding:1px 5px;border-radius:3px;font-family:inherit;line-height:1.4;" @mousedown.prevent @click.stop="$dispatch('open-estimator', {pk: {{ entry.pk }}, rowId: 'uc-{{ entry.pk }}'})">WIDGET</button>
+    </div>
   </td>
   {% else %}
   <td class="cell-na" style="width:70px">—</td>
