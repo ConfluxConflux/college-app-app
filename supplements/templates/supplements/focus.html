@@ -17,6 +17,7 @@
        get count() { return this.limitType === 'char' ? this.cc : this.wc; },
        get overLimit() { return this.limitVal > 0 && this.count > this.limitVal; },
        get nearLimit() { return this.limitVal > 0 && this.count >= Math.floor(this.limitVal * 0.9) && !this.overLimit; },
+       showCount: false,
        onInput() {
          this.saved = false;
        }
@@ -28,11 +29,19 @@
       ← Back
     </a>
     <span class="focus-college-label">{{ essay.college.name }}</span>
-    <span class="focus-saved-label" :class="saving ? 'is-saving' : (saved ? 'is-saved' : 'is-unsaved')">
-      <span x-show="saving">Saving…</span>
-      <span x-show="!saving && saved">Saved</span>
-      <span x-show="!saving && !saved">Unsaved</span>
-    </span>
+    <div style="display:flex; align-items:center; gap:0.75rem;">
+      <span x-show="showCount" class="focus-counter" style="font-size:0.8rem;">
+        <span x-text="count"></span>
+        <span x-show="limitVal > 0"> / <span x-text="limitVal"></span> <span x-text="limitType === 'char' ? 'chars' : 'words'"></span></span>
+        <span x-show="limitVal === 0"> words</span>
+      </span>
+      <button class="focus-back-btn" @click="showCount = !showCount" x-text="showCount ? 'Hide Word Count' : 'Show Word Count'"></button>
+      <span class="focus-saved-label" :class="saving ? 'is-saving' : (saved ? 'is-saved' : 'is-unsaved')">
+        <span x-show="saving">Saving…</span>
+        <span x-show="!saving && saved">Saved</span>
+        <span x-show="!saving && !saved">Unsaved</span>
+      </span>
+    </div>
   </div>
 
   <!-- Prompt area -->
@@ -67,17 +76,6 @@
       >{{ essay.response }}</textarea>
     </form>
 
-    <!-- Counter -->
-    <div class="focus-counter-row">
-      <span class="focus-counter"
-            :class="{ 'is-over': overLimit, 'is-near': nearLimit }">
-        <span x-text="count"></span>
-        <span x-show="limitVal > 0"> / <span x-text="limitVal"></span>
-          <span x-text="limitType === 'char' ? ' characters' : ' words'"></span>
-        </span>
-        <span x-show="limitVal === 0"> words</span>
-      </span>
-    </div>
   </div>
 
   <!-- Design decision: Focus mode background -->
