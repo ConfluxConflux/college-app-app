@@ -602,7 +602,7 @@
             <td class="compare-cell compare-muted">—</td>
             <td class="compare-cell compare-text">{{ a.description }}{% if a.description %}<span class="compare-cc">{{ a.description|length }}/150</span>{% endif %}</td>
             <td class="compare-cell compare-grades">{% if a.grade_9 %}9 {% endif %}{% if a.grade_10 %}10 {% endif %}{% if a.grade_11 %}11 {% endif %}{% if a.grade_12 %}12{% endif %}</td>
-            <td class="compare-cell compare-timing">{% if a.timing_school %}School yr{% endif %}{% if a.timing_breaks %}{% if a.timing_school %} · {% endif %}Breaks{% endif %}{% if a.timing_all_year %}{% if a.timing_school or a.timing_breaks %} · {% endif %}All yr{% endif %}{% if not a.timing_school and not a.timing_breaks and not a.timing_all_year %}—{% endif %}</td>
+            <td class="compare-cell compare-timing">{% if a.timing_school %}School{% endif %}{% if a.timing_breaks %}{% if a.timing_school %} · {% endif %}Breaks{% endif %}{% if a.timing_all_year %}{% if a.timing_school or a.timing_breaks %} · {% endif %}All yr{% endif %}{% if not a.timing_school and not a.timing_breaks and not a.timing_all_year %}—{% endif %}</td>
             <td class="compare-cell">{{ a.hours_per_week|default:"—" }}</td>
             <td class="compare-cell">{{ a.weeks_per_year|default:"—" }}</td>
             <td class="compare-cell"><a href="{% url 'activities:ca_edit' a.pk %}" class="compare-edit">edit</a></td>
@@ -663,7 +663,7 @@
           <td class="compare-cell compare-muted">—</td>
           <td class="compare-cell compare-text">{{ a.description }}</td>
           <td class="compare-cell compare-grades">{% if a.grade_9 %}9 {% endif %}{% if a.grade_10 %}10 {% endif %}{% if a.grade_11 %}11 {% endif %}{% if a.grade_12 %}12{% endif %}</td>
-          <td class="compare-cell compare-timing">{% if a.timing_school %}School yr{% endif %}{% if a.timing_breaks %}{% if a.timing_school %} · {% endif %}Breaks{% endif %}{% if a.timing_all_year %}{% if a.timing_school or a.timing_breaks %} · {% endif %}All yr{% endif %}{% if not a.timing_school and not a.timing_breaks and not a.timing_all_year %}—{% endif %}</td>
+          <td class="compare-cell compare-timing">{% if a.timing_school %}School{% endif %}{% if a.timing_breaks %}{% if a.timing_school %} · {% endif %}Breaks{% endif %}{% if a.timing_all_year %}{% if a.timing_school or a.timing_breaks %} · {% endif %}All yr{% endif %}{% if not a.timing_school and not a.timing_breaks and not a.timing_all_year %}—{% endif %}</td>
           <td class="compare-cell">{{ a.hours_per_week|default:"—" }}</td>
           <td class="compare-cell">{{ a.weeks_per_year|default:"—" }}</td>
           <td class="compare-cell"><a href="{% url 'activities:ca_edit' a.pk %}" class="compare-edit">edit</a></td>
