@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Word Counter - College App App{% endblock %}
+
+{% block content %}
+<div class="tabs is-boxed is-medium">
+  <ul>
+    <li>
+      <a href="{% url 'widgets:estimator' %}">Estimator</a>
+    </li>
+    <li>
+      <a href="{% url 'widgets:focus_write' %}">Focus Write</a>
+    </li>
+    <li class="is-active">
+      <a href="{% url 'widgets:word_counter' %}">Word Counter</a>
+    </li>
+  </ul>
+</div>
+
+<div x-data="{
+  text: '',
+  get wc() { return this.text.trim() ? this.text.trim().split(/\s+/).length : 0; },
+  get cc() { return this.text.length; },
+}" style="display:flex; gap:2.5rem; align-items:flex-start;">
+
+  <!-- Textarea -->
+  <div style="flex:1;">
+    <textarea
+      class="textarea"
+      rows="8"
+      placeholder="Paste or type your text here…"
+      x-model="text"
+      spellcheck="false"
+      style="font-size:0.95rem; resize:vertical;"
+    ></textarea>
+  </div>
+
+  <!-- Counts -->
+  <div style="width:220px; flex-shrink:0; text-align:right; padding-top:0.25rem;">
+    <div style="margin-bottom:1.5rem;">
+      <div style="font-size:4rem; font-weight:700; line-height:1;" x-text="wc"></div>
+      <div style="font-size:1rem; color:#888; font-weight:600;" x-text="wc === 1 ? 'word' : 'words'"></div>
+    </div>
+    <div>
+      <div style="font-size:4rem; font-weight:700; line-height:1;" x-text="cc"></div>
+      <div style="font-size:1rem; color:#888; font-weight:600;" x-text="cc === 1 ? 'character' : 'characters'"></div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
