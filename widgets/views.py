@@ -26,9 +26,9 @@ def advice(request):
             'source': 'mitadmissions.org',
         },
         {
-            'title': "Writing, Briefly",
-            'url': 'https://paulgraham.com/writing44.html',
-            'source': 'paulgraham.com',
+            'title': "College advice for people who are exactly like me",
+            'url': 'https://www.benkuhn.net/college/',
+            'source': 'benkuhn.net',
         },
         {
             'title': "Mikail's Thoughts about College Admissions",
@@ -36,9 +36,9 @@ def advice(request):
             'source': 'docs.google.com',
         },
         {
-            'title': "College advice for people who are exactly like me",
-            'url': 'https://www.benkuhn.net/college/',
-            'source': 'benkuhn.net',
+            'title': "Writing, Briefly",
+            'url': 'https://paulgraham.com/writing44.html',
+            'source': 'paulgraham.com',
         },
     ]
     return render(request, 'widgets/advice.html', {'links': links})
