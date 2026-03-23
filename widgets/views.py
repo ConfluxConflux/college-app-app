@@ -21,7 +21,7 @@ def resources(request):
             'source': 'collegevine.com',
         },
         {
-            'title': "a2c (but don't get sucked down the distraction hole)",
+            'title': "The Notorious A2C (but don't get sucked down the distraction hole)",
             'url': 'https://www.applyingto.college/home',
             'source': 'applyingto.college',
         },
