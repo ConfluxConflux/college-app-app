@@ -16,17 +16,17 @@ def word_counter(request):
 def resources(request):
     links = [
         {
-            'title': "CollegeVine",
+            'title': "CollegeVine (good for building a list & estimating your chances, but take with salt)",
             'url': 'http://collegevine.com/',
             'source': 'collegevine.com',
         },
         {
-            'title': "Applying to College",
+            'title': "a2c (but don't get sucked down the distraction hole)",
             'url': 'https://www.applyingto.college/home',
             'source': 'applyingto.college',
         },
         {
-            'title': "The Music of 3Blue1Brown",
+            'title': "3Blue1Brown Soundtrack (my favorite music for focusing)",
             'url': 'https://vincerubinetti.bandcamp.com/album/the-music-of-3blue1brown',
             'source': 'vincerubinetti.bandcamp.com',
         },
