@@ -219,7 +219,10 @@
             </tbody>
           </table>
 
-          <button class="button is-small is-light mb-4" @click="addRow()">+ Add period</button>
+          <button class="button is-small is-light" @click="addRow()">+ Add period</button>
+          <p class="is-size-7 has-text-grey mt-2 mb-4">
+            Tip: a school semester &asymp; 18 weeks &nbsp;&middot;&nbsp; a full school year &asymp; 36 weeks &nbsp;&middot;&nbsp; summer &asymp; 8&ndash;12 weeks
+          </p>
 
           <template x-if="hasData">
             <div>
