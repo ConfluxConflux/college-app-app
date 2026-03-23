@@ -31,12 +31,12 @@ def advice(request):
             'source': 'paulgraham.com',
         },
         {
-            'title': "College Application Document",
+            'title': "Mikail's Thoughts about College Admissions",
             'url': 'https://docs.google.com/document/d/1U0fGlaeLvX-i2ZPhQti0JaPRP2YcqW8DsZ2DPvz6PvM/edit?tab=t.0',
             'source': 'docs.google.com',
         },
         {
-            'title': "College Application Advice",
+            'title': "College advice for people who are exactly like me",
             'url': 'https://www.benkuhn.net/college/',
             'source': 'benkuhn.net',
         },
