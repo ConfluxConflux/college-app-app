@@ -19,10 +19,14 @@
 
 <div x-data="{
   text: '',
-  tooltip: false,
   get wc() { return this.text.trim() ? this.text.trim().split(/\s+/).length : 0; },
   get cc() { return this.text.length; },
 }">
+
+  <h2 class="title is-4 mb-2">Word and Character Counter</h2>
+  <p class="has-text-grey mb-5" style="max-width:680px; font-size:0.9rem">
+    Google Docs counts words differently than the Common App. The Common App <strong>ONLY CARES ABOUT SPACES</strong>, and so does this word counter. Are you doing an application that counts words differently? Send a quick email to <a href="mailto:chromaticconflux@gmail.com">chromaticconflux@gmail.com</a> and I'll add it as a setting.
+  </p>
 
   <!-- Count banner -->
   <div style="background:#e8f4f2; border-radius:6px 6px 0 0; padding:0.65rem 1rem; display:flex; align-items:baseline; gap:0.35rem; font-family:'Libre Baskerville', Georgia, serif;">
@@ -31,12 +35,6 @@
     <span style="font-size:2rem; color:#aaa; margin-right:0.75rem;">·</span>
     <span style="font-size:2.4rem; font-weight:700; line-height:1;" x-text="cc"></span>
     <span style="font-size:2.4rem; color:#555; margin-left:0.3rem; font-style:italic;" x-text="cc === 1 ? 'character' : 'characters'"></span>
-    <span style="position:relative; margin-left:0.5rem; align-self:center;">
-      <span @click="tooltip = !tooltip" style="font-family:'Open Sans',sans-serif; font-size:0.8rem; font-style:normal; color:#888; border:1.5px solid #aaa; border-radius:50%; width:1.3rem; height:1.3rem; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; user-select:none;">ⓘ</span>
-      <div x-show="tooltip" @click.outside="tooltip = false" style="position:absolute; left:0; top:2rem; background:white; border:1px solid #ddd; border-radius:6px; box-shadow:0 4px 16px rgba(0,0,0,0.12); padding:0.85rem 1rem; width:340px; font-family:'Open Sans',sans-serif; font-size:0.82rem; line-height:1.6; color:#333; z-index:100;">
-        Google Docs counts words differently than the Common App. The Common App <strong>ONLY CARES ABOUT SPACES</strong>, and so does this word counter. Are you doing an application that counts words differently? Send a quick email to <a href="mailto:chromaticconflux@gmail.com">chromaticconflux@gmail.com</a> and I'll add it as a setting.
-      </div>
-    </span>
   </div>
 
   <!-- Textarea -->
