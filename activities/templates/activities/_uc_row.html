@@ -60,11 +60,11 @@
   {# Grades #}
   <td>
     <form hx-post="{% url 'activities:uc_cell' entry.pk 'grades' %}" hx-trigger="change" hx-swap="none">
-      <div class="is-size-7" style="white-space:nowrap">
-        <label><input type="checkbox" name="grade_9" {% if entry.grade_9 %}checked{% endif %}> 9</label>&nbsp;
-        <label><input type="checkbox" name="grade_10" {% if entry.grade_10 %}checked{% endif %}> 10</label>&nbsp;
-        <label><input type="checkbox" name="grade_11" {% if entry.grade_11 %}checked{% endif %}> 11</label>&nbsp;
-        <label><input type="checkbox" name="grade_12" {% if entry.grade_12 %}checked{% endif %}> 12</label>
+      <div class="is-size-7">
+        <label style="display:block"><input type="checkbox" name="grade_9" {% if entry.grade_9 %}checked{% endif %}> 9</label>
+        <label style="display:block"><input type="checkbox" name="grade_10" {% if entry.grade_10 %}checked{% endif %}> 10</label>
+        <label style="display:block"><input type="checkbox" name="grade_11" {% if entry.grade_11 %}checked{% endif %}> 11</label>
+        <label style="display:block"><input type="checkbox" name="grade_12" {% if entry.grade_12 %}checked{% endif %}> 12</label>
       </div>
     </form>
   </td>
