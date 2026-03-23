@@ -21,31 +21,25 @@
   text: '',
   get wc() { return this.text.trim() ? this.text.trim().split(/\s+/).length : 0; },
   get cc() { return this.text.length; },
-}" style="display:flex; gap:2.5rem; align-items:flex-start;">
+}">
+
+  <!-- Count banner -->
+  <div style="background:#e8f4f2; border-radius:6px 6px 0 0; padding:0.6rem 1rem; display:flex; align-items:baseline; gap:0.5rem;">
+    <span style="font-size:2.4rem; font-weight:700; line-height:1;" x-text="wc"></span>
+    <span style="font-size:1.1rem; color:#555; margin-right:1.5rem;" x-text="wc === 1 ? 'word' : 'words'"></span>
+    <span style="font-size:2.4rem; font-weight:700; line-height:1;" x-text="cc"></span>
+    <span style="font-size:1.1rem; color:#555;" x-text="cc === 1 ? 'character' : 'characters'"></span>
+  </div>
 
   <!-- Textarea -->
-  <div style="flex:1;">
-    <textarea
-      class="textarea"
-      rows="8"
-      placeholder="Paste or type your text here…"
-      x-model="text"
-      spellcheck="false"
-      style="font-size:0.95rem; resize:vertical;"
-    ></textarea>
-  </div>
-
-  <!-- Counts -->
-  <div style="width:220px; flex-shrink:0; text-align:right; padding-top:0.25rem;">
-    <div style="margin-bottom:1.5rem;">
-      <div style="font-size:4rem; font-weight:700; line-height:1;" x-text="wc"></div>
-      <div style="font-size:1rem; color:#888; font-weight:600;" x-text="wc === 1 ? 'word' : 'words'"></div>
-    </div>
-    <div>
-      <div style="font-size:4rem; font-weight:700; line-height:1;" x-text="cc"></div>
-      <div style="font-size:1rem; color:#888; font-weight:600;" x-text="cc === 1 ? 'character' : 'characters'"></div>
-    </div>
-  </div>
+  <textarea
+    class="textarea"
+    rows="14"
+    placeholder="Paste or type your text here…"
+    x-model="text"
+    spellcheck="false"
+    style="font-size:0.95rem; resize:vertical; border-radius:0 0 6px 6px; border-top:none;"
+  ></textarea>
 
 </div>
 {% endblock %}
