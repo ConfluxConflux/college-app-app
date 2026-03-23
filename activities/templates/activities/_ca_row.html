@@ -78,7 +78,7 @@
   <td>
     <form hx-post="{% url 'activities:ca_cell' activity.pk 'timing' %}" hx-trigger="change" hx-swap="none">
       <div class="is-size-7" style="line-height:1.9; white-space:nowrap">
-        <label style="display:block"><input type="checkbox" name="timing_school"   {% if activity.timing_school   %}checked{% endif %}> School yr</label>
+        <label style="display:block"><input type="checkbox" name="timing_school"   {% if activity.timing_school   %}checked{% endif %}> School</label>
         <label style="display:block"><input type="checkbox" name="timing_breaks"   {% if activity.timing_breaks   %}checked{% endif %}> Breaks</label>
         <label style="display:block"><input type="checkbox" name="timing_all_year" {% if activity.timing_all_year %}checked{% endif %}> All year</label>
       </div>
