@@ -52,7 +52,7 @@ def advice(request):
             'source': 'benkuhn.net',
         },
         {
-            'title': "A Proof School Graduate's Thoughts about College Admissions",
+            'title': "Thoughts about College Admissions",
             'url': 'https://docs.google.com/document/d/1FPAK8zeqHCmVRaXMxDT-ylCUug04YqhS6Lf9ypynP5g/edit?tab=t.0',
             'source': 'docs.google.com',
         },
