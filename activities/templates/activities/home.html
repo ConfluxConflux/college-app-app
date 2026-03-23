@@ -147,7 +147,8 @@
   get totalHours() { return this.filled.reduce((s,r)=>s+(parseFloat(r.weeks)||0)*(parseFloat(r.hrs)||0),0) },
   get hasData() { return this.totalWeeks>0 },
   get avgHrs() { return this.hasData ? this.totalHours/this.totalWeeks : 0 },
-  get avgWks() { return this.totalWeeks/4 },
+  get activeYears() { const gs=new Set(this.filled.map(r=>r.grade).filter(g=>g!=='')); return gs.size||this.filled.length||1 },
+  get avgWks() { return this.totalWeeks/this.activeYears },
   get suggestHrs() { return Math.round(this.avgHrs) },
   get suggestWks() { return Math.round(this.avgWks) },
   get pct() { return Math.min(this.totalWeeks/208*100,100) },
@@ -252,7 +253,7 @@
                     <span class="estimator-stat-val" x-text="fmt(avgHrs,1)+' hrs'"></span>
                   </div>
                   <div class="estimator-stat">
-                    <span class="estimator-stat-label">Avg wks/year (4-yr span)</span>
+                    <span class="estimator-stat-label">Avg wks/year (<span x-text="activeYears"></span>-yr span)</span>
                     <span class="estimator-stat-val" x-text="fmt(avgWks,1)+' wks'"></span>
                   </div>
                   <div class="estimator-stat">
