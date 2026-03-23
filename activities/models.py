@@ -53,6 +53,9 @@ class UCEntry(models.Model):
 
     personal_notes = models.TextField(blank=True)
 
+    # Estimator widget data — stores the rows the user built in the modal
+    estimator_data = models.JSONField(null=True, blank=True)
+
     class Meta:
         ordering = ['order']
         verbose_name = 'UC activity/award'

@@ -12,6 +12,7 @@ urlpatterns = [
     path('brainstorm/', views.activities_home, {'tab': 'centralized'}, name='home_brainstorm'),
     path('estimator/', views.estimator_redirect, name='home_estimator'),
     # UC
+    path('uc/<int:pk>/estimator-data/', views.uc_estimator_data, name='uc_estimator_data'),
     path('uc/<int:pk>/set-time/', views.uc_set_time, name='uc_set_time'),
     path('uc/reorder/', views.uc_reorder, name='uc_reorder'),
     path('uc/slot/<int:slot>/add/', views.uc_slot_add, name='uc_slot_add'),
