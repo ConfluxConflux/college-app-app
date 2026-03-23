@@ -12,6 +12,19 @@
 
 <h1 class="title">Add College</h1>
 
+<div x-data="{ cornellWarning: false }" @keyup.window="cornellWarning = document.getElementById('id_name') && document.getElementById('id_name').value.trim().toLowerCase() === 'cornell college'">
+  <div x-show="cornellWarning" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.4); z-index:1000; display:flex; align-items:center; justify-content:center;">
+    <div style="background:white; border-radius:8px; padding:1.5rem 2rem; max-width:480px; box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+      <p class="has-text-weight-bold mb-3">Did you mean to select Cornell University instead?</p>
+      <p style="font-size:0.92rem; line-height:1.6;">Cornell College seems to be a perfectly fine school; it's in Iowa and you only take one course at a time; but it gets lots of applicants who think they're applying to Cornell University — the famous Ivy League school.</p>
+      <div class="mt-4" style="display:flex; gap:0.75rem;">
+        <button type="button" class="button is-warning" @click="cornellWarning = false; document.getElementById('id_name').value = 'Cornell University'">Switch to Cornell University</button>
+        <button type="button" class="button is-light" @click="cornellWarning = false">No, I meant Cornell College</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <form method="post">
   {% csrf_token %}
   <div class="box">
