@@ -52,8 +52,8 @@ def advice(request):
             'source': 'benkuhn.net',
         },
         {
-            'title': "Mikail's Thoughts about College Admissions",
-            'url': 'https://docs.google.com/document/d/1U0fGlaeLvX-i2ZPhQti0JaPRP2YcqW8DsZ2DPvz6PvM/edit?tab=t.0',
+            'title': "A Proof School Graduate's Thoughts about College Admissions",
+            'url': 'https://docs.google.com/document/d/1FPAK8zeqHCmVRaXMxDT-ylCUug04YqhS6Lf9ypynP5g/edit?tab=t.0',
             'source': 'docs.google.com',
         },
         {
