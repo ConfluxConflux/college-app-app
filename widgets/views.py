@@ -13,6 +13,27 @@ def word_counter(request):
     return render(request, 'widgets/word_counter.html')
 
 
+def resources(request):
+    links = [
+        {
+            'title': "CollegeVine",
+            'url': 'http://collegevine.com/',
+            'source': 'collegevine.com',
+        },
+        {
+            'title': "Applying to College",
+            'url': 'https://www.applyingto.college/home',
+            'source': 'applyingto.college',
+        },
+        {
+            'title': "The Music of 3Blue1Brown",
+            'url': 'https://vincerubinetti.bandcamp.com/album/the-music-of-3blue1brown',
+            'source': 'vincerubinetti.bandcamp.com',
+        },
+    ]
+    return render(request, 'widgets/resources.html', {'links': links})
+
+
 def advice(request):
     links = [
         {

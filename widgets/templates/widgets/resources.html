@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Advice - College App App{% endblock %}
+{% block title %}Resources - College App App{% endblock %}
 
 {% block content %}
 <div class="tabs is-boxed is-medium">
@@ -14,10 +14,10 @@
     <li>
       <a href="{% url 'widgets:word_counter' %}">Word Counter</a>
     </li>
-    <li class="is-active">
+    <li>
       <a href="{% url 'widgets:advice' %}">Advice</a>
     </li>
-    <li>
+    <li class="is-active">
       <a href="{% url 'widgets:resources' %}">Resources</a>
     </li>
   </ul>
