@@ -35,7 +35,7 @@
       <textarea x-ref="t" class="textarea is-small" name="value" rows="3" x-model="v" maxlength="250"
         hx-post="{% url 'activities:uc_cell' entry.pk 'background' %}" hx-trigger="blur, input delay:1500ms" hx-swap="none"
         @blur="e=false"></textarea>
-      <p style="text-align:right;margin-top:0.25rem;font-size:0.75rem;line-height:1;"><span :class="cc(250)" x-text="chars+' / 250 chars'"></span></p>
+      <p style="text-align:right;margin-top:0.25rem;font-size:0.75rem;line-height:1;"><span :class="cc(250)" x-text="chars + ' / 250 ' + (chars === 1 ? 'char' : 'chars')"></span></p>
     </div>
   </td>
   {% else %}
@@ -53,7 +53,7 @@
       <textarea x-ref="t" class="textarea is-small" name="value" rows="3" x-model="v" maxlength="350"
         hx-post="{% url 'activities:uc_cell' entry.pk 'description' %}" hx-trigger="blur, input delay:1500ms" hx-swap="none"
         @blur="e=false"></textarea>
-      <p style="text-align:right;margin-top:0.25rem;font-size:0.75rem;line-height:1;"><span :class="cc(350)" x-text="chars+' / 350 chars'"></span></p>
+      <p style="text-align:right;margin-top:0.25rem;font-size:0.75rem;line-height:1;"><span :class="cc(350)" x-text="chars + ' / 350 ' + (chars === 1 ? 'char' : 'chars')"></span></p>
     </div>
   </td>
 

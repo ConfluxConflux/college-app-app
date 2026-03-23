@@ -33,11 +33,11 @@
   {% if word_limit or char_limit %}
   <p style="text-align:right; margin-top:0.25rem; font-size:0.75rem; line-height:1;">
     {% if word_limit %}
-    <span :class="wordColor({{ word_limit }})" x-text="words + ' / {{ word_limit }} words'"></span>
+    <span :class="wordColor({{ word_limit }})" x-text="words + ' / {{ word_limit }} ' + (words === 1 ? 'word' : 'words')"></span>
     {% endif %}
     {% if word_limit and char_limit %}<span class="has-text-grey"> &nbsp;·&nbsp; </span>{% endif %}
     {% if char_limit %}
-    <span :class="charColor({{ char_limit }})" x-text="chars + ' / {{ char_limit }} chars'"></span>
+    <span :class="charColor({{ char_limit }})" x-text="chars + ' / {{ char_limit }} ' + (chars === 1 ? 'char' : 'chars')"></span>
     {% endif %}
   </p>
   {% endif %}

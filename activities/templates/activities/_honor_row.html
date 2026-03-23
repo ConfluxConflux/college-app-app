@@ -12,7 +12,7 @@
       <input x-ref="i" class="input is-small" type="text" name="value" x-model="v"
         hx-post="{% url 'activities:honor_cell' honor.pk 'title' %}" hx-trigger="blur" hx-swap="none"
         @blur="e=false">
-      <p style="text-align:right;margin-top:0.15rem;font-size:0.72rem;line-height:1; color:#aaa" x-text="chars+' chars'"></p>
+      <p style="text-align:right;margin-top:0.15rem;font-size:0.72rem;line-height:1; color:#aaa" x-text="chars + (chars === 1 ? ' char' : ' chars')"></p>
     </div>
   </td>
 
