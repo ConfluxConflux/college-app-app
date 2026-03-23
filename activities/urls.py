@@ -10,7 +10,7 @@ urlpatterns = [
     path('mit/', views.activities_home, {'tab': 'mit'}, name='home_mit'),
     path('compare/', views.activities_home, {'tab': 'compare'}, name='home_compare'),
     path('brainstorm/', views.activities_home, {'tab': 'centralized'}, name='home_brainstorm'),
-    path('estimator/', views.estimator_standalone, name='home_estimator'),
+    path('estimator/', views.estimator_redirect, name='home_estimator'),
     # UC
     path('uc/<int:pk>/set-time/', views.uc_set_time, name='uc_set_time'),
     path('uc/reorder/', views.uc_reorder, name='uc_reorder'),

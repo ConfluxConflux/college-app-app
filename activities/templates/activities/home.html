@@ -128,9 +128,6 @@
       <li {% if tab == 'compare' %}class="is-active"{% endif %}>
         <a href="{% url 'activities:home_compare' %}">Compare</a>
       </li>
-      <li {% if tab == 'estimator' %}class="is-active"{% endif %}>
-        <a href="{% url 'activities:home_estimator' %}">Estimator</a>
-      </li>
       <li {% if tab == 'centralized' %}class="is-active"{% endif %}>
         <a href="{% url 'activities:home_brainstorm' %}">Brainstorm <span class="tag is-rounded ml-1 {% if tab == 'centralized' %}is-primary{% else %}is-light{% endif %}">{{ core_activity_count }}</span></a>
       </li>

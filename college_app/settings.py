@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'colleges',
     'activities',
     'supplements',
+    'widgets',
 ]
 
 MIDDLEWARE = [

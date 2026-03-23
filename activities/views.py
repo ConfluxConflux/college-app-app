@@ -53,8 +53,8 @@ def redirect_to_uc(request):
     return redirect('activities:home_uc')
 
 
-def estimator_standalone(request):
-    return render(request, 'activities/estimator.html')
+def estimator_redirect(request):
+    return redirect('widgets:estimator')
 
 
 def activities_home(request, tab='uc'):

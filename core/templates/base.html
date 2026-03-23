@@ -50,6 +50,10 @@
            href="{% url 'supplements:home' %}">
           Essays
         </a>
+        <a class="navbar-item {% if request.resolver_match.app_name == 'widgets' %}is-active{% endif %}"
+           href="{% url 'widgets:home' %}">
+          Widgets
+        </a>
       </div>
       <div class="navbar-end">
         <a class="navbar-item {% if request.resolver_match.url_name == 'profile' %}is-active{% endif %}"

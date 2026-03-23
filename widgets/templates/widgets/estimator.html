@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Activity Time Estimator - College App App{% endblock %}
+
+{% block content %}
+<h1 class="title">Widgets</h1>
+
+<div class="tabs is-boxed is-medium">
+  <ul>
+    <li class="is-active">
+      <a href="{% url 'widgets:estimator' %}">Activity Time Estimator</a>
+    </li>
+  </ul>
+</div>
+
+{% include "activities/_estimator_content.html" %}
+{% endblock %}
