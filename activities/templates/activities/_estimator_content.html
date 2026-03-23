@@ -5,6 +5,7 @@
   ],
   nid: 3,
   get filled() { return this.rows.filter(r => parseFloat(r.weeks) > 0 && r.hrs !== '') },
+  get lastFilled() { const f=this.filled; return f.length ? f[f.length-1] : null },
   get totalWeeks() { return this.filled.reduce((s,r) => s + (parseFloat(r.weeks)||0), 0) },
   get totalHours() { return this.filled.reduce((s,r) => s + (parseFloat(r.weeks)||0) * (parseFloat(r.hrs)||0), 0) },
   get hasData() { return this.totalWeeks > 0 },
@@ -52,10 +53,10 @@
               <td class="estimator-td estimator-radio-td"><input type="radio" :name="'grade-' + row.id" x-model="row.grade" value="11"></td>
               <td class="estimator-td estimator-radio-td"><input type="radio" :name="'grade-' + row.id" x-model="row.grade" value="12"></td>
               <td class="estimator-td">
-                <input class="estimator-input estimator-num" type="number" x-model="row.weeks" min="0" max="52" step="1" placeholder="—">
+                <input class="estimator-input estimator-num" type="number" x-model="row.weeks" min="0" max="52" step="1" placeholder="—" @focus="if(row.weeks==='' && lastFilled) row.weeks=lastFilled.weeks">
               </td>
               <td class="estimator-td">
-                <input class="estimator-input estimator-num" type="number" x-model="row.hrs" min="0" step="0.5" placeholder="—">
+                <input class="estimator-input estimator-num" type="number" x-model="row.hrs" min="0" step="0.5" placeholder="—" @focus="if(row.hrs==='' && lastFilled) row.hrs=lastFilled.hrs">
               </td>
               <td class="estimator-td">
                 <input class="estimator-input" type="text" x-model="row.notes" placeholder="e.g. quit early because of that annoying coach">
