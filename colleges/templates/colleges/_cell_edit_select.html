@@ -3,6 +3,19 @@
   {% for field_name, field_label in table_fields %}
   <td class="col-{{ field_name }}">
     {% if field_name == field %}
+    <div x-data="{ cornellWarning: false }" style="display:contents">
+    {% if 'cornell college' in college.name|lower %}
+    <div x-show="cornellWarning" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:1000;display:flex;align-items:center;justify-content:center;">
+      <div style="background:white;border-radius:8px;padding:1.5rem 2rem;max-width:480px;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+        <p class="has-text-weight-bold mb-3">Did you mean to select Cornell University instead?</p>
+        <p style="font-size:0.92rem;line-height:1.6;">Cornell College seems to be a perfectly fine school; it's in Iowa and you only take one course at a time; but it gets lots of applicants who think they're applying to Cornell University — the famous Ivy League school.</p>
+        <div class="mt-4" style="display:flex;gap:0.75rem;">
+          <button type="button" class="button is-light" @click="cornellWarning = false">No, I meant Cornell College</button>
+          <button type="button" class="button is-warning" @click="cornellWarning = false">Got it, thanks</button>
+        </div>
+      </div>
+    </div>
+    {% endif %}
     <form hx-post="{% url 'colleges:edit_cell' college.pk field %}"
           hx-target="#college-row-{{ college.pk }}"
           hx-swap="outerHTML">
@@ -11,7 +24,7 @@
         <div class="control">
           <div class="select is-small">
             <select name="value" autofocus
-                    onchange="this.form.requestSubmit()"
+                    onchange="{% if 'cornell college' in college.name|lower %}if(['applying','likely','considering','applied','accepted','enrolled'].includes(this.value)){ this.closest('[x-data]').__x.$data.cornellWarning = true; } {% endif %}this.form.requestSubmit()"
                     onkeydown="if(event.key==='Escape'){htmx.ajax('GET','{% url 'colleges:list' %}','#college-table-wrapper')}">
               <option value="">—</option>
               {% for val, label in choices %}
@@ -27,6 +40,7 @@
         </div>
       </div>
     </form>
+    </div>
     {% elif field_name == 'name' %}
       <strong>{{ college.name }}</strong>
     {% elif field_name == 'apply_status' %}
