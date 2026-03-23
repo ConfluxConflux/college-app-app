@@ -171,15 +171,32 @@ def core_activity_mit_cell(request, pk, field):
 
 def home(request):
     applicant = _get_applicant()
+    college_count = College.objects.filter(applicant=applicant).count()
+    applying_count = College.objects.filter(applicant=applicant).exclude(apply_status__in=['', 'not_applying', 'unlikely']).count()
+    uc_count = UCEntry.objects.filter(applicant=applicant).count()
+    common_app_activity_count = CommonAppActivity.objects.filter(applicant=applicant).count()
+    common_app_honor_count = CommonAppHonor.objects.filter(applicant=applicant).count()
+    mit_count = MITEntry.objects.filter(applicant=applicant).count()
+    essay_count = SupplementEssay.objects.filter(applicant=applicant).count()
+    essay_done_count = SupplementEssay.objects.filter(applicant=applicant, status='done').count()
+    submitted_count = College.objects.filter(applicant=applicant, apply_status__in=['applied', 'accepted', 'deferred', 'waitlisted', 'rejected', 'enrolled', 'withdrawn']).count()
     context = {
         'applicant': applicant,
-        'college_count': College.objects.filter(applicant=applicant).count(),
-        'applying_count': College.objects.filter(applicant=applicant).exclude(apply_status__in=['', 'not_applying', 'unlikely']).count(),
-        'uc_count': UCEntry.objects.filter(applicant=applicant).count(),
-        'common_app_activity_count': CommonAppActivity.objects.filter(applicant=applicant).count(),
-        'common_app_honor_count': CommonAppHonor.objects.filter(applicant=applicant).count(),
-        'mit_count': MITEntry.objects.filter(applicant=applicant).count(),
-        'essay_count': SupplementEssay.objects.filter(applicant=applicant).count(),
-        'essay_done_count': SupplementEssay.objects.filter(applicant=applicant, status='done').count(),
+        'college_count': college_count,
+        'applying_count': applying_count,
+        'uc_count': uc_count,
+        'common_app_activity_count': common_app_activity_count,
+        'common_app_honor_count': common_app_honor_count,
+        'mit_count': mit_count,
+        'essay_count': essay_count,
+        'essay_done_count': essay_done_count,
+        'submitted_count': submitted_count,
+        # Auto-detection flags for the dashboard checklist
+        'auto_has_college_list': college_count >= 4,
+        'auto_has_big_college_list': college_count >= 8,
+        'auto_has_activities': uc_count > 0 or common_app_activity_count > 0,
+        'auto_has_essay': essay_count > 0,
+        'auto_has_done_essay': essay_done_count > 0,
+        'auto_has_submitted': submitted_count > 0,
     }
     return render(request, 'core/home.html', context)

@@ -1,44 +1,293 @@
 {% extends "base.html" %}
-
 {% block title %}Dashboard - College App App{% endblock %}
 
 {% block content %}
 <h1 class="title">Dashboard</h1>
-<div class="columns is-multiline">
-  <div class="column is-4">
-    <div class="box">
-      <h2 class="title is-5">
-        <a href="{% url 'colleges:list' %}">Colleges</a>
-      </h2>
-      <p class="is-size-3 has-text-weight-bold has-text-primary">{{ college_count }}</p>
-      <p class="has-text-grey">colleges tracked ({{ applying_count }} active)</p>
+
+{# ── Stats row ── #}
+<div class="columns mb-5">
+  <div class="column is-3">
+    <div class="box" style="text-align:center; padding:1rem;">
+      <div style="font-size:2rem; font-weight:700; color:#3b82f6; line-height:1;">{{ college_count }}</div>
+      <div style="font-size:0.82rem; color:#888; margin-top:0.15rem;">colleges tracked</div>
+      <div style="font-size:0.78rem; color:#555; margin-top:0.2rem;">{{ applying_count }} in progress</div>
+      <a href="{% url 'colleges:list' %}" style="font-size:0.78rem; color:#3b82f6; display:block; margin-top:0.4rem;">View →</a>
     </div>
   </div>
-
-  <div class="column is-4">
-    <div class="box">
-      <h2 class="title is-5">
-        <a href="{% url 'activities:home' %}">Activities & Honors</a>
-      </h2>
-      <div class="content">
-        <ul>
-          <li>{{ uc_count }}/20 UC entries</li>
-          <li>{{ common_app_activity_count }}/10 Common App activities</li>
-          <li>{{ common_app_honor_count }}/5 Common App honors</li>
-          <li>{{ mit_count }} MIT entries</li>
-        </ul>
-      </div>
+  <div class="column is-3">
+    <div class="box" style="text-align:center; padding:1rem;">
+      <div style="font-size:2rem; font-weight:700; color:#3b82f6; line-height:1;">{{ uc_count }}/20</div>
+      <div style="font-size:0.82rem; color:#888; margin-top:0.15rem;">UC activities</div>
+      <div style="font-size:0.78rem; color:#555; margin-top:0.2rem;">{{ common_app_activity_count }}/10 CA · {{ common_app_honor_count }}/5 honors</div>
+      <a href="{% url 'activities:home_uc' %}" style="font-size:0.78rem; color:#3b82f6; display:block; margin-top:0.4rem;">View →</a>
     </div>
   </div>
-
-  <div class="column is-4">
-    <div class="box">
-      <h2 class="title is-5">
-        <a href="{% url 'supplements:home' %}">Essays</a>
-      </h2>
-      <p class="has-text-grey">A place to keep track of personal essays and supplementals.</p>
-      <p class="has-text-danger has-text-weight-bold" style="margin-top: 0.5rem;">I HAVE NOT MADE THIS YET</p>
+  <div class="column is-3">
+    <div class="box" style="text-align:center; padding:1rem;">
+      <div style="font-size:2rem; font-weight:700; color:#3b82f6; line-height:1;">{{ essay_done_count }}/{{ essay_count }}</div>
+      <div style="font-size:0.82rem; color:#888; margin-top:0.15rem;">essays done</div>
+      <div style="font-size:0.78rem; color:#555; margin-top:0.2rem;">{{ essay_count }} total tracked</div>
+      <a href="{% url 'supplements:home' %}" style="font-size:0.78rem; color:#3b82f6; display:block; margin-top:0.4rem;">View →</a>
+    </div>
+  </div>
+  <div class="column is-3">
+    <div class="box" style="text-align:center; padding:1rem;">
+      <div style="font-size:2rem; font-weight:700; color:#3b82f6; line-height:1;">{{ submitted_count }}</div>
+      <div style="font-size:0.82rem; color:#888; margin-top:0.15rem;">submitted</div>
+      <div style="font-size:0.78rem; color:#555; margin-top:0.2rem;">{{ applying_count }} in progress</div>
+      <a href="{% url 'colleges:applications' %}" style="font-size:0.78rem; color:#3b82f6; display:block; margin-top:0.4rem;">View →</a>
     </div>
   </div>
 </div>
+
+{# ── Checklist ── #}
+<div x-data="dashboard()" x-init="init()" style="max-width:820px;">
+
+  {# Next Steps #}
+  <template x-if="nextSteps().length > 0">
+    <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:1rem 1.25rem; margin-bottom:1.75rem;">
+      <div style="font-weight:600; font-size:0.88rem; color:#1d4ed8; margin-bottom:0.6rem; letter-spacing:0.02em;">SUGGESTED NEXT STEPS</div>
+      <template x-for="task in nextSteps()" :key="task.key">
+        <div style="display:flex; align-items:baseline; gap:0.5rem; padding:0.2rem 0; font-size:0.9rem;">
+          <span style="color:#93c5fd; flex-shrink:0;">→</span>
+          <span x-text="task.label" style="color:#1e3a5f;"></span>
+          <a x-show="task.url" :href="task.url" style="font-size:0.78rem; color:#3b82f6; flex-shrink:0; margin-left:0.15rem;">↗</a>
+        </div>
+      </template>
+    </div>
+  </template>
+
+  {# Season 0: Spring of 11th Grade #}
+  <div style="margin-bottom:1rem;">
+    <div @click="open[0] = !open[0]"
+         style="display:flex; align-items:center; gap:0.75rem; cursor:pointer; padding:0.65rem 0.9rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; user-select:none;">
+      <span style="font-weight:600; font-size:0.95rem; flex:1;">Spring of 11th Grade — Getting Started</span>
+      <span style="font-size:0.78rem; color:#64748b; background:#e2e8f0; border-radius:12px; padding:1px 8px;"
+            x-text="seasonProgress(0).done + '/' + seasonProgress(0).total"></span>
+      <span style="color:#94a3b8; font-size:0.8rem;" x-text="open[0] ? '▲' : '▼'"></span>
+    </div>
+    <div x-show="open[0]" style="border:1px solid #e2e8f0; border-top:none; border-radius:0 0 6px 6px; padding:0.5rem 0.9rem;">
+      <template x-for="task in tasks.filter(t => t.season === 0)" :key="task.key">
+        <div style="display:flex; align-items:baseline; gap:0.6rem; padding:0.45rem 0; border-bottom:1px solid #f1f5f9;">
+          <input type="checkbox" :checked="isChecked(task)" @change="toggle(task)"
+                 :disabled="!!task.autoKey && isChecked(task)"
+                 style="flex-shrink:0; margin-top:2px; cursor:pointer; accent-color:#22c55e;">
+          <span x-text="task.label"
+                :style="isChecked(task) ? 'color:#94a3b8; text-decoration:line-through; font-size:0.9rem;' : 'font-size:0.9rem;'"></span>
+          <span x-show="task.autoKey && isChecked(task)"
+                style="font-size:0.7rem; color:#22c55e; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:0 6px; flex-shrink:0;">auto</span>
+          <a x-show="task.url && !isChecked(task)" :href="task.url"
+             style="font-size:0.78rem; color:#3b82f6; flex-shrink:0; margin-left:auto;">↗</a>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  {# Season 1: Summer #}
+  <div style="margin-bottom:1rem;">
+    <div @click="open[1] = !open[1]"
+         style="display:flex; align-items:center; gap:0.75rem; cursor:pointer; padding:0.65rem 0.9rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; user-select:none;">
+      <span style="font-weight:600; font-size:0.95rem; flex:1;">Summer Before 12th Grade</span>
+      <span style="font-size:0.78rem; color:#64748b; background:#e2e8f0; border-radius:12px; padding:1px 8px;"
+            x-text="seasonProgress(1).done + '/' + seasonProgress(1).total"></span>
+      <span style="color:#94a3b8; font-size:0.8rem;" x-text="open[1] ? '▲' : '▼'"></span>
+    </div>
+    <div x-show="open[1]" style="border:1px solid #e2e8f0; border-top:none; border-radius:0 0 6px 6px; padding:0.5rem 0.9rem;">
+      <template x-for="task in tasks.filter(t => t.season === 1)" :key="task.key">
+        <div style="display:flex; align-items:baseline; gap:0.6rem; padding:0.45rem 0; border-bottom:1px solid #f1f5f9;">
+          <input type="checkbox" :checked="isChecked(task)" @change="toggle(task)"
+                 :disabled="!!task.autoKey && isChecked(task)"
+                 style="flex-shrink:0; margin-top:2px; cursor:pointer; accent-color:#22c55e;">
+          <span x-text="task.label"
+                :style="isChecked(task) ? 'color:#94a3b8; text-decoration:line-through; font-size:0.9rem;' : 'font-size:0.9rem;'"></span>
+          <span x-show="task.autoKey && isChecked(task)"
+                style="font-size:0.7rem; color:#22c55e; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:0 6px; flex-shrink:0;">auto</span>
+          <a x-show="task.url && !isChecked(task)" :href="task.url"
+             style="font-size:0.78rem; color:#3b82f6; flex-shrink:0; margin-left:auto;">↗</a>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  {# Season 2: Fall #}
+  <div style="margin-bottom:1rem;">
+    <div @click="open[2] = !open[2]"
+         style="display:flex; align-items:center; gap:0.75rem; cursor:pointer; padding:0.65rem 0.9rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; user-select:none;">
+      <span style="font-weight:600; font-size:0.95rem; flex:1;">Fall of 12th Grade — Applying</span>
+      <span style="font-size:0.78rem; color:#64748b; background:#e2e8f0; border-radius:12px; padding:1px 8px;"
+            x-text="seasonProgress(2).done + '/' + seasonProgress(2).total"></span>
+      <span style="color:#94a3b8; font-size:0.8rem;" x-text="open[2] ? '▲' : '▼'"></span>
+    </div>
+    <div x-show="open[2]" style="border:1px solid #e2e8f0; border-top:none; border-radius:0 0 6px 6px; padding:0.5rem 0.9rem;">
+      <template x-for="task in tasks.filter(t => t.season === 2)" :key="task.key">
+        <div style="display:flex; align-items:baseline; gap:0.6rem; padding:0.45rem 0; border-bottom:1px solid #f1f5f9;">
+          <input type="checkbox" :checked="isChecked(task)" @change="toggle(task)"
+                 :disabled="!!task.autoKey && isChecked(task)"
+                 style="flex-shrink:0; margin-top:2px; cursor:pointer; accent-color:#22c55e;">
+          <span x-text="task.label"
+                :style="isChecked(task) ? 'color:#94a3b8; text-decoration:line-through; font-size:0.9rem;' : 'font-size:0.9rem;'"></span>
+          <span x-show="task.autoKey && isChecked(task)"
+                style="font-size:0.7rem; color:#22c55e; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:0 6px; flex-shrink:0;">auto</span>
+          <a x-show="task.url && !isChecked(task)" :href="task.url"
+             style="font-size:0.78rem; color:#3b82f6; flex-shrink:0; margin-left:auto;">↗</a>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  {# Season 3: Winter #}
+  <div style="margin-bottom:1rem;">
+    <div @click="open[3] = !open[3]"
+         style="display:flex; align-items:center; gap:0.75rem; cursor:pointer; padding:0.65rem 0.9rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; user-select:none;">
+      <span style="font-weight:600; font-size:0.95rem; flex:1;">Winter of 12th Grade — Waiting</span>
+      <span style="font-size:0.78rem; color:#64748b; background:#e2e8f0; border-radius:12px; padding:1px 8px;"
+            x-text="seasonProgress(3).done + '/' + seasonProgress(3).total"></span>
+      <span style="color:#94a3b8; font-size:0.8rem;" x-text="open[3] ? '▲' : '▼'"></span>
+    </div>
+    <div x-show="open[3]" style="border:1px solid #e2e8f0; border-top:none; border-radius:0 0 6px 6px; padding:0.5rem 0.9rem;">
+      <template x-for="task in tasks.filter(t => t.season === 3)" :key="task.key">
+        <div style="display:flex; align-items:baseline; gap:0.6rem; padding:0.45rem 0; border-bottom:1px solid #f1f5f9;">
+          <input type="checkbox" :checked="isChecked(task)" @change="toggle(task)"
+                 :disabled="!!task.autoKey && isChecked(task)"
+                 style="flex-shrink:0; margin-top:2px; cursor:pointer; accent-color:#22c55e;">
+          <span x-text="task.label"
+                :style="isChecked(task) ? 'color:#94a3b8; text-decoration:line-through; font-size:0.9rem;' : 'font-size:0.9rem;'"></span>
+          <span x-show="task.autoKey && isChecked(task)"
+                style="font-size:0.7rem; color:#22c55e; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:0 6px; flex-shrink:0;">auto</span>
+          <a x-show="task.url && !isChecked(task)" :href="task.url"
+             style="font-size:0.78rem; color:#3b82f6; flex-shrink:0; margin-left:auto;">↗</a>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  {# Season 4: Spring #}
+  <div style="margin-bottom:1rem;">
+    <div @click="open[4] = !open[4]"
+         style="display:flex; align-items:center; gap:0.75rem; cursor:pointer; padding:0.65rem 0.9rem; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; user-select:none;">
+      <span style="font-weight:600; font-size:0.95rem; flex:1;">Spring of 12th Grade — Decisions</span>
+      <span style="font-size:0.78rem; color:#64748b; background:#e2e8f0; border-radius:12px; padding:1px 8px;"
+            x-text="seasonProgress(4).done + '/' + seasonProgress(4).total"></span>
+      <span style="color:#94a3b8; font-size:0.8rem;" x-text="open[4] ? '▲' : '▼'"></span>
+    </div>
+    <div x-show="open[4]" style="border:1px solid #e2e8f0; border-top:none; border-radius:0 0 6px 6px; padding:0.5rem 0.9rem;">
+      <template x-for="task in tasks.filter(t => t.season === 4)" :key="task.key">
+        <div style="display:flex; align-items:baseline; gap:0.6rem; padding:0.45rem 0; border-bottom:1px solid #f1f5f9;">
+          <input type="checkbox" :checked="isChecked(task)" @change="toggle(task)"
+                 :disabled="!!task.autoKey && isChecked(task)"
+                 style="flex-shrink:0; margin-top:2px; cursor:pointer; accent-color:#22c55e;">
+          <span x-text="task.label"
+                :style="isChecked(task) ? 'color:#94a3b8; text-decoration:line-through; font-size:0.9rem;' : 'font-size:0.9rem;'"></span>
+          <span x-show="task.autoKey && isChecked(task)"
+                style="font-size:0.7rem; color:#22c55e; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:0 6px; flex-shrink:0;">auto</span>
+          <a x-show="task.url && !isChecked(task)" :href="task.url"
+             style="font-size:0.78rem; color:#3b82f6; flex-shrink:0; margin-left:auto;">↗</a>
+        </div>
+      </template>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function dashboard() {
+  const AUTO = {
+    has_college_list:      {{ auto_has_college_list|yesno:'true,false' }},
+    has_big_college_list:  {{ auto_has_big_college_list|yesno:'true,false' }},
+    has_activities:        {{ auto_has_activities|yesno:'true,false' }},
+    has_essay:             {{ auto_has_essay|yesno:'true,false' }},
+    has_done_essay:        {{ auto_has_done_essay|yesno:'true,false' }},
+    has_submitted:         {{ auto_has_submitted|yesno:'true,false' }},
+  };
+
+  // season: 0=Spring11, 1=Summer, 2=Fall12, 3=Winter12, 4=Spring12
+  // autoKey: if set, task is auto-detected from AUTO flags (checkbox disabled when checked)
+  // url: optional deep-link into the app
+  const TASKS = [
+    // ── Spring of 11th ──
+    {key:'s11_ca_account',    label:'Start a Common App account',                                                     season:0, url:''},
+    {key:'s11_browse_ca',     label:'Browse through the Common App and click every button',                           season:0, url:''},
+    {key:'s11_ca_profile',    label:'Begin filling in Common App profile sections (personal info, education, testing)',season:0, url:''},
+    {key:'s11_rec_draft',     label:'Pick 4 teachers and draft recommendation request emails',                        season:0, url:''},
+    {key:'s11_counselor_qs',  label:'Draft answers to the counselor letter questions ("what to highlight about you")',season:0, url:''},
+    {key:'s11_college_factors',label:'Make a list of what you want out of college and sort by priority',              season:0, url:''},
+    {key:'s11_college_list',  label:'Add at least 4 colleges to your list',                                          season:0, url:'{% url "colleges:list" %}', autoKey:'has_college_list'},
+
+    // ── Summer ──
+    {key:'sum_rec_sent',      label:'Send recommendation request emails (June)',                                      season:1, url:''},
+    {key:'sum_ca_filled',     label:'Fill out all Common App sections (profile, family, education, testing)',         season:1, url:''},
+    {key:'sum_testing',       label:'Double-check standardized testing plan and sign up for remaining tests (June)',  season:1, url:''},
+    {key:'sum_essay',         label:'Draft your Common App personal essay (June–August)',                             season:1, url:'{% url "supplements:home" %}', autoKey:'has_essay'},
+    {key:'sum_college_list',  label:'Revise college list to 8+ schools across reach, target, and safety',            season:1, url:'{% url "colleges:list" %}', autoKey:'has_big_college_list'},
+    {key:'sum_ed_ea',         label:'Identify an early decision / early action school',                              season:1, url:'{% url "colleges:list" %}'},
+
+    // ── Fall of 12th ──
+    {key:'fall_finalize',     label:'Finalize college list including EA/ED school and fill in all deadlines',         season:2, url:'{% url "colleges:list" %}'},
+    {key:'fall_action_items', label:'Make a detailed list of action items and self-imposed deadlines',                season:2, url:''},
+    {key:'fall_activities',   label:'Complete and polish activities list',                                            season:2, url:'{% url "activities:home_uc" %}', autoKey:'has_activities'},
+    {key:'fall_essays',       label:'Write and revise all supplemental essays',                                       season:2, url:'{% url "supplements:home" %}', autoKey:'has_done_essay'},
+    {key:'fall_non_essay',    label:'Polish non-essay application sections (profile, testing, awards, recommenders)', season:2, url:''},
+    {key:'fall_submit',       label:'Submit applications on time',                                                    season:2, url:'{% url "colleges:applications" %}', autoKey:'has_submitted'},
+
+    // ── Winter of 12th ──
+    {key:'win_thank_you',     label:'Write thank you notes to recommenders',                                          season:3, url:''},
+    {key:'win_try_new',       label:'Try something new — a mini-course, club, or activity outside your comfort zone', season:3, url:''},
+    {key:'win_handoff',       label:'Make a good hand-off for activities you\'ve led',                                season:3, url:''},
+    {key:'win_community',     label:'Do something for your community',                                                season:3, url:''},
+
+    // ── Spring of 12th ──
+    {key:'spr_stride',        label:'Take decisions in stride (rejections happen; you can only pick one anyway)',     season:4, url:''},
+    {key:'spr_compare',       label:'Compare offers carefully, including finances and net cost',                      season:4, url:''},
+    {key:'spr_visit',         label:'Visit schools you are seriously considering',                                    season:4, url:''},
+    {key:'spr_decide',        label:'Make a decision and notify your counselors',                                     season:4, url:''},
+    {key:'spr_thank_recs',    label:'Let your recommenders know where you\'re going — they want to celebrate',        season:4, url:''},
+    {key:'spr_land',          label:'Stick the landing — finish school strong and leave a positive mark',             season:4, url:''},
+  ];
+
+  return {
+    tasks: TASKS,
+    checked: {},
+    open: {0: false, 1: false, 2: false, 3: false, 4: false},
+
+    init() {
+      // Load manual checkbox state from localStorage
+      TASKS.forEach(t => {
+        if (!t.autoKey) {
+          this.checked[t.key] = localStorage.getItem('dash_' + t.key) === '1';
+        }
+      });
+      // Open the first season that has incomplete tasks
+      for (let s = 0; s < 5; s++) {
+        if (TASKS.filter(t => t.season === s).some(t => !this.isChecked(t))) {
+          this.open[s] = true;
+          break;
+        }
+      }
+    },
+
+    isChecked(task) {
+      if (task.autoKey) return AUTO[task.autoKey] || false;
+      return this.checked[task.key] || false;
+    },
+
+    toggle(task) {
+      if (task.autoKey) return;
+      const v = !this.checked[task.key];
+      this.checked[task.key] = v;
+      if (v) localStorage.setItem('dash_' + task.key, '1');
+      else localStorage.removeItem('dash_' + task.key);
+    },
+
+    seasonProgress(s) {
+      const st = TASKS.filter(t => t.season === s);
+      return { done: st.filter(t => this.isChecked(t)).length, total: st.length };
+    },
+
+    nextSteps() {
+      return TASKS.filter(t => !this.isChecked(t)).slice(0, 4);
+    },
+  };
+}
+</script>
+
 {% endblock %}
