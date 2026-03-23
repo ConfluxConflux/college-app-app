@@ -1,0 +1,44 @@
+{% extends "focus_base.html" %}
+
+{% block title %}Focus Write — College App App{% endblock %}
+
+{% block content %}
+<div class="focus-shell"
+     x-data="{
+       text: '',
+       limitType: 'word',
+       limitVal: 0,
+       get wc() { return this.text.trim() ? this.text.trim().split(/\s+/).length : 0; },
+       get cc() { return this.text.length; },
+       get count() { return this.limitType === 'char' ? this.cc : this.wc; },
+     }">
+
+  <!-- Back bar -->
+  <div class="focus-topbar">
+    <a href="{% url 'widgets:home' %}" class="focus-back-btn">← Back</a>
+    <span class="focus-college-label">Focus Write</span>
+    <span></span>
+  </div>
+
+  <!-- Editor -->
+  <div class="focus-editor-area">
+    <textarea
+      class="focus-textarea"
+      placeholder="Start writing…"
+      x-model="text"
+      x-init="$el.style.height = Math.max($el.scrollHeight, 320) + 'px'"
+      @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
+      spellcheck="true"
+      autocomplete="off"
+    ></textarea>
+
+    <!-- Counter -->
+    <div class="focus-counter-row">
+      <span class="focus-counter">
+        <span x-text="wc"></span> words &nbsp;·&nbsp; <span x-text="cc"></span> characters
+      </span>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -6,4 +6,5 @@ app_name = 'widgets'
 urlpatterns = [
     path('', views.estimator, name='home'),
     path('estimator/', views.estimator, name='estimator'),
+    path('focus-write/', views.focus_write, name='focus_write'),
 ]
