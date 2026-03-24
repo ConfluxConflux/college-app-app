@@ -7,9 +7,18 @@
      x-data="{
        text: '',
        showCount: false,
+       fs: false,
        get wc() { return this.text.trim() ? this.text.trim().split(/\s+/).length : 0; },
        get cc() { return this.text.length; },
-     }">
+       toggleFs() {
+         if (!document.fullscreenElement) {
+           document.documentElement.requestFullscreen();
+         } else {
+           document.exitFullscreen();
+         }
+       },
+     }"
+     x-init="document.addEventListener('fullscreenchange', () => { fs = !!document.fullscreenElement; })">
 
   <!-- Back bar -->
   <div class="focus-topbar">
@@ -20,6 +29,7 @@
         <span x-text="wc + (wc === 1 ? ' word' : ' words')"></span> &nbsp;·&nbsp; <span x-text="cc + (cc === 1 ? ' char' : ' chars')"></span>
       </span>
       <button class="focus-back-btn" @click="showCount = !showCount" x-text="showCount ? 'Hide Word Count' : 'Show Word Count'"></button>
+      <button class="focus-back-btn" @click="toggleFs()" x-text="fs ? '⤡ Exit Fullscreen' : '⤢ Fullscreen'"></button>
     </div>
   </div>
 
