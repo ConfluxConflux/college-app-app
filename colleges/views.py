@@ -10,6 +10,7 @@ from .forms import CollegeForm
 from .models import College
 from activities.models import UCEntry, CommonAppActivity, CommonAppHonor, MITEntry
 from core.models import Applicant
+from core.utils import get_applicant
 from supplements.models import SupplementEssay
 
 
@@ -375,7 +376,7 @@ def applications(request):
         platform_display = dict(College.APP_PLATFORM_CHOICES).get(platform, '') if platform else ''
 
         try:
-            applicant = Applicant.objects.get(pk=1)
+            applicant = get_applicant(request)
         except Applicant.DoesNotExist:
             applicant = None
 

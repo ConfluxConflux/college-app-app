@@ -16,4 +16,5 @@ urlpatterns = [
     path('core-activities/<int:pk>/mit-cell/<str:field>/', views.core_activity_mit_cell, name='core_activity_mit_cell'),
     path('signup/', views.not_yet, name='signup'),
     path('login/', views.not_yet, name='login'),
+    path('switch-applicant/<int:pk>/', views.switch_applicant, name='switch_applicant'),
 ]

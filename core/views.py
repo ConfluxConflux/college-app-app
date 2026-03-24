@@ -8,10 +8,16 @@ from supplements.models import SupplementEssay
 from .models import Applicant, CoreActivity
 
 
-# Temporary: single test applicant until real auth is wired up.
+# Temporary: test applicant switcher until real auth is wired up.
 # When auth exists, replace with: applicant = request.user.applicant
-def _get_applicant():
-    return Applicant.objects.get(pk=1)
+def _get_applicant(request):
+    from .utils import get_applicant
+    return get_applicant(request)
+
+
+def switch_applicant(request, pk):
+    request.session['applicant_pk'] = pk
+    return redirect('core:home')
 
 
 def _core_row_ctx(activity, editing=None):
@@ -38,7 +44,7 @@ def not_yet(request):
 
 
 def profile(request):
-    applicant = _get_applicant()
+    applicant = _get_applicant(request)
     if request.method == 'POST':
         applicant.brainstorm = request.POST.get('brainstorm', '')
         applicant.save()
@@ -67,7 +73,7 @@ def core_activity_cell(request, pk, field):
 
 
 def core_activity_add(request):
-    applicant = _get_applicant()
+    applicant = _get_applicant(request)
     activity = CoreActivity.objects.create(
         applicant=applicant,
         name='',
@@ -170,7 +176,7 @@ def core_activity_mit_cell(request, pk, field):
 
 
 def home(request):
-    applicant = _get_applicant()
+    applicant = _get_applicant(request)
     college_count = College.objects.filter(applicant=applicant).count()
     applying_count = College.objects.filter(applicant=applicant).exclude(apply_status__in=['', 'not_applying', 'unlikely']).count()
     uc_count = UCEntry.objects.filter(applicant=applicant).count()

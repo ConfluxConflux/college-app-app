@@ -10,6 +10,7 @@ from django.views.decorators.http import require_POST
 from .forms import UCEntryForm, CommonAppActivityForm, CommonAppHonorForm, MITEntryForm
 from .models import UCEntry, CommonAppActivity, CommonAppHonor, MITEntry
 from core.models import CoreActivity, Applicant
+from core.utils import get_applicant
 
 
 def _get_cross_links(core_activity, exclude_model=None, exclude_pk=None):
@@ -58,7 +59,7 @@ def estimator_redirect(request):
 
 
 def activities_home(request, tab='uc'):
-    applicant = Applicant.objects.get(pk=1)
+    applicant = get_applicant(request)
     uc_entries_list = list(UCEntry.objects.filter(applicant=applicant).order_by('order').select_related('core_activity'))
     uc_slots = uc_entries_list[:20]
     while len(uc_slots) < 20:
@@ -112,7 +113,7 @@ def activities_home(request, tab='uc'):
 
 def uc_add(request):
     if request.method == 'POST' and request.headers.get('HX-Request'):
-        applicant = Applicant.objects.get(pk=1)
+        applicant = get_applicant(request)
         entry = UCEntry.objects.create(
             applicant=applicant,
             category='extracurricular',
@@ -205,7 +206,7 @@ def uc_delete(request, pk):
 def uc_slot_add(request, slot):
     """Create a new UCEntry for an empty slot, returned in edit mode."""
     field = request.POST.get('field', 'name')
-    applicant = Applicant.objects.get(pk=1)
+    applicant = get_applicant(request)
     entry = UCEntry.objects.create(
         applicant=applicant,
         order=slot,
@@ -246,7 +247,7 @@ def uc_set_time(request, pk):
 
 @require_POST
 def uc_reorder(request):
-    applicant = Applicant.objects.get(pk=1)
+    applicant = get_applicant(request)
     data = json.loads(request.body)
     for i, pk in enumerate(data.get('order', []), start=1):
         UCEntry.objects.filter(pk=pk, applicant=applicant).update(order=i)
@@ -331,7 +332,7 @@ def ca_cell(request, pk, field):
 @require_POST
 def ca_slot_add(request, slot):
     field = request.POST.get('field', 'organization')
-    applicant = Applicant.objects.get(pk=1)
+    applicant = get_applicant(request)
     activity = CommonAppActivity.objects.create(
         applicant=applicant,
         order=slot,
@@ -347,7 +348,7 @@ def ca_slot_add(request, slot):
 
 @require_POST
 def ca_reorder(request):
-    applicant = Applicant.objects.get(pk=1)
+    applicant = get_applicant(request)
     data = json.loads(request.body)
     for i, pk in enumerate(data.get('order', []), start=1):
         CommonAppActivity.objects.filter(pk=pk, applicant=applicant).update(order=i)
@@ -366,7 +367,7 @@ def ca_delete(request, pk):
 
 def honor_add(request):
     if request.method == 'POST' and request.headers.get('HX-Request'):
-        applicant = Applicant.objects.get(pk=1)
+        applicant = get_applicant(request)
         honor = CommonAppHonor.objects.create(
             applicant=applicant,
             order=CommonAppHonor.objects.filter(applicant=applicant).count(),
@@ -518,7 +519,7 @@ def _grades(obj):
 
 
 def export_uc(request):
-    applicant = Applicant.objects.get(pk=1)
+    applicant = get_applicant(request)
     entries = UCEntry.objects.filter(applicant=applicant)
     lines = ['UC ACTIVITIES & AWARDS EXPORT', '=' * 40, '']
     for i, e in enumerate(entries, 1):
@@ -561,7 +562,7 @@ def export_uc(request):
 
 
 def export_uc_csv(request):
-    applicant = Applicant.objects.get(pk=1)
+    applicant = get_applicant(request)
     entries = UCEntry.objects.filter(applicant=applicant).order_by('order')
 
     buf = io.StringIO()
@@ -605,7 +606,7 @@ def export_uc_csv(request):
 
 
 def export_ca_txt(request):
-    applicant = Applicant.objects.get(pk=1)
+    applicant = get_applicant(request)
     activities = CommonAppActivity.objects.filter(applicant=applicant).order_by('order')
     lines = [f'COMMON APP ACTIVITIES ({activities.count()}/10)', '=' * 40, '']
     for i, a in enumerate(activities, 1):
@@ -638,7 +639,7 @@ def export_ca_txt(request):
 
 
 def export_ca_csv(request):
-    applicant = Applicant.objects.get(pk=1)
+    applicant = get_applicant(request)
     activities = CommonAppActivity.objects.filter(applicant=applicant).order_by('order')
     buf = io.StringIO()
     writer = csv.writer(buf)
@@ -674,7 +675,7 @@ def export_ca_csv(request):
 
 
 def export_honors_txt(request):
-    applicant = Applicant.objects.get(pk=1)
+    applicant = get_applicant(request)
     honors = CommonAppHonor.objects.filter(applicant=applicant).order_by('order')
     lines = [f'COMMON APP HONORS ({honors.count()}/5)', '=' * 40, '']
     for i, h in enumerate(honors, 1):
@@ -698,7 +699,7 @@ def export_honors_txt(request):
 
 
 def export_honors_csv(request):
-    applicant = Applicant.objects.get(pk=1)
+    applicant = get_applicant(request)
     honors = CommonAppHonor.objects.filter(applicant=applicant).order_by('order')
     buf = io.StringIO()
     writer = csv.writer(buf)
@@ -732,7 +733,7 @@ def export_common_app(request):
 
 
 def export_mit(request):
-    applicant = Applicant.objects.get(pk=1)
+    applicant = get_applicant(request)
     entries = MITEntry.objects.filter(applicant=applicant)
     lines = ['MIT ENTRIES EXPORT', '=' * 40, '']
     category_order = ['job', 'activity', 'summer', 'scholastic', 'non_scholastic']
