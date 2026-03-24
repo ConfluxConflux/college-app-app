@@ -42,7 +42,6 @@ OPTIONAL_FIELDS = [
 ALL_TABLE_FIELDS = DEFAULT_FIELDS + OPTIONAL_FIELDS
 ALL_TABLE_FIELDS_DICT = dict(ALL_TABLE_FIELDS)
 EDITABLE_FIELDS = {f[0] for f in ALL_TABLE_FIELDS}
-EDIT_STATUS_CHOICES = [(v, l) for v, l in College.APPLY_STATUS_CHOICES if v not in {'likely', 'unlikely'}]
 
 # The three views and which statuses they show
 VIEWS = {
@@ -143,7 +142,6 @@ def college_list(request):
         'table_fields': ALL_TABLE_FIELDS,
         'optional_fields': OPTIONAL_FIELDS,
         'optional_field_names': {f[0] for f in OPTIONAL_FIELDS},
-        'edit_status_choices': EDIT_STATUS_CHOICES,
         'sort': sort,
         'sort_dir': sort_dir,
         'status_filter': status_filter,
@@ -219,7 +217,7 @@ def college_edit_cell(request, pk, field):
         value = request.POST.get('value', '')
         setattr(college, field, value)
         college.save()
-        ctx = {'college': college, 'table_fields': ALL_TABLE_FIELDS, 'optional_field_names': {f[0] for f in OPTIONAL_FIELDS}, 'edit_status_choices': EDIT_STATUS_CHOICES}
+        ctx = {'college': college, 'table_fields': ALL_TABLE_FIELDS, 'optional_field_names': {f[0] for f in OPTIONAL_FIELDS}}
         if field == 'apply_status':
             applicant = get_applicant(request)
             ctx['platform_tracker'] = _build_platform_tracker(applicant)
@@ -257,7 +255,6 @@ def college_add_row(request):
         'college': college,
         'table_fields': ALL_TABLE_FIELDS,
         'optional_field_names': {f[0] for f in OPTIONAL_FIELDS},
-        'edit_status_choices': EDIT_STATUS_CHOICES,
     })
 
 

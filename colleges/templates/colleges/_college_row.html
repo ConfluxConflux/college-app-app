@@ -2,77 +2,20 @@
 <tr id="college-row-{{ college.pk }}" class="status-{{ college.apply_status }}" data-pk="{{ college.pk }}">
   {% for field_name, field_label in table_fields %}
   <td class="col-{{ field_name }}"
-      style="{% if field_name in optional_field_names %}display:none;{% endif %}">
-
+      hx-get="{% url 'colleges:edit_cell' college.pk field_name %}"
+      hx-target="#college-row-{{ college.pk }}"
+      hx-swap="outerHTML"
+      style="cursor:pointer;{% if field_name in optional_field_names %} display:none;{% endif %}"
+      title="Click to edit {{ field_label }}">
     {% if field_name == 'name' %}
-      <div x-data="{ e: false, v: '{{ college.name|escapejs }}' }"
-           @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
-        <strong x-show="!e" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||'—'"></strong>
-        <div x-show="e" @click.stop>
-          <input x-ref="i" class="input is-small" type="text" name="value" x-model="v"
-                 hx-post="{% url 'colleges:edit_cell' college.pk 'name' %}"
-                 hx-trigger="blur" hx-swap="none"
-                 @blur="e=false">
-        </div>
-      </div>
-
+      <strong>{{ college.name }}</strong>
     {% elif field_name == 'apply_status' %}
-      <div x-data="{ cornellWarning: false }">
-        {% if 'cornell college' in college.name|lower %}
-        <div x-show="cornellWarning" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:1000;display:flex;align-items:center;justify-content:center;">
-          <div style="background:white;border-radius:8px;padding:1.5rem 2rem;max-width:480px;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
-            <p class="has-text-weight-bold mb-3">Did you mean to select Cornell University instead?</p>
-            <p style="font-size:0.92rem;line-height:1.6;">Cornell College seems to be a perfectly fine school; it's in Iowa and you only take one course at a time; but it gets lots of applicants who think they're applying to Cornell University — the famous Ivy League school.</p>
-            <div class="mt-4" style="display:flex;gap:0.75rem;">
-              <button type="button" class="button is-light" @click="cornellWarning = false">No, I meant Cornell College</button>
-              <button type="button" class="button is-warning" @click="cornellWarning = false">Got it, thanks</button>
-            </div>
-          </div>
-        </div>
-        {% endif %}
-        <div class="select is-small">
-          <select name="value"
-                  hx-post="{% url 'colleges:edit_cell' college.pk 'apply_status' %}"
-                  hx-trigger="change"
-                  hx-target="#college-row-{{ college.pk }}"
-                  hx-swap="outerHTML"
-                  @change="{% if 'cornell college' in college.name|lower %}if(['applying','likely','considering','applied','accepted','enrolled'].includes($event.target.value)){ cornellWarning = true; }{% endif %}">
-            <option value="">—</option>
-            {% for val, label in edit_status_choices %}
-            <option value="{{ val }}" {% if val == college.apply_status %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-
+      <span class="tag {{ college.status_color }} is-light">{{ college.get_apply_status_display|default:"—" }}</span>
     {% elif field_name == 'applicant_notes' %}
-      <div x-data="{ e: false, v: '{{ college.applicant_notes|escapejs }}' }"
-           @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
-        <span x-show="!e" style="cursor:pointer; display:block; min-height:1.2em; font-size:0.85rem"
-              x-text="v ? (v.split(' ').length > 12 ? v.split(' ').slice(0,12).join(' ')+'…' : v) : '—'"></span>
-        <div x-show="e" @click.stop>
-          <input x-ref="i" class="input is-small" type="text" name="value" x-model="v"
-                 hx-post="{% url 'colleges:edit_cell' college.pk 'applicant_notes' %}"
-                 hx-trigger="blur" hx-swap="none"
-                 @blur="e=false">
-        </div>
-      </div>
-
+      {{ college.applicant_notes|truncatewords:12 }}
     {% else %}
-      {% with val=college|getfield:field_name %}
-      <div x-data="{ e: false, v: '{% if val %}{{ val|escapejs }}{% endif %}' }"
-           @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
-        <span x-show="!e" style="cursor:pointer; display:block; min-height:1.2em; font-size:0.85rem" x-text="v||'—'"></span>
-        <div x-show="e" @click.stop>
-          <input x-ref="i" class="input is-small" type="text" name="value" x-model="v"
-                 hx-post="{% url 'colleges:edit_cell' college.pk field_name %}"
-                 hx-trigger="blur" hx-swap="none"
-                 @blur="e=false">
-        </div>
-      </div>
-      {% endwith %}
+      {% with val=college|getfield:field_name %}{{ val|default:"" }}{% endwith %}
     {% endif %}
-
   </td>
   {% endfor %}
 </tr>
