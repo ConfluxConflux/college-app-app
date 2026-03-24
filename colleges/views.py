@@ -207,6 +207,22 @@ def college_edit_cell(request, pk, field):
     })
 
 
+@require_POST
+def college_add_row(request):
+    applicant = get_applicant(request)
+    college = College.objects.create(
+        applicant=applicant,
+        name='',
+        apply_status='not_applying',
+        order=College.objects.filter(applicant=applicant).count(),
+    )
+    return render(request, 'colleges/_college_row.html', {
+        'college': college,
+        'table_fields': ALL_TABLE_FIELDS,
+        'optional_field_names': {f[0] for f in OPTIONAL_FIELDS},
+    })
+
+
 def college_add(request):
     if request.method == 'POST':
         form = CollegeForm(request.POST)
