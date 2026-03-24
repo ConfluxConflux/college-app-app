@@ -1,5 +1,5 @@
 {% load college_tags %}
-<tr id="college-row-{{ college.pk }}" class="status-{{ college.apply_status }}">
+<tr id="college-row-{{ college.pk }}" class="status-{{ college.apply_status }}" data-pk="{{ college.pk }}">
   {% for field_name, field_label in table_fields %}
   <td class="col-{{ field_name }}"
       hx-get="{% url 'colleges:edit_cell' college.pk field_name %}"

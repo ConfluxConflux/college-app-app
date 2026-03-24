@@ -59,7 +59,7 @@
   </div>
 </div>
 
-<div id="college-table-wrapper">
+<div id="college-table-wrapper" data-view="{{ current_view }}">
   {% include "colleges/_college_table.html" %}
 </div>
 {% endblock %}
@@ -99,6 +99,12 @@
     });
   }
 
+  (function() {
+    var style = document.createElement('style');
+    style.textContent = '#college-table-wrapper[data-view="applications"] tr[data-pk] { cursor:pointer; } #college-table-wrapper[data-view="applications"] tr[data-pk]:hover { background:#f0f8f7 !important; }';
+    document.head.appendChild(style);
+  })();
+
   document.addEventListener('DOMContentLoaded', function() {
     applyVisibility();
 
@@ -128,12 +134,23 @@
       document.getElementById('search-bar').style.display = view === 'all' ? '' : 'none';
       if (view !== 'all') document.getElementById('college-search').value = '';
       document.getElementById('view-hidden').value = view;
+      document.getElementById('college-table-wrapper').dataset.view = view;
 
       htmx.ajax('GET', '{% url "colleges:list" %}?view=' + view, {
         target: '#college-table-wrapper',
         swap: 'innerHTML'
       });
     });
+  });
+
+  // Click row in "Your List" view → Applications tab for that college
+  document.getElementById('college-table-wrapper').addEventListener('click', function(e) {
+    if (document.getElementById('view-hidden').value !== 'applications') return;
+    var tr = e.target.closest('tr[data-pk]');
+    if (!tr) return;
+    // Don't navigate if clicking on an interactive element
+    if (e.target.closest('input, select, button, a, textarea')) return;
+    window.location.href = '{% url "colleges:applications" %}?college=' + tr.dataset.pk;
   });
 
   // Re-apply visibility after any HTMX update to the table
