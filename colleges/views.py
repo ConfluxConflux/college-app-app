@@ -137,13 +137,14 @@ def college_list(request):
         return any(keyword.lower() in (p or '').lower() for p in active_platforms)
 
     platform_tracker = [
-        {'label': 'Common App',     'active': _needs('common'),     'supported': True},
-        {'label': 'UC App',         'active': _needs('uc'),         'supported': True},
-        {'label': 'MIT App',        'active': _needs('mit'),        'supported': True},
-        {'label': 'Georgetown App', 'active': _needs('georgetown'), 'supported': False},
-        {'label': 'UCAS',           'active': _needs('ucas'),       'supported': False},
-        {'label': 'CSU App',        'active': _needs('csu'),        'supported': False},
-        {'label': 'Canadian',       'active': _needs('canada'),     'supported': False},
+        {'label': 'Common App', 'active': _needs('common'),     'supported': True},
+        {'label': 'UC App',     'active': _needs('uc'),         'supported': True},
+        {'label': 'MIT App',    'active': _needs('mit'),        'supported': True},
+        {'label': 'CSU App',    'active': _needs('csu'),        'supported': False},
+        {'label': 'UCAS',       'active': _needs('ucas'),       'supported': False},
+        {'label': 'Canadian',   'active': _needs('canada'),     'supported': False},
+        {'label': 'Georgetown', 'active': _needs('georgetown'), 'supported': False},
+        {'label': 'Minerva',    'active': _needs('minerva'),    'supported': False},
     ]
 
     # Status choices for the filter dropdown — limit to current view's statuses, exclude hidden statuses
