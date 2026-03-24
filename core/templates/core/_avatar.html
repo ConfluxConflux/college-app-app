@@ -1,13 +1,19 @@
+{% load static %}
 {# Usage: {% include "core/_avatar.html" with size=32 %} — size in px #}
-{% with initial=applicant.first_name|slice:":1"|upper %}
+{% if applicant.profile_picture %}
+<img src="{% static applicant.profile_picture %}"
+     alt="{{ applicant.first_name }}"
+     style="width:{{ size }}px;height:{{ size }}px;border-radius:50%;object-fit:cover;display:block;flex-shrink:0;">
+{% else %}
 <svg width="{{ size }}" height="{{ size }}" viewBox="0 0 {{ size }} {{ size }}" xmlns="http://www.w3.org/2000/svg"
-     style="border-radius:50%;flex-shrink:0;display:block;">
-  <circle cx="{{ size|floatformat:0 }}" cy="{{ size|floatformat:0 }}" r="{{ size|floatformat:0 }}" fill="#5bc8b8"/>
+     style="display:block;flex-shrink:0;">
+  <circle cx="{% widthratio size 2 1 %}" cy="{% widthratio size 2 1 %}" r="{% widthratio size 2 1 %}" fill="#5bc8b8"/>
   <text x="50%" y="50%"
         dominant-baseline="central"
         text-anchor="middle"
-        font-family="'Libre Baskerville', Georgia, serif"
+        font-family="'Open Sans', sans-serif"
+        font-weight="600"
         font-size="{% widthratio size 2 1 %}"
-        fill="white">{{ initial }}</text>
+        fill="white">{{ applicant.first_name|slice:":1"|upper }}</text>
 </svg>
-{% endwith %}
+{% endif %}
