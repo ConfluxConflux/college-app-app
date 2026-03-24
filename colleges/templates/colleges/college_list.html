@@ -148,8 +148,9 @@
     if (document.getElementById('view-hidden').value !== 'applications') return;
     var tr = e.target.closest('tr[data-pk]');
     if (!tr) return;
-    // Don't navigate if clicking on an interactive element
-    if (e.target.closest('input, select, button, a, textarea')) return;
+    // Don't navigate if clicking on an interactive element (but intercept anchors)
+    if (e.target.closest('input, select, button, textarea')) return;
+    e.preventDefault();
     window.location.href = '{% url "colleges:applications" %}?college=' + tr.dataset.pk;
   });
 
