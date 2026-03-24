@@ -2,6 +2,10 @@
 
 {% block title %}Essays — College App App{% endblock %}
 
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+{% endblock %}
+
 {% block content %}
 
 <div class="is-flex is-align-items-baseline" style="gap:1rem; margin-bottom:1.5rem;">
@@ -235,6 +239,7 @@
           <select class="essay-status-pill"
                   :class="s || 'blank'"
                   x-model="s"
+                  @change="if($event.target.value === 'done') confetti({ particleCount: 180, spread: 80, origin: { y: 0.6 } })"
                   hx-post="{% url 'supplements:essay_status' essay.pk %}"
                   hx-trigger="change"
                   hx-swap="none"
