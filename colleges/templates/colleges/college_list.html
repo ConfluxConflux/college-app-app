@@ -7,6 +7,14 @@
 
 <h1 class="title">College List</h1>
 
+{% if current_view == 'applications' %}
+<div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem;">
+  {% for p in platform_tracker %}
+  <span style="padding:0.3rem 0.85rem; border-radius:999px; font-size:0.82rem; font-weight:600; font-family:'Open Sans',sans-serif; {% if p.active %}background:#2a9d8f; color:#fff;{% else %}background:#e8e8e8; color:#aaa;{% endif %}">{{ p.label }}</span>
+  {% endfor %}
+</div>
+{% endif %}
+
 <!-- View tabs -->
 <div class="buttons has-addons mb-3" id="view-tabs">
   <button class="button {% if current_view == 'applications' %}is-dark is-selected{% endif %}"
