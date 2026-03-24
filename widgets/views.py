@@ -30,6 +30,16 @@ def resources(request):
             'url': 'https://vincerubinetti.bandcamp.com/album/the-music-of-3blue1brown',
             'source': 'vincerubinetti.bandcamp.com',
         },
+        {
+            'title': "MIT Admissions Blog",
+            'url': 'https://mitadmissions.org/blogs/',
+            'source': 'mitadmissions.org',
+        },
+        {
+            'title': "Admissions Matters (supposedly comprehensive book that I've never read)",
+            'url': 'https://www.amazon.com/Admission-Matters-Students-Parents-Getting/dp/1119885736/',
+            'source': 'amazon.com',
+        },
     ]
     return render(request, 'widgets/resources.html', {'links': links})
 
