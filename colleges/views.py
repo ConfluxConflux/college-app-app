@@ -328,6 +328,23 @@ def applications(request):
         except (College.DoesNotExist, ValueError):
             pass
 
+    # Platform tracker — which platforms are needed for active colleges
+    ACTIVE_STATUSES = {'applying', 'considering', 'applied', 'deferred', 'waitlisted', 'accepted', 'enrolled'}
+    active_platforms = set(
+        College.objects.filter(applicant=applicant, apply_status__in=ACTIVE_STATUSES)
+        .values_list('app_platform', flat=True)
+    )
+    def _needs(keyword):
+        return any(keyword.lower() in (p or '').lower() for p in active_platforms)
+
+    platform_tracker = [
+        {'label': 'Common App',      'active': _needs('common')},
+        {'label': 'UC App',          'active': _needs('uc')},
+        {'label': 'MIT App',         'active': _needs('mit')},
+        {'label': 'Georgetown App',  'active': _needs('georgetown')},
+        {'label': 'UCAS',            'active': _needs('ucas')},
+    ]
+
     # Status choices for the status badge dropdown
     status_choices = [
         ('applying', 'Applying'),
@@ -446,6 +463,7 @@ def applications(request):
         'colleges': colleges,
         'selected': selected,
         'status_choices': status_choices,
+        'platform_tracker': platform_tracker,
         # essays
         'essays': essays,
         'essay_status_choices': SupplementEssay.STATUS_CHOICES,

@@ -4,7 +4,25 @@
 
 {% block content %}
 
-<p class="has-text-danger has-text-weight-bold" style="margin-bottom: 1.5rem;">BASICALLY FULLY DESIGNED BY CLAUDE, VERY WIP</p>
+<p class="has-text-danger has-text-weight-bold" style="margin-bottom: 1rem;">BASICALLY FULLY DESIGNED BY CLAUDE, VERY WIP</p>
+
+{# ── Platform tracker ── #}
+<div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.5rem;">
+  {% for p in platform_tracker %}
+  <span style="
+    padding:0.3rem 0.85rem;
+    border-radius:999px;
+    font-size:0.82rem;
+    font-weight:600;
+    font-family:'Open Sans',sans-serif;
+    {% if p.active %}
+      background:#2a9d8f; color:#fff;
+    {% else %}
+      background:#e8e8e8; color:#aaa;
+    {% endif %}
+  ">{{ p.label }}</span>
+  {% endfor %}
+</div>
 
 {# ── Header: college selector + status badge ── #}
 <div style="display:flex; align-items:baseline; gap:0.75em; margin-bottom:1rem;">
