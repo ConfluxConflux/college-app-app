@@ -1,32 +1,18 @@
-<div class="table-container" style="overflow: visible; overflow-y: visible;">
+<div class="table-container">
   <table class="table is-bordered is-hoverable is-fullwidth is-narrow">
     <thead>
       <tr>
         {% for field_name, field_label in table_fields %}
-        <th class="col-{{ field_name }}" style="white-space: nowrap; position: relative; overflow: visible; padding-right: 22px;">
-          <div style="display: flex; align-items: center; gap: 4px;">
-            <a hx-get="{% url 'colleges:list' %}?view={{ current_view }}&sort={{ field_name }}&dir={% if sort == field_name and sort_dir == 'asc' %}desc{% else %}asc{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search %}&q={{ search }}{% endif %}"
-               hx-target="#college-table-wrapper"
-               hx-push-url="true"
-               class="has-text-dark"
-               style="text-decoration: none;">
-              {{ field_label }}
-              {% if sort == field_name %}
-                {% if sort_dir == 'asc' %}&#9650;{% else %}&#9660;{% endif %}
-              {% endif %}
-            </a>
-            {% if field_name != 'name' and field_name != 'apply_status' and field_name != 'applicant_notes' %}
-            <button class="delete is-small"
-                    @click.stop="removeCol('{{ field_name }}')"
-                    title="Remove column"
-                    style="width: 14px; height: 14px; min-height: 14px; flex-shrink: 0;"></button>
-            {% endif %}
-          </div>
-          <button class="col-add-btn"
-                  @click.stop="openMenu($event, '{{ field_name }}')"
-                  x-show="available.length > 0"
-                  title="Add column"
-                  style="position: absolute; right: -9px; top: 50%; transform: translateY(-50%); z-index: 5;">+</button>
+        <th class="col-{{ field_name }}"
+            style="white-space:nowrap;{% if field_name in optional_field_names %} display:none;{% endif %}">
+          <a hx-get="{% url 'colleges:list' %}?view={{ current_view }}&sort={{ field_name }}&dir={% if sort == field_name and sort_dir == 'asc' %}desc{% else %}asc{% endif %}{% if search %}&q={{ search }}{% endif %}"
+             hx-target="#college-table-wrapper"
+             hx-push-url="true"
+             class="has-text-dark"
+             style="text-decoration:none;">
+            {{ field_label }}
+            {% if sort == field_name %}{% if sort_dir == 'asc' %}&#9650;{% else %}&#9660;{% endif %}{% endif %}
+          </a>
         </th>
         {% endfor %}
       </tr>

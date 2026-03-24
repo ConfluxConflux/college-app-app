@@ -1,54 +1,10 @@
 {% extends "base.html" %}
-{% load static %}
 
 {% block title %}Colleges - College App App{% endblock %}
 
-{% block extra_head %}
-<link href="https://unpkg.com/tabulator-tables@6.2.1/dist/css/tabulator_bulma.min.css" rel="stylesheet">
-<style>
-  .tabulator {
-    font-size: 15px;
-    font-family: 'Open Sans', sans-serif;
-  }
-  .tabulator .tabulator-cell {
-    padding: 8px 10px;
-  }
-  .tabulator .tabulator-col-title {
-    font-weight: 600;
-  }
-  .tabulator-row.tabulator-row-even {
-    background-color: #fafafa;
-  }
-  .tabulator .tabulator-cell.tabulator-editing input,
-  .tabulator .tabulator-cell.tabulator-editing select {
-    font-size: 15px;
-    padding: 2px 6px;
-  }
-  /* Status badge colors */
-  .status-badge {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 13px;
-    font-weight: 600;
-    white-space: nowrap;
-  }
-  .status-applying    { background: #d4edda; color: #155724; }
-  .status-likely      { background: #cce5ff; color: #004085; }
-  .status-considering { background: #fff3cd; color: #856404; }
-  .status-unlikely    { background: #f8d7da; color: #721c24; }
-  .status-not_applying{ background: #e2e3e5; color: #383d41; }
-  .status-applied     { background: #cce5ff; color: #004085; }
-  .status-accepted    { background: #d4edda; color: #155724; }
-  .status-deferred    { background: #fff3cd; color: #856404; }
-  .status-waitlisted  { background: #fff3cd; color: #856404; }
-  .status-rejected    { background: #f8d7da; color: #721c24; }
-  .status-enrolled    { background: #d4edda; color: #155724; }
-</style>
-{% endblock %}
-
 {% block content %}
-<p class="has-text-weight-bold" style="margin-bottom: 1rem; color: #b45309;">this used to be better. I tried to migrate to a spreadsheet package and it got all messed up</p>
+<p class="has-text-weight-bold" style="margin-bottom:1rem; color:#b45309;">this used to be better. I tried to migrate to a spreadsheet package and it got all messed up</p>
+
 <div class="level">
   <div class="level-left">
     <div class="level-item">
@@ -73,267 +29,125 @@
 </div>
 
 <!-- Search (shown only for All Colleges) -->
-<div id="search-bar" class="mb-3" style="{% if current_view != 'all' %}display:none{% endif %}">
-  <div class="field" style="max-width: 320px;">
+<div id="search-bar" class="mb-3"{% if current_view != 'all' %} style="display:none"{% endif %}>
+  <input type="hidden" id="view-hidden" name="view" value="{{ current_view }}">
+  <div class="field" style="max-width:320px;">
     <div class="control">
-      <input class="input" type="text" id="college-search" placeholder="Search colleges...">
+      <input class="input" type="text" id="college-search" name="q"
+             value="{{ search }}" placeholder="Search colleges..."
+             hx-get="{% url 'colleges:list' %}"
+             hx-trigger="keyup changed delay:300ms"
+             hx-target="#college-table-wrapper"
+             hx-include="#view-hidden"
+             hx-swap="innerHTML">
     </div>
   </div>
 </div>
 
 <!-- Column toggle -->
-<div class="mb-3">
-  <div class="dropdown" id="col-toggle-dropdown" x-data="{ open: false }" @click.outside="open = false" :class="{ 'is-active': open }">
+<div class="mb-3" x-data="{ open: false }" @click.outside="open = false">
+  <div class="dropdown" :class="{ 'is-active': open }">
     <div class="dropdown-trigger">
-      <button class="button is-small" @click="open = !open; if (open && window._buildColToggle) window._buildColToggle()" aria-haspopup="true">
-        <span>Columns</span>
-        <span class="icon is-small"><i>&#9660;</i></span>
+      <button class="button is-small" @click="open = !open" aria-haspopup="true">
+        <span>Columns &#9660;</span>
       </button>
     </div>
-    <div class="dropdown-menu" style="min-width: 200px; z-index: 100;">
-      <div class="dropdown-content" id="col-toggle-list">
-        <!-- Populated by JS -->
+    <div class="dropdown-menu" style="min-width:180px; z-index:100;">
+      <div class="dropdown-content">
+        {% for field, label in optional_fields %}
+        <a class="dropdown-item col-toggle-item" data-field="{{ field }}"
+           style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+          <span class="col-check" style="width:14px; display:inline-block;"></span>
+          <span>{{ label }}</span>
+        </a>
+        {% endfor %}
       </div>
     </div>
   </div>
 </div>
 
-<div id="college-grid"></div>
+<div id="college-table-wrapper">
+  {% include "colleges/_college_table.html" %}
+</div>
+{% endblock %}
 
-<script src="https://unpkg.com/tabulator-tables@6.2.1/dist/js/tabulator.min.js"></script>
+{% block extra_js %}
 <script>
 (function() {
-  var STATUS_LABELS = {
-    'applying':    'Applying',
-    'considering': 'Considering',
-    'not_applying':'Not Applying',
-    'applied':     'Submitted',
-    'deferred':    'Deferred',
-    'waitlisted':  'Waitlisted',
-    'accepted':    'Accepted',
-    'rejected':    'Rejected',
-    'enrolled':    'Enrolled',
-    'withdrawn':   'Withdrawn',
-  };
+  var STORAGE_KEY = 'college-list-cols';
 
-  var STATUS_OPTIONS = Object.entries(STATUS_LABELS).map(function(e) {
-    return { label: e[1], value: e[0] };
-  });
-
-  // Badge: more saturated colors with text color for the pill inside the Status cell
-  var BADGE_STYLES = {
-    'applying':    { bg: '#b8d8fc', color: '#222' },
-    'likely':      { bg: '#cce4fd', color: '#222' },
-    'considering': { bg: '#b8b0e8', color: '#222' },
-    'unlikely':    { bg: '#e8b8b8', color: '#222' },
-    'not_applying':{ bg: '#c8c8c8', color: '#222' },
-    'applied':     { bg: '#43A047', color: '#fff' },
-    'accepted':    { bg: '#a0d8a0', color: '#222' },
-    'deferred':    { bg: '#f5d080', color: '#222' },
-    'waitlisted':  { bg: '#f5c890', color: '#222' },
-    'rejected':    { bg: '#f0a0a0', color: '#222' },
-    'enrolled':    { bg: '#90ccd8', color: '#222' },
-    'withdrawn':   { bg: '#c8b0a0', color: '#222' },
-  };
-
-  var OPTIONAL_FIELDS = [
-    'tier', 'acceptance_rate', 'collegevine_chance', 'sat_avg',
-    'undergrad_enrollment', 'location', 'app_platform', 'terms',
-    'ea_deadline', 'ed1_deadline', 'ed2_deadline', 'rd_deadline',
-    'intended_major', 'parent_notes'
-  ];
-
-  var COLUMN_DEFS = [
-    {
-      title: 'College', field: 'name', frozen: true, minWidth: 180, widthGrow: 2,
-      editor: 'input',
-      formatter: function(cell) {
-        var val = cell.getValue();
-        var id = cell.getRow().getData().id;
-        return '<a href="/colleges/' + id + '/" style="color:inherit;text-decoration:none;font-weight:600;">' + (val || '') + '</a>';
-      },
-      formatterParams: { target: '_blank' },
-    },
-    {
-      title: 'Status', field: 'apply_status', minWidth: 130,
-      editor: 'list',
-      editorParams: { values: STATUS_OPTIONS },
-      formatter: function(cell) {
-        var val = cell.getValue();
-        var label = STATUS_LABELS[val] || val;
-        var s = BADGE_STYLES[val] || { bg: '#999', color: '#fff' };
-        return '<span style="display:inline-block;padding:0.2em 0.75em;border-radius:999px;font-size:0.82em;font-weight:600;background:' + s.bg + ';color:' + s.color + ';">' + label + '</span>';
-      },
-    },
-    {
-      title: 'Notes', field: 'applicant_notes', minWidth: 200, widthGrow: 3,
-      editor: 'textarea',
-      formatter: 'textarea',
-    },
-    // Optional columns (hidden by default)
-    { title: 'Tier',        field: 'tier',                 minWidth: 80,  editor: 'input', visible: false },
-    { title: 'Acc. Rate',   field: 'acceptance_rate',      minWidth: 100, editor: 'input', visible: false },
-    { title: 'CV Chance',   field: 'collegevine_chance',   minWidth: 100, editor: 'input', visible: false },
-    { title: 'SAT Avg',     field: 'sat_avg',              minWidth: 90,  editor: 'input', visible: false },
-    { title: 'Enrollment',  field: 'undergrad_enrollment', minWidth: 110, editor: 'input', visible: false },
-    { title: 'Location',    field: 'location',             minWidth: 150, editor: 'input', visible: false },
-    { title: 'Platform',    field: 'app_platform',         minWidth: 120, editor: 'input', visible: false },
-    { title: 'Terms',       field: 'terms',                minWidth: 90,  editor: 'input', visible: false },
-    { title: 'EA',          field: 'ea_deadline',          minWidth: 100, editor: 'input', visible: false },
-    { title: 'ED I',        field: 'ed1_deadline',         minWidth: 100, editor: 'input', visible: false },
-    { title: 'ED II',       field: 'ed2_deadline',         minWidth: 100, editor: 'input', visible: false },
-    { title: 'RD',          field: 'rd_deadline',          minWidth: 100, editor: 'input', visible: false },
-    { title: 'Major',       field: 'intended_major',       minWidth: 130, editor: 'input', visible: false },
-    { title: 'Parent Notes',field: 'parent_notes',         minWidth: 180, widthGrow: 2, editor: 'textarea', formatter: 'textarea', visible: false },
-  ];
-
-  var currentView = '{{ current_view }}';
-  var searchTimeout = null;
-  var searchVal = '';
-
-  function jsonUrl() {
-    return '/colleges/json/?view=' + currentView + (searchVal ? '&q=' + encodeURIComponent(searchVal) : '');
+  function getSaved() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) { return {}; }
   }
 
-  var table = new Tabulator('#college-grid', {
-    ajaxURL: jsonUrl(),
-    layout: 'fitDataStretch',
-    columns: COLUMN_DEFS,
-    movableColumns: true,
-    resizableColumns: true,
-    height: 'calc(100vh - 340px)',
-    placeholder: 'No colleges match your filters.',
-    cellEdited: function(cell) {
-      var row = cell.getRow().getData();
-      var field = cell.getField();
-      var value = cell.getValue();
-      fetch('/colleges/' + row.id + '/update/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': '{{ csrf_token }}',
-        },
-        body: JSON.stringify({ field: field, value: value }),
-      }).then(function(r) {
-        if (!r.ok) {
-          alert('Save failed. Please reload.');
-          cell.restoreOldValue();
-        } else if (field === 'apply_status') {
-          // Re-fetch so view filter and sort order reflect the new status
-          table.replaceData(jsonUrl());
+  function save(state) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+  }
+
+  // Show/hide columns and update checkmarks
+  function applyVisibility() {
+    var saved = getSaved();
+    document.querySelectorAll('.col-toggle-item').forEach(function(item) {
+      var field = item.dataset.field;
+      item.querySelector('.col-check').textContent = saved[field] ? '✓' : '';
+    });
+    document.querySelectorAll('[class*="col-"]').forEach(function(el) {
+      var match = el.className.match(/(?:^| )col-([\w]+)/);
+      if (!match) return;
+      var field = match[1];
+      // Only manage optional columns
+      if (el.closest('#college-table-wrapper') && el.classList.contains('col-' + field)) {
+        // Check if this is an optional field by seeing if there's a toggle item for it
+        var isOptional = !!document.querySelector('.col-toggle-item[data-field="' + field + '"]');
+        if (isOptional) {
+          el.style.display = saved[field] ? '' : 'none';
         }
-      });
-    },
-  });
-
-  // ── Manual column visibility persistence (replaces Tabulator's built-in, which conflicts) ──
-  var COL_STORAGE_KEY = 'college-list-cols';
-
-  function loadSavedColVisibility() {
-    var saved;
-    try { saved = JSON.parse(localStorage.getItem(COL_STORAGE_KEY) || '{}'); } catch(e) { saved = {}; }
-    OPTIONAL_FIELDS.forEach(function(field) {
-      var col = table.getColumn(field);
-      if (!col) return;
-      if (saved[field] === true) {
-        table.showColumn(field);
-      } else {
-        table.hideColumn(field);
       }
     });
   }
 
-  function saveColVisibility() {
-    var state = {};
-    OPTIONAL_FIELDS.forEach(function(field) {
-      var col = table.getColumn(field);
-      if (col) state[field] = col.isVisible();
+  document.addEventListener('DOMContentLoaded', function() {
+    applyVisibility();
+
+    // Column toggle clicks
+    document.querySelector('.dropdown-content').addEventListener('click', function(e) {
+      var item = e.target.closest('.col-toggle-item');
+      if (!item) return;
+      e.stopPropagation();
+      var field = item.dataset.field;
+      var state = getSaved();
+      state[field] = !state[field];
+      save(state);
+      applyVisibility();
     });
-    try { localStorage.setItem(COL_STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
-  }
 
-  table.on('tableBuilt', function() {
-    loadSavedColVisibility();
-    buildColToggle();
-  });
+    // View tab switching
+    document.getElementById('view-tabs').addEventListener('click', function(e) {
+      var btn = e.target.closest('[data-view]');
+      if (!btn) return;
+      var view = btn.dataset.view;
 
-  // Expose so Alpine can call it when opening the dropdown
-  window._buildColToggle = buildColToggle;
-
-  function buildColToggle() {
-    var list = document.getElementById('col-toggle-list');
-    list.innerHTML = '';
-    OPTIONAL_FIELDS.forEach(function(field) {
-      var col = table.getColumn(field);
-      if (!col) return;
-      var visible = col.isVisible();
-      var label = col.getDefinition().title;
-
-      var a = document.createElement('a');
-      a.className = 'dropdown-item';
-      a.style.display = 'flex';
-      a.style.alignItems = 'center';
-      a.style.gap = '8px';
-      a.style.cursor = 'pointer';
-
-      var check = document.createElement('span');
-      check.style.width = '14px';
-      check.style.display = 'inline-block';
-      check.textContent = visible ? '✓' : '';
-
-      var lbl = document.createElement('span');
-      lbl.textContent = label;
-
-      a.appendChild(check);
-      a.appendChild(lbl);
-
-      a.addEventListener('click', function(e) {
-        e.stopPropagation();
-        var freshCol = table.getColumn(field);
-        if (!freshCol) return;
-        if (freshCol.isVisible()) {
-          table.hideColumn(field);
-          check.textContent = '';
-        } else {
-          table.showColumn(field);
-          check.textContent = '✓';
-        }
-        saveColVisibility();
+      document.querySelectorAll('#view-tabs button').forEach(function(b) {
+        b.classList.remove('is-dark', 'is-selected');
       });
+      btn.classList.add('is-dark', 'is-selected');
 
-      list.appendChild(a);
+      document.getElementById('search-bar').style.display = view === 'all' ? '' : 'none';
+      if (view !== 'all') document.getElementById('college-search').value = '';
+      document.getElementById('view-hidden').value = view;
+
+      htmx.ajax('GET', '{% url "colleges:list" %}?view=' + view, {
+        target: '#college-table-wrapper',
+        swap: 'innerHTML'
+      });
     });
-  }
-
-  // View tab switching
-  document.getElementById('view-tabs').addEventListener('click', function(e) {
-    var btn = e.target.closest('[data-view]');
-    if (!btn) return;
-    currentView = btn.dataset.view;
-
-    document.querySelectorAll('#view-tabs button').forEach(function(b) {
-      b.classList.remove('is-dark', 'is-selected');
-    });
-    btn.classList.add('is-dark', 'is-selected');
-
-    // Show/hide search
-    document.getElementById('search-bar').style.display = currentView === 'all' ? '' : 'none';
-    if (currentView !== 'all') {
-      searchVal = '';
-      document.getElementById('college-search').value = '';
-    }
-
-    table.setData(jsonUrl());
   });
 
-  // Search
-  document.getElementById('college-search').addEventListener('input', function(e) {
-    clearTimeout(searchTimeout);
-    var val = e.target.value;
-    searchTimeout = setTimeout(function() {
-      searchVal = val;
-      table.setData(jsonUrl());
-    }, 300);
+  // Re-apply visibility after any HTMX update to the table
+  document.addEventListener('htmx:afterSettle', function(e) {
+    if (e.target.id === 'college-table-wrapper' || e.target.closest('#college-table-wrapper')) {
+      applyVisibility();
+    }
   });
 })();
 </script>

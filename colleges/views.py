@@ -137,6 +137,7 @@ def college_list(request):
         'colleges': colleges,
         'table_fields': ALL_TABLE_FIELDS,
         'optional_fields': OPTIONAL_FIELDS,
+        'optional_field_names': {f[0] for f in OPTIONAL_FIELDS},
         'sort': sort,
         'sort_dir': sort_dir,
         'status_filter': status_filter,
