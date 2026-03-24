@@ -14,7 +14,7 @@
 <!-- View tabs -->
 <div class="buttons has-addons mb-3" id="view-tabs">
   <button class="button {% if current_view == 'applications' %}is-dark is-selected{% endif %}"
-          data-view="applications">Your Applications</button>
+          data-view="applications">Your List</button>
   <button class="button {% if current_view == 'all' %}is-dark is-selected{% endif %}"
           data-view="all">All Colleges</button>
   <button class="button {% if current_view == 'submitted' %}is-dark is-selected{% endif %}"
@@ -27,7 +27,7 @@
   <div class="field" style="max-width:320px;">
     <div class="control">
       <input class="input" type="text" id="college-search" name="q"
-             value="{{ search }}" placeholder="Search colleges..."
+             value="{{ search }}" placeholder="Search for a college to add to your list..."
              hx-get="{% url 'colleges:list' %}"
              hx-trigger="keyup changed delay:300ms"
              hx-target="#college-table-wrapper"
