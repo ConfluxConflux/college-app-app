@@ -7,6 +7,7 @@ def seed_hedgie_wedgie(apps, schema_editor):
         first_name='Hedgie',
         last_name='Wedgie',
         email='hedgiewedgie@proofschool.org',
+        profile_picture='img/default_profile.png',
     )
 
 

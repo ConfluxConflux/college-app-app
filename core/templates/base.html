@@ -60,7 +60,7 @@
            href="{% url 'core:profile' %}"
            style="gap: 0.6rem;">
           {{ applicant.first_name }}
-          <img src="{% static applicant.profile_picture %}"
+          <img src="{% static applicant.profile_picture|default:'img/default_profile.png' %}"
                alt="Profile"
                style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
         </a>

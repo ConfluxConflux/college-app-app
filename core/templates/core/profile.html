@@ -7,7 +7,7 @@
 <h1 class="title">Profile</h1>
 
 <div style="display: flex; align-items: center; gap: 2rem; margin-top: 1.5rem;">
-  <img src="{% static applicant.profile_picture %}"
+  <img src="{% static applicant.profile_picture|default:'img/default_profile.png' %}"
        alt="Profile picture"
        style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
   <div>

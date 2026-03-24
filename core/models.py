@@ -8,7 +8,7 @@ class Applicant(models.Model):
     last_name = models.CharField(max_length=100)
     email = models.EmailField(blank=True)
     # Static file path (e.g. 'img/profile.jpeg') or external URL
-    profile_picture = models.CharField(max_length=300, blank=True)
+    profile_picture = models.CharField(max_length=300, blank=True, default='img/default_profile.png')
     brainstorm = models.TextField(blank=True)
 
     def __str__(self):
