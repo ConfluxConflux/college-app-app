@@ -258,14 +258,14 @@
 <div x-data="{ tab: '{{ tab }}' }">
   <div class="tabs is-boxed is-medium">
     <ul>
-      <li {% if tab == 'uc' %}class="is-active"{% endif %}>
-        <a href="{% url 'activities:home_uc' %}">UC <span class="tag is-rounded ml-1 {% if tab == 'uc' %}is-primary{% else %}is-light{% endif %}">{{ uc_count }}/20</span></a>
+      <li {% if tab == 'uc' %}class="is-active"{% endif %}{% if uc_platform_state == 'none' %} style="background:#f5f5f5;"{% endif %}>
+        <a href="{% url 'activities:home_uc' %}"{% if uc_platform_state == 'none' %} style="color:#aaa;"{% endif %}>UC <span class="tag is-rounded ml-1 {% if tab == 'uc' %}is-primary{% else %}is-light{% endif %}">{{ uc_count }}/20</span></a>
       </li>
-      <li {% if tab == 'common_app' %}class="is-active"{% endif %}>
-        <a href="{% url 'activities:home_common' %}">Common App <span class="tag is-rounded ml-1 {% if tab == 'common_app' %}is-primary{% else %}is-light{% endif %}">{{ ca_count }}/10 · {{ honor_count }}/5</span></a>
+      <li {% if tab == 'common_app' %}class="is-active"{% endif %}{% if common_platform_state == 'none' %} style="background:#f5f5f5;"{% endif %}>
+        <a href="{% url 'activities:home_common' %}"{% if common_platform_state == 'none' %} style="color:#aaa;"{% endif %}>Common App <span class="tag is-rounded ml-1 {% if tab == 'common_app' %}is-primary{% else %}is-light{% endif %}">{{ ca_count }}/10 · {{ honor_count }}/5</span></a>
       </li>
-      <li {% if tab == 'mit' %}class="is-active"{% endif %}>
-        <a href="{% url 'activities:home_mit' %}">MIT <span class="tag is-rounded ml-1 {% if tab == 'mit' %}is-primary{% else %}is-light{% endif %}">{{ mit_count }}</span></a>
+      <li {% if tab == 'mit' %}class="is-active"{% endif %}{% if mit_platform_state == 'none' %} style="background:#f5f5f5;"{% endif %}>
+        <a href="{% url 'activities:home_mit' %}"{% if mit_platform_state == 'none' %} style="color:#aaa;"{% endif %}>MIT <span class="tag is-rounded ml-1 {% if tab == 'mit' %}is-primary{% else %}is-light{% endif %}">{{ mit_count }}</span></a>
       </li>
       <li {% if tab == 'compare' %}class="is-active"{% endif %}>
         <a href="{% url 'activities:home_compare' %}">Compare</a>

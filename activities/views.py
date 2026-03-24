@@ -58,6 +58,22 @@ def estimator_redirect(request):
     return redirect('widgets:estimator')
 
 
+def _platform_state(applicant, keyword):
+    """Return 'applying', 'considering', or 'none' for a given platform keyword."""
+    from colleges.models import College
+    applying = {'applying', 'applied', 'deferred', 'waitlisted', 'accepted', 'enrolled'}
+    considering = {'considering'}
+    platforms = College.objects.filter(applicant=applicant).values_list('app_platform', flat=True)
+    applying_set = set(College.objects.filter(applicant=applicant, apply_status__in=applying).values_list('app_platform', flat=True))
+    considering_set = set(College.objects.filter(applicant=applicant, apply_status__in=considering).values_list('app_platform', flat=True))
+    kw = keyword.lower()
+    if any(kw in (p or '').lower() for p in applying_set):
+        return 'applying'
+    if any(kw in (p or '').lower() for p in considering_set):
+        return 'considering'
+    return 'none'
+
+
 def activities_home(request, tab='uc'):
     applicant = get_applicant(request)
     uc_entries_list = list(UCEntry.objects.filter(applicant=applicant).order_by('order').select_related('core_activity'))
@@ -103,6 +119,9 @@ def activities_home(request, tab='uc'):
         'orphaned_uc': [e for e in uc_entries_list if e.pk not in linked_uc_pks],
         'orphaned_ca': [e for e in ca_entries_list if e.pk not in linked_ca_pks],
         'orphaned_mit': [e for e in mit_entries_list if e.pk not in linked_mit_pks],
+        'uc_platform_state': _platform_state(applicant, 'uc'),
+        'common_platform_state': _platform_state(applicant, 'common'),
+        'mit_platform_state': _platform_state(applicant, 'mit'),
     }
     if request.headers.get('HX-Request'):
         return render(request, 'activities/_tab_content.html', context)
