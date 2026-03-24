@@ -64,15 +64,22 @@
 
 <!-- UC Activities & Awards -->
 <div x-show="tab === 'uc'">
-  <div class="level mb-3">
+  <div class="level mb-2">
     <div class="level-left">
       <h2 class="title is-4 mb-0">UC Activities & Awards</h2>
     </div>
-    <div class="level-right">
-      <a href="{% url 'activities:export_uc' %}" class="button is-light is-small mr-1">Export .txt</a>
+    <div class="level-right" style="display:flex; align-items:center; gap:0.5rem">
+      <div class="buttons has-addons mb-0">
+        <button class="button is-small is-info is-selected" data-uc-view="order" onclick="setUcView('order')">By Order</button>
+        <button class="button is-small is-light" data-uc-view="category" onclick="setUcView('category')">By Category</button>
+      </div>
+      <a href="{% url 'activities:export_uc' %}" class="button is-light is-small">Export .txt</a>
       <a href="{% url 'activities:export_uc_csv' %}" class="button is-light is-small">Export .csv</a>
     </div>
   </div>
+  <p id="uc-category-note" class="is-size-7 has-text-grey mb-3" style="display:none">
+    Viewing by category &middot; 20 slots total &middot; no per-category limits &middot; drag-and-drop unavailable in this view
+  </p>
   <div class="table-container">
     <table class="table is-bordered is-hoverable is-fullwidth is-narrow">
       <thead>

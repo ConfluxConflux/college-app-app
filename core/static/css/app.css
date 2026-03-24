@@ -135,6 +135,15 @@ body {
 .table tbody tr.uc-cat-volunteer       { background-color: #dcfce7 !important; }
 .table tbody tr.uc-cat-work            { background-color: #ffedd5 !important; }
 .table tbody tr.uc-cat-coursework      { background-color: #ede9fe !important; }
+.table tbody tr.uc-cat-edu_prep        { background-color: #bae6fd !important; }
+
+/* UC category-view section header rows */
+.uc-section-header td {
+  padding: 6px 10px !important;
+  font-size: 0.82rem !important;
+  border-top: 2px solid rgba(0,0,0,0.1) !important;
+  border-bottom: 1px solid rgba(0,0,0,0.07) !important;
+}
 
 /* UC placeholder (empty slot) rows */
 .table tbody tr.uc-placeholder { background-color: rgba(248,248,248,0.5) !important; }

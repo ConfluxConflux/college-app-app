@@ -1,4 +1,4 @@
-<tr id="uc-{{ entry.pk }}" data-pk="{{ entry.pk }}" class="uc-cat-{{ entry.category }}"
+<tr id="uc-{{ entry.pk }}" data-pk="{{ entry.pk }}" data-category="{{ entry.category }}" class="uc-cat-{{ entry.category }}"
     style="--bulma-table-cell-background-color:transparent;{% if entry.category == 'award' %}background-color:#fef9c3{% elif entry.category == 'extracurricular' %}background-color:#dbeafe{% elif entry.category == 'volunteer' %}background-color:#dcfce7{% elif entry.category == 'work' %}background-color:#ffedd5{% elif entry.category == 'coursework' %}background-color:#ede9fe{% endif %}">
   <td class="drag-handle" style="width:18px">⠿</td>
   <td class="has-text-grey is-size-7" style="width:28px">{{ slot_num|default:entry.order }}</td>

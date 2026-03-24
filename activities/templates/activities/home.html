@@ -12,6 +12,142 @@
     if (parts.length === 2) return parts.pop().split(';').shift();
   }
 
+  // ── UC category view toggle ──────────────────────────────────────────────
+  var ucSortable = null;
+  var ucViewMode = 'order';
+  var ucSavedOrder = [];
+
+  var UC_CATEGORY_ORDER = ['extracurricular', 'award', 'volunteer', 'work', 'edu_prep', 'coursework'];
+  var UC_CATEGORY_LABELS = {
+    extracurricular: 'Extracurricular Activities',
+    award:           'Awards & Honors',
+    volunteer:       'Volunteer / Community Service',
+    work:            'Work Experience',
+    edu_prep:        'Educational Preparation Programs',
+    coursework:      'Other Coursework',
+  };
+  var UC_CATEGORY_COLORS = {
+    extracurricular: '#dbeafe',
+    award:           '#fef9c3',
+    volunteer:       '#dcfce7',
+    work:            '#ffedd5',
+    edu_prep:        '#bae6fd',
+    coursework:      '#ede9fe',
+  };
+
+  function hideCategoryColumn(hide) {
+    var table = document.getElementById('uc-entries-tbody');
+    if (!table) return;
+    table = table.closest('table');
+    var d = hide ? 'none' : '';
+    table.querySelectorAll('thead th:nth-child(4)').forEach(function(el) { el.style.display = d; });
+    table.querySelectorAll('#uc-entries-tbody td:nth-child(4)').forEach(function(el) { el.style.display = d; });
+  }
+
+  function applyUcCategoryView(tbody) {
+    // Remove stale section headers
+    tbody.querySelectorAll('.uc-section-header').forEach(function(el) { el.remove(); });
+
+    // Collect all rows and their current DOM index (for within-group ordering)
+    var allRows = Array.from(tbody.querySelectorAll('tr'));
+    var entryRows = allRows
+      .map(function(r, i) { return { el: r, idx: i }; })
+      .filter(function(x) { return !!x.el.dataset.pk; });
+
+    // Group by category
+    var groups = {};
+    UC_CATEGORY_ORDER.forEach(function(cat) { groups[cat] = []; });
+    entryRows.forEach(function(x) {
+      var cat = x.el.dataset.category || 'extracurricular';
+      if (!groups[cat]) cat = 'extracurricular';
+      groups[cat].push(x);
+    });
+
+    // Hide placeholders and drag handles
+    allRows.forEach(function(r) {
+      if (r.classList.contains('uc-placeholder')) r.style.display = 'none';
+    });
+    tbody.querySelectorAll('.drag-handle').forEach(function(el) { el.style.visibility = 'hidden'; });
+
+    // Build sections
+    var colCount = tbody.closest('table').querySelector('thead tr').children.length;
+    UC_CATEGORY_ORDER.forEach(function(cat) {
+      var rows = groups[cat];
+      if (!rows.length) return;
+
+      // Section header row
+      var htr = document.createElement('tr');
+      htr.className = 'uc-section-header';
+      htr.style.backgroundColor = UC_CATEGORY_COLORS[cat];
+      var htd = document.createElement('td');
+      htd.colSpan = colCount;
+      htd.innerHTML = '<strong>' + UC_CATEGORY_LABELS[cat] + '</strong>'
+        + ' <span class="tag is-rounded is-small ml-1" style="background:rgba(0,0,0,0.1);font-weight:normal">'
+        + rows.length + '</span>';
+      htr.appendChild(htd);
+      tbody.appendChild(htr);
+
+      // Rows in their relative original order
+      rows.sort(function(a, b) { return a.idx - b.idx; });
+      rows.forEach(function(x) { tbody.appendChild(x.el); });
+    });
+
+    // Ensure category column stays hidden on any rows that just moved
+    hideCategoryColumn(true);
+  }
+
+  window.setUcView = function(mode) {
+    var tbody = document.getElementById('uc-entries-tbody');
+    if (!tbody) return;
+
+    ucViewMode = mode;
+    try { localStorage.setItem('ucViewMode', mode); } catch(e) {}
+
+    // Update toggle buttons
+    document.querySelectorAll('[data-uc-view]').forEach(function(btn) {
+      var active = btn.dataset.ucView === mode;
+      btn.classList.toggle('is-info', active);
+      btn.classList.toggle('is-selected', active);
+      btn.classList.toggle('is-light', !active);
+    });
+
+    // Show/hide note
+    var note = document.getElementById('uc-category-note');
+    if (note) note.style.display = mode === 'category' ? '' : 'none';
+
+    if (mode === 'category') {
+      ucSavedOrder = Array.from(tbody.querySelectorAll('tr')).map(function(r) { return r.id; }).filter(Boolean);
+      hideCategoryColumn(true);
+      applyUcCategoryView(tbody);
+      if (ucSortable) ucSortable.option('disabled', true);
+    } else {
+      // Restore original row order
+      hideCategoryColumn(false);
+      tbody.querySelectorAll('.uc-section-header').forEach(function(el) { el.remove(); });
+      ucSavedOrder.forEach(function(id) {
+        var row = document.getElementById(id);
+        if (row) tbody.appendChild(row);
+      });
+      // Show placeholders and drag handles
+      tbody.querySelectorAll('.uc-placeholder').forEach(function(r) { r.style.display = ''; });
+      tbody.querySelectorAll('.drag-handle').forEach(function(el) { el.style.visibility = ''; });
+      if (ucSortable) ucSortable.option('disabled', false);
+    }
+  };
+
+  // Re-apply category grouping after HTMX settles a UC row change
+  document.addEventListener('htmx:afterSettle', function(e) {
+    if (ucViewMode !== 'category') return;
+    var tbody = document.getElementById('uc-entries-tbody');
+    if (!tbody) return;
+    var target = e.detail && e.detail.target;
+    if (target && (target === tbody || tbody.contains(target)
+        || (target.id && (target.id === 'uc-entries-tbody' || target.id.startsWith('uc-'))))) {
+      setTimeout(function() { applyUcCategoryView(tbody); }, 0);
+    }
+  });
+  // ────────────────────────────────────────────────────────────────────────
+
   // Tooltip: move popups to <body> so position:fixed is always viewport-relative
   // (avoids any ancestor transform/filter/backdrop-filter creating a different containing block)
   function initTooltips() {
@@ -61,7 +197,7 @@
   function initUcSort() {
     const tbody = document.getElementById('uc-entries-tbody');
     if (!tbody) return;
-    Sortable.create(tbody, {
+    ucSortable = Sortable.create(tbody, {
       handle: '.drag-handle',
       filter: '.uc-placeholder',
       animation: 150,
@@ -104,6 +240,12 @@
     initTooltips();
     initUcSort();
     initCaSort();
+    // Restore last-used UC view mode
+    try {
+      if (localStorage.getItem('ucViewMode') === 'category') {
+        window.setUcView('category');
+      }
+    } catch(e) {}
   });
 })();
 </script>
