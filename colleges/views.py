@@ -127,25 +127,7 @@ def college_list(request):
     if status_filter:
         colleges = colleges.filter(apply_status=status_filter)
 
-    # Platform tracker (shown on Your Applications tab)
-    ACTIVE_STATUSES = {'applying', 'considering', 'applied', 'deferred', 'waitlisted', 'accepted', 'enrolled'}
-    active_platforms = set(
-        College.objects.filter(applicant=applicant, apply_status__in=ACTIVE_STATUSES)
-        .values_list('app_platform', flat=True)
-    )
-    def _needs(keyword):
-        return any(keyword.lower() in (p or '').lower() for p in active_platforms)
-
-    platform_tracker = [
-        {'label': 'Common App', 'active': _needs('common'),     'supported': True},
-        {'label': 'UC App',     'active': _needs('uc'),         'supported': True},
-        {'label': 'MIT App',    'active': _needs('mit'),        'supported': True},
-        {'label': 'CSU App',    'active': _needs('csu'),        'supported': False},
-        {'label': 'UCAS',       'active': _needs('ucas'),       'supported': False},
-        {'label': 'Canadian',   'active': _needs('canada'),     'supported': False},
-        {'label': 'Georgetown', 'active': _needs('georgetown'), 'supported': False},
-        {'label': 'Minerva',    'active': _needs('minerva'),    'supported': False},
-    ]
+    platform_tracker = _build_platform_tracker(applicant)
 
     # Status choices for the filter dropdown — limit to current view's statuses, exclude hidden statuses
     HIDDEN_STATUSES = {'likely', 'unlikely'}
@@ -174,6 +156,26 @@ def college_list(request):
         return render(request, 'colleges/_college_table.html', context)
 
     return render(request, 'colleges/college_list.html', context)
+
+
+def _build_platform_tracker(applicant):
+    ACTIVE_STATUSES = {'applying', 'considering', 'applied', 'deferred', 'waitlisted', 'accepted', 'enrolled'}
+    active_platforms = set(
+        College.objects.filter(applicant=applicant, apply_status__in=ACTIVE_STATUSES)
+        .values_list('app_platform', flat=True)
+    )
+    def _needs(keyword):
+        return any(keyword.lower() in (p or '').lower() for p in active_platforms)
+    return [
+        {'label': 'Common App', 'active': _needs('common'),     'supported': True},
+        {'label': 'UC App',     'active': _needs('uc'),         'supported': True},
+        {'label': 'MIT App',    'active': _needs('mit'),        'supported': True},
+        {'label': 'CSU App',    'active': _needs('csu'),        'supported': False},
+        {'label': 'UCAS',       'active': _needs('ucas'),       'supported': False},
+        {'label': 'Canadian',   'active': _needs('canada'),     'supported': False},
+        {'label': 'Georgetown', 'active': _needs('georgetown'), 'supported': False},
+        {'label': 'Minerva',    'active': _needs('minerva'),    'supported': False},
+    ]
 
 
 def college_detail(request, pk):
@@ -206,9 +208,12 @@ def college_edit_cell(request, pk, field):
         value = request.POST.get('value', '')
         setattr(college, field, value)
         college.save()
-        return render(request, 'colleges/_college_row.html', {
-            'college': college, 'table_fields': ALL_TABLE_FIELDS
-        })
+        ctx = {'college': college, 'table_fields': ALL_TABLE_FIELDS, 'optional_field_names': {f[0] for f in OPTIONAL_FIELDS}}
+        if field == 'apply_status':
+            applicant = get_applicant(request)
+            ctx['platform_tracker'] = _build_platform_tracker(applicant)
+            return render(request, 'colleges/_college_row_with_tracker.html', ctx)
+        return render(request, 'colleges/_college_row.html', ctx)
 
     current_value = getattr(college, field, '')
     field_label = ALL_TABLE_FIELDS_DICT.get(field, field)

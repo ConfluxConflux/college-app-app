@@ -1,0 +1,19 @@
+<div id="platform-tracker" hx-swap-oob="true" style="display:flex; gap:1.5rem; flex-wrap:wrap; align-items:flex-start; margin-bottom:1rem;">
+  <div>
+    <div style="font-size:0.7rem; color:#999; font-family:'Open Sans',sans-serif; font-style:italic; margin-bottom:0.4rem; text-align:right;">supported by College App App</div>
+    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+      {% for p in platform_tracker %}{% if p.supported %}
+        <span style="padding:0.3rem 0.85rem; border-radius:999px; font-size:0.82rem; font-weight:600; font-family:'Open Sans',sans-serif; {% if p.active %}background:#2a9d8f; color:#fff;{% else %}background:#e8e8e8; color:#aaa;{% endif %}">{{ p.label }}</span>
+      {% endif %}{% endfor %}
+    </div>
+  </div>
+  <div style="width:1px; background:#ccc; align-self:stretch; flex-shrink:0;"></div>
+  <div>
+    <div style="font-size:0.7rem; color:#999; font-family:'Open Sans',sans-serif; font-style:italic; margin-bottom:0.4rem;">not yet supported — make sure to research what you need to do!</div>
+    <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+      {% for p in platform_tracker %}{% if not p.supported %}
+        <span style="padding:0.3rem 0.85rem; border-radius:999px; font-size:0.82rem; font-weight:600; font-family:'Open Sans',sans-serif; {% if p.active %}background:#e07a3a; color:#fff;{% else %}background:#e8e8e8; color:#aaa;{% endif %}">{{ p.label }}</span>
+      {% endif %}{% endfor %}
+    </div>
+  </div>
+</div>
