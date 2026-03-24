@@ -29,7 +29,10 @@
     <div style="background:#fff;border-radius:12px;padding:2rem;max-width:360px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
       <p style="font-size:1.1rem;font-weight:600;margin:0 0 0.5rem;">Copy your writing somewhere else!</p>
       <p style="font-size:0.9rem;color:#666;margin:0 0 1.5rem;">Your text won't be saved when you leave.</p>
-      <button @click="goBack()" style="background:#2563eb;color:#fff;border:none;border-radius:8px;padding:0.6rem 1.5rem;font-size:1rem;font-weight:600;cursor:pointer;">I did</button>
+      <div style="display:flex;gap:0.75rem;justify-content:center;">
+        <button @click="goBack()" style="background:#2563eb;color:#fff;border:none;border-radius:8px;padding:0.6rem 1.5rem;font-size:1rem;font-weight:600;cursor:pointer;">I did</button>
+        <button @click="showBackPrompt = false" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:0.6rem 1.5rem;font-size:1rem;font-weight:600;cursor:pointer;">Ok wait lemme do that</button>
+      </div>
     </div>
   </div>
 
