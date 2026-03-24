@@ -8,6 +8,7 @@
        text: '',
        showCount: false,
        fs: false,
+       showBackPrompt: false,
        get wc() { return this.text.trim() ? this.text.trim().split(/\s+/).length : 0; },
        get cc() { return this.text.length; },
        toggleFs() {
@@ -17,12 +18,24 @@
            document.exitFullscreen();
          }
        },
+       goBack() {
+         window.location.href = '{% url 'widgets:home' %}';
+       },
      }"
      x-init="document.addEventListener('fullscreenchange', () => { fs = !!document.fullscreenElement; })">
 
+  <!-- Back confirmation prompt -->
+  <div x-show="showBackPrompt" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;">
+    <div style="background:#fff;border-radius:12px;padding:2rem;max-width:360px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+      <p style="font-size:1.1rem;font-weight:600;margin:0 0 0.5rem;">Copy your writing somewhere else!</p>
+      <p style="font-size:0.9rem;color:#666;margin:0 0 1.5rem;">Your text won't be saved when you leave.</p>
+      <button @click="goBack()" style="background:#2563eb;color:#fff;border:none;border-radius:8px;padding:0.6rem 1.5rem;font-size:1rem;font-weight:600;cursor:pointer;">I did</button>
+    </div>
+  </div>
+
   <!-- Back bar -->
   <div class="focus-topbar">
-    <a href="{% url 'widgets:home' %}" class="focus-back-btn">← Back</a>
+    <button @click="showBackPrompt = true" class="focus-back-btn">← Back</button>
     <span class="focus-college-label">Focus Write</span>
     <div style="display:flex; align-items:center; gap:0.75rem;">
       <span x-show="showCount" class="focus-counter" style="font-size:0.8rem;">
