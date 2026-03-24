@@ -84,7 +84,9 @@ def core_activity_add(request):
         name='',
         order=CoreActivity.objects.filter(applicant=applicant).count(),
     )
-    return render(request, 'core/_core_activity_row.html', _core_row_ctx(activity, editing='name'))
+    response = render(request, 'core/_core_activity_row.html', _core_row_ctx(activity, editing='name'))
+    response['HX-Trigger'] = 'confetti'
+    return response
 
 
 @require_POST

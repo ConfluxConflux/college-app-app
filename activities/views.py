@@ -139,10 +139,12 @@ def uc_add(request):
             name='',
             order=UCEntry.objects.filter(applicant=applicant).count(),
         )
-        return render(request, 'activities/_uc_row.html', {
+        response = render(request, 'activities/_uc_row.html', {
             'entry': entry,
             'uc_category_choices': UCEntry.CATEGORY_CHOICES,
         })
+        response['HX-Trigger'] = 'confetti'
+        return response
     if request.method == 'POST':
         form = UCEntryForm(request.POST)
         if form.is_valid():
@@ -391,7 +393,9 @@ def honor_add(request):
             applicant=applicant,
             order=CommonAppHonor.objects.filter(applicant=applicant).count(),
         )
-        return render(request, 'activities/_honor_row.html', {'honor': honor})
+        response = render(request, 'activities/_honor_row.html', {'honor': honor})
+        response['HX-Trigger'] = 'confetti'
+        return response
     if request.method == 'POST':
         form = CommonAppHonorForm(request.POST)
         if form.is_valid():

@@ -3,7 +3,15 @@
 {% block title %}Activities & Honors - College App App{% endblock %}
 
 {% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
+<script>
+function fireConfetti() {
+  confetti({ particleCount: 120, angle: 60,  spread: 70, origin: { x: 0,   y: 0.65 } });
+  confetti({ particleCount: 120, angle: 120, spread: 70, origin: { x: 1,   y: 0.65 } });
+  confetti({ particleCount: 80,  spread: 360, startVelocity: 20, gravity: 0.6, origin: { x: 0.5, y: 0.45 } });
+}
+</script>
 <script>
 (function() {
   function getCookie(name) {
@@ -235,6 +243,8 @@
       }
     });
   }
+
+  document.body.addEventListener('confetti', fireConfetti);
 
   document.addEventListener('DOMContentLoaded', function() {
     initTooltips();

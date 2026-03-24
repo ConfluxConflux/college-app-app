@@ -2,6 +2,17 @@
 
 {% block title %}Focus — {{ essay.college.name }}{% endblock %}
 
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<script>
+function fireConfetti() {
+  confetti({ particleCount: 120, angle: 60,  spread: 70, origin: { x: 0,   y: 0.65 } });
+  confetti({ particleCount: 120, angle: 120, spread: 70, origin: { x: 1,   y: 0.65 } });
+  confetti({ particleCount: 80,  spread: 360, startVelocity: 20, gravity: 0.6, origin: { x: 0.5, y: 0.45 } });
+}
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="focus-shell"
      x-data="{
@@ -10,6 +21,7 @@
        saving: false,
        limitType: '{{ essay.limit_type }}',
        limitVal: {{ essay.limit_val }},
+       _prevCount: 0,
        get wc() {
          return this.text.trim() ? this.text.trim().split(/\s+/).length : 0;
        },
@@ -20,8 +32,12 @@
        showCount: false,
        onInput() {
          this.saved = false;
+         const prev = this._prevCount;
+         this._prevCount = this.count;
+         if (this.limitVal > 0 && prev < this.limitVal && this.count >= this.limitVal) fireConfetti();
        }
-     }">
+     }"
+     x-init="_prevCount = count">
 
   <!-- Back bar -->
   <div class="focus-topbar">

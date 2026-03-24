@@ -215,8 +215,10 @@ function fireConfetti() {
            get overLimit() { return this.limitVal > 0 && this.count > this.limitVal; },
            get nearLimit() { return this.limitVal > 0 && this.count >= Math.floor(this.limitVal * 0.9) && !this.overLimit; },
            onInput(val) {
+             const wasAtOrOver = this.limitVal > 0 && this.count >= this.limitVal;
              this.text = val;
              this.saved = false;
+             if (this.limitVal > 0 && !wasAtOrOver && this.count >= this.limitVal) fireConfetti();
            }
          }">
 
