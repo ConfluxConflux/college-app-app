@@ -4,6 +4,13 @@
 
 {% block extra_head %}
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+<script>
+function fireConfetti() {
+  confetti({ particleCount: 120, angle: 60,  spread: 70, origin: { x: 0,   y: 0.65 } });
+  confetti({ particleCount: 120, angle: 120, spread: 70, origin: { x: 1,   y: 0.65 } });
+  confetti({ particleCount: 80,  spread: 360, startVelocity: 20, gravity: 0.6, origin: { x: 0.5, y: 0.45 } });
+}
+</script>
 {% endblock %}
 
 {% block content %}
@@ -239,7 +246,7 @@
           <select class="essay-status-pill"
                   :class="s || 'blank'"
                   x-model="s"
-                  @change="if($event.target.value === 'done') confetti({ particleCount: 180, spread: 80, origin: { y: 0.6 } })"
+                  @change="if($event.target.value === 'done') fireConfetti()"
                   hx-post="{% url 'supplements:essay_status' essay.pk %}"
                   hx-trigger="change"
                   hx-swap="none"
