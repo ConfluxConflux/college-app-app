@@ -100,8 +100,9 @@ def college_list(request):
     if current_view not in VIEWS:
         current_view = 'applications'
 
+    applicant = get_applicant(request)
     view_config = VIEWS[current_view]
-    colleges = College.objects.all()
+    colleges = College.objects.filter(applicant=applicant)
 
     # Apply view filter
     if view_config['statuses']:
@@ -211,7 +212,8 @@ def college_add(request):
         form = CollegeForm(request.POST)
         if form.is_valid():
             college = form.save(commit=False)
-            college.order = College.objects.count()
+            college.applicant = get_applicant(request)
+            college.order = College.objects.filter(applicant=college.applicant).count()
             college.save()
             return redirect('colleges:list')
     else:
@@ -226,8 +228,9 @@ def college_json(request):
     if current_view not in VIEWS:
         current_view = 'applications'
 
+    applicant = get_applicant(request)
     view_config = VIEWS[current_view]
-    colleges = College.objects.all()
+    colleges = College.objects.filter(applicant=applicant)
 
     if view_config['statuses']:
         colleges = colleges.filter(apply_status__in=view_config['statuses'])
@@ -296,7 +299,8 @@ def college_delete(request, pk):
 
 
 def applications(request):
-    colleges = College.objects.all().annotate(
+    applicant = get_applicant(request)
+    colleges = College.objects.filter(applicant=applicant).annotate(
         status_order=APP_PROGRESS_STATUS_ORDER
     ).order_by('status_order', 'name')
 
