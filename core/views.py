@@ -179,7 +179,8 @@ def core_activity_mit_cell(request, pk, field):
 def home(request):
     applicant = _get_applicant(request)
     college_count = College.objects.filter(applicant=applicant).count()
-    applying_count = College.objects.filter(applicant=applicant).exclude(apply_status__in=['', 'not_applying', 'unlikely']).count()
+    applying_count = College.objects.filter(applicant=applicant, apply_status='applying').count()
+    applying_considering_count = College.objects.filter(applicant=applicant).exclude(apply_status__in=['', 'not_applying', 'unlikely']).count()
     uc_count = UCEntry.objects.filter(applicant=applicant).count()
     common_app_activity_count = CommonAppActivity.objects.filter(applicant=applicant).count()
     common_app_honor_count = CommonAppHonor.objects.filter(applicant=applicant).count()
@@ -191,6 +192,7 @@ def home(request):
         'applicant': applicant,
         'college_count': college_count,
         'applying_count': applying_count,
+        'applying_considering_count': applying_considering_count,
         'uc_count': uc_count,
         'common_app_activity_count': common_app_activity_count,
         'common_app_honor_count': common_app_honor_count,
