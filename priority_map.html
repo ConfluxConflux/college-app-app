@@ -2,319 +2,299 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Feature Priority Map</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
-
   body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: #0f0f13;
     color: #e8e8f0;
-    min-height: 100vh;
-    padding: 40px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 24px 60px;
   }
+  h1 { font-size: 20px; font-weight: 600; margin-bottom: 4px; color: #fff; }
+  .subtitle { font-size: 12px; color: #555; margin-bottom: 36px; }
 
-  h1 {
-    font-size: 22px;
-    font-weight: 600;
-    letter-spacing: -0.3px;
-    margin-bottom: 6px;
-    color: #fff;
-  }
-
-  .subtitle {
-    font-size: 13px;
-    color: #666;
-    margin-bottom: 40px;
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto;
-    gap: 16px;
-    max-width: 1000px;
-  }
-
-  .quadrant {
-    border-radius: 14px;
-    padding: 22px 22px 18px;
+  .chart-wrap {
     position: relative;
+    width: 780px;
   }
 
-  .q1 { background: #0e2a1a; border: 1px solid #1a4a2e; }
-  .q2 { background: #1a1e0e; border: 1px solid #353d14; }
-  .q3 { background: #0d1a2a; border: 1px solid #14304a; }
-  .q4 { background: #1a1a1a; border: 1px solid #2a2a2a; }
-  .q5 { background: #1a0e1a; border: 1px solid #351435; }
+  svg { display: block; }
 
-  .q-label {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    margin-bottom: 4px;
-  }
-
-  .q1 .q-label { color: #4ade80; }
-  .q2 .q-label { color: #a3e635; }
-  .q3 .q-label { color: #60a5fa; }
-  .q4 .q-label { color: #94a3b8; }
-  .q5 .q-label { color: #c084fc; }
-
-  .q-title {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 4px;
-    color: #fff;
-  }
-
-  .q-description {
-    font-size: 12px;
-    color: #666;
-    margin-bottom: 16px;
-  }
-
-  .tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 7px;
-  }
-
-  .tag {
-    font-size: 12px;
-    padding: 5px 11px;
-    border-radius: 20px;
-    font-weight: 500;
-    line-height: 1.3;
-  }
-
-  .q1 .tag { background: #0a3d1f; color: #86efac; border: 1px solid #166534; }
-  .q2 .tag { background: #1e2d0a; color: #d9f99d; border: 1px solid #3f6212; }
-  .q3 .tag { background: #0c2340; color: #93c5fd; border: 1px solid #1e40af; }
-  .q4 .tag { background: #1f1f1f; color: #94a3b8; border: 1px solid #334155; }
-  .q5 .tag { background: #2a0a2a; color: #d8b4fe; border: 1px solid #7e22ce; }
-
-  .tag.deferred {
-    opacity: 0.5;
-    font-style: italic;
-  }
-
-  .bottom-row {
-    grid-column: span 2;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
-
-  .axis-labels {
-    display: flex;
-    justify-content: space-between;
-    max-width: 1000px;
-    margin-bottom: 10px;
-    padding: 0 4px;
-  }
-
-  .axis-label {
-    font-size: 11px;
-    color: #444;
-    letter-spacing: 0.5px;
-  }
-
-  .badge {
-    display: inline-block;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    padding: 2px 7px;
-    border-radius: 4px;
-    margin-left: 8px;
-    vertical-align: middle;
-    position: relative;
-    top: -1px;
-  }
-
-  .q1 .badge { background: #14532d; color: #4ade80; }
-  .q2 .badge { background: #365314; color: #bef264; }
-  .q3 .badge { background: #1e3a5f; color: #60a5fa; }
-  .q4 .badge { background: #1e293b; color: #64748b; }
-  .q5 .badge { background: #3b0764; color: #c084fc; }
-
-  .divider {
-    width: 100%;
-    height: 1px;
-    background: #222;
-    margin: 32px 0;
-    max-width: 1000px;
-  }
-
-  .timeline {
-    max-width: 1000px;
-  }
-
-  .timeline-title {
+  .tooltip {
+    position: fixed;
+    background: #1c1c24;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 9px 13px;
     font-size: 13px;
-    font-weight: 600;
-    color: #888;
-    letter-spacing: 0.5px;
-    margin-bottom: 16px;
-    text-transform: uppercase;
-    font-size: 11px;
-    letter-spacing: 1.2px;
-  }
-
-  .timeline-row {
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    margin-bottom: 18px;
-  }
-
-  .timeline-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    margin-top: 5px;
-    flex-shrink: 0;
-  }
-
-  .dot-green { background: #4ade80; }
-  .dot-lime { background: #a3e635; }
-  .dot-blue { background: #60a5fa; }
-  .dot-gray { background: #475569; }
-
-  .timeline-step {
-    font-size: 13px;
-    color: #ccc;
+    color: #e8e8f0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.12s;
+    max-width: 220px;
     line-height: 1.5;
+    z-index: 100;
   }
+  .tooltip .tip-title { font-weight: 600; color: #fff; margin-bottom: 3px; }
+  .tooltip .tip-meta { font-size: 11px; color: #666; }
 
-  .timeline-step strong {
-    color: #fff;
-    font-weight: 600;
+  .legend {
+    display: flex;
+    gap: 24px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: #888;
+  }
+  .legend-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
   }
 </style>
 </head>
 <body>
 
 <h1>Feature Priority Map</h1>
-<p class="subtitle">college app app · march 2026 · kathy meeting + others</p>
+<p class="subtitle">college app app · importance vs easiness · march 2026</p>
 
-<div class="grid">
-
-  <!-- Tier 1: Fast + High Value -->
-  <div class="quadrant q1">
-    <div class="q-label">Tier 1</div>
-    <div class="q-title">Do First <span class="badge">this week</span></div>
-    <div class="q-description">Fast to build · High impact · Directly address Kathy's pain</div>
-    <div class="tags">
-      <span class="tag">Text box fills whole cell</span>
-      <span class="tag">Separate UC A&A sections</span>
-      <span class="tag">Educational program not gray</span>
-      <span class="tag">Tooltip awkwardness</span>
-      <span class="tag">Ignore char counts (toggle)</span>
-      <span class="tag">Test rows missing attributes</span>
-      <span class="tag">Supplemental + Doc grouping</span>
-      <span class="tag">Reduce vertical scroll</span>
-    </div>
-  </div>
-
-  <!-- Tier 2: Medium + High Value -->
-  <div class="quadrant q2">
-    <div class="q-label">Tier 2</div>
-    <div class="q-title">Next Sprint <span class="badge">soon</span></div>
-    <div class="q-description">More effort · High value · Makes it feel like a real product</div>
-    <div class="tags">
-      <span class="tag">Side-by-side similar essays</span>
-      <span class="tag">UC A&A groups + instructions</span>
-      <span class="tag">Dashboard: per-college tracker</span>
-      <span class="tag">Task list (rec letters etc.)</span>
-      <span class="tag">Focus mode on double-click</span>
-      <span class="tag">Hrs/wk · wks/yr widget</span>
-      <span class="tag">Table filtered to your colleges</span>
-      <span class="tag">Failsafe data export</span>
-    </div>
-  </div>
-
-  <!-- Tier 3: High Effort + High Value -->
-  <div class="quadrant q3">
-    <div class="q-label">Tier 3</div>
-    <div class="q-title">Plan Carefully <span class="badge">scoped first</span></div>
-    <div class="q-description">Substantial work · High ceiling · Needs design decisions first</div>
-    <div class="tags">
-      <span class="tag">Supplementals (major feature)</span>
-      <span class="tag">Better college list</span>
-      <span class="tag">Per-college pages</span>
-      <span class="tag">College info database</span>
-      <span class="tag">Activities positioning</span>
-      <span class="tag">Tagging essay prompts</span>
-    </div>
-  </div>
-
-  <!-- Bottom row: Quick grabs + Defer -->
-  <div class="bottom-row">
-
-    <div class="quadrant q4">
-      <div class="q-label">Tier 4</div>
-      <div class="q-title">Grab When Blocked <span class="badge">anytime</span></div>
-      <div class="q-description">Low effort · Low stakes · Nice to have</div>
-      <div class="tags">
-        <span class="tag">Centralize color management</span>
-        <span class="tag">Page backgrounds</span>
-        <span class="tag">"Withdrawn" wording</span>
-        <span class="tag">Version browser (for you)</span>
-        <span class="tag">Error reporting flow</span>
-        <span class="tag">Tell you what to do (Leo)</span>
-      </div>
-    </div>
-
-    <div class="quadrant q5">
-      <div class="q-label">Defer</div>
-      <div class="q-title">Later / Needs Designer <span class="badge">not now</span></div>
-      <div class="q-description">Block on Proofniks · No defined scope · Post-launch</div>
-      <div class="tags">
-        <span class="tag deferred">Logo + mascot</span>
-        <span class="tag deferred">Rename</span>
-        <span class="tag deferred">Gamification</span>
-        <span class="tag deferred">Prettier front page</span>
-        <span class="tag deferred">Customizable fonts</span>
-        <span class="tag deferred">Log in with Google</span>
-        <span class="tag deferred">Finaid</span>
-        <span class="tag deferred">turbopuffer</span>
-        <span class="tag deferred">Impact font (please no)</span>
-      </div>
-    </div>
-
-  </div>
+<div class="chart-wrap">
+  <svg id="chart" width="780" height="680"></svg>
 </div>
 
-<div class="divider"></div>
-
-<div class="timeline">
-  <div class="timeline-title">Recommended sequence</div>
-
-  <div class="timeline-row">
-    <div class="timeline-dot dot-green"></div>
-    <div class="timeline-step"><strong>This week —</strong> Tier 1 polish. All are isolated fixes to existing features. Text box fill + section separation will have the most visible payoff for Kathy.</div>
-  </div>
-
-  <div class="timeline-row">
-    <div class="timeline-dot dot-lime"></div>
-    <div class="timeline-step"><strong>Then —</strong> Side-by-side views and dashboard tracker. These give the app a coherent story and make it feel complete rather than a collection of tables.</div>
-  </div>
-
-  <div class="timeline-row">
-    <div class="timeline-dot dot-blue"></div>
-    <div class="timeline-step"><strong>Before Tier 3 —</strong> Scope supplementals and college list properly. Both are large enough to derail momentum if started too early or underspecified.</div>
-  </div>
-
-  <div class="timeline-row">
-    <div class="timeline-dot dot-gray"></div>
-    <div class="timeline-step"><strong>Block on Proofniks —</strong> Don't touch logo, mascot, gamification, or visual design until you have a designer. Code work there is likely to be throwaway.</div>
-  </div>
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#4ade80"></div>Do first (easy + important)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#60a5fa"></div>Plan carefully (hard + important)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#facc15"></div>Nice to have (easy + less important)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#475569"></div>Skip / defer (hard + less important)</div>
 </div>
 
+<div class="tooltip" id="tooltip">
+  <div class="tip-title" id="tip-title"></div>
+  <div class="tip-meta" id="tip-meta"></div>
+</div>
+
+<script>
+const PAD = { top: 40, right: 40, bottom: 70, left: 70 };
+const W = 780, H = 680;
+const PW = W - PAD.left - PAD.right;
+const PH = H - PAD.top - PAD.bottom;
+
+// [label, fullName, easiness 1-10, importance 1-10, note]
+const items = [
+  // UC A&A polish
+  ["Fill cell on click",     "Text box fills whole cell when clicked",         9.0, 8.5, "UC A&A · pure CSS/JS"],
+  ["Separate UC sections",   "Separate sections for UC A&A categories",        6.5, 8.0, "UC A&A · structure already partial"],
+  ["Ed. program not gray",   "Educational program field not grayed out",       9.5, 3.5, "UC A&A · trivial style fix"],
+  ["Fix tooltips",           "Tooltip UX awkwardness",                         8.0, 5.0, "UC A&A · small polish"],
+  ["Ignore char counts",     "Setting to ignore char counts until relevant",   8.0, 6.0, "UC A&A · simple toggle"],
+  ["Test row attributes",    "Test rows missing all attributes",               8.5, 5.0, "UC A&A · bug fix"],
+  ["Colleges from list",     "Table filtered to colleges you're applying to",  5.0, 8.5, "UC A&A · smart filtering"],
+  ["Group supplementals",    "Group supplementals + link Google Docs/dash",    5.5, 7.5, "Navigation · few hours"],
+  ["Reduce scroll",          "Don't make Kathy scroll (layout audit)",         5.5, 7.0, "UX · high visibility"],
+
+  // Medium effort, high value
+  ["Side-by-side view",      "Side-by-side view of similar essays/activities", 3.5, 9.5, "Core use case · very high value"],
+  ["UC A&A groups+instr",    "UC A&As grouped by category with instructions",  4.5, 7.5, "UC A&A · medium lift"],
+  ["Dashboard tracker",      "Dashboard: per-college app status tracker",      3.5, 8.5, "Dashboard · product coherence"],
+  ["Task list",              "Task list (rec letters, deadlines)",              5.0, 7.5, "Dashboard · spec'd in linked doc"],
+  ["Focus mode",             "Focus mode on double-click (word count etc.)",   4.5, 7.0, "Writing UX · medium effort"],
+  ["Hrs/wk widget",          "Hrs/wk + wks/yr averaging widget",               6.5, 6.5, "Activities · scoped"],
+  ["Failsafe export",        "Failsafe: auto-export data to email/DB",         6.0, 8.0, "Infra · high trust value"],
+
+  // Hard + high value
+  ["Supplementals",          "Supplementals (major feature)",                  1.5, 9.5, "Major · needs full scoping"],
+  ["Better college list",    "Better / more integrated college list",          2.0, 8.0, "Data model decision required"],
+  ["Per-college pages",      "Pages for each college with app + progress",     2.5, 7.5, "High effort · high ceiling"],
+  ["College DB",             "Fix goofy college info database",                2.0, 6.0, "Depends on data source"],
+  ["Activities position",    "Activities positioning",                         3.5, 6.0, "Unclear scope"],
+  ["Tag essay prompts",      "Tagging essay prompts",                          4.0, 6.5, "Useful for reuse"],
+
+  // Easy + low value
+  ["Color management",       "Centralize color code management",               8.5, 3.0, "Dev hygiene · 30min"],
+  ["Page backgrounds",       "Different backgrounds per page",                 9.0, 2.0, "Aesthetic"],
+  ['"Withdrawn" fix',        '"Withdrawn" wording fix',                        9.5, 2.0, "Trivial"],
+  ["Version browser",        "Version browser tool (for you, not users)",      5.0, 3.0, "Internal tooling"],
+  ["Error reporting",        "Error reporting flow",                           7.5, 4.0, "Could be a mailto link"],
+  ["Tell what to do",        "Have it tell you what to do (Leo feedback)",     5.5, 5.0, "Onboarding / guidance"],
+
+  // Defer
+  ["Logo/mascot",            "Logo, mascot, rename (block on Proofniks)",      1.5, 4.0, "Defer · needs designer"],
+  ["Google login",           "Log in with Google",                             2.0, 5.5, "Later"],
+  ["Gamification",           "Gamification (easy wins unclear)",               3.0, 4.5, "Needs design thinking first"],
+  ["Prettier front page",    "Prettier front page / visual design",            4.0, 3.5, "Defer · needs designer"],
+  ["Finaid",                 "Financial aid stuff",                            1.5, 5.0, "Later"],
+];
+
+function getColor(easy, imp) {
+  const highImp = imp >= 6;
+  const highEasy = easy >= 5;
+  if (highImp && highEasy)  return "#4ade80";  // green: do first
+  if (highImp && !highEasy) return "#60a5fa";  // blue: plan carefully
+  if (!highImp && highEasy) return "#facc15";  // yellow: nice to have
+  return "#475569";                             // gray: skip/defer
+}
+
+function toX(easy) { return PAD.left + (easy / 10) * PW; }
+function toY(imp)  { return PAD.top  + ((10 - imp) / 10) * PH; }
+
+// Jitter to avoid overlap: nudge points that are very close
+function jitter(items, xFn, yFn, iters=80) {
+  const pts = items.map(it => ({ x: xFn(it[2]), y: yFn(it[3]), ox: xFn(it[2]), oy: yFn(it[3]) }));
+  const R = 28;
+  for (let iter = 0; iter < iters; iter++) {
+    for (let i = 0; i < pts.length; i++) {
+      for (let j = i+1; j < pts.length; j++) {
+        const dx = pts[i].x - pts[j].x, dy = pts[i].y - pts[j].y;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        if (dist < R && dist > 0.01) {
+          const push = (R - dist) / 2;
+          const nx = dx/dist, ny = dy/dist;
+          pts[i].x += nx * push * 0.5;
+          pts[i].y += ny * push * 0.5;
+          pts[j].x -= nx * push * 0.5;
+          pts[j].y -= ny * push * 0.5;
+        }
+      }
+      // gentle pull toward original
+      pts[i].x += (pts[i].ox - pts[i].x) * 0.05;
+      pts[i].y += (pts[i].oy - pts[i].y) * 0.05;
+    }
+  }
+  return pts;
+}
+
+const positions = jitter(items, it => toX(it), it => toY(it));
+
+const svg = document.getElementById("chart");
+const ns = "http://www.w3.org/2000/svg";
+
+function el(tag, attrs, text) {
+  const e = document.createElementNS(ns, tag);
+  for (const [k,v] of Object.entries(attrs)) e.setAttribute(k, v);
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+
+// Quadrant fills
+const quads = [
+  { x: PAD.left, y: PAD.top, w: PW/2, h: PH/2, fill: "#1a2a1a", label: "Plan carefully", lx: PAD.left + PW*0.25, ly: PAD.top + PH*0.25 },
+  { x: PAD.left + PW/2, y: PAD.top, w: PW/2, h: PH/2, fill: "#1a2a1a", label: "Do first ✦", lx: PAD.left + PW*0.75, ly: PAD.top + PH*0.25 },
+  { x: PAD.left, y: PAD.top + PH/2, w: PW/2, h: PH/2, fill: "#181818", label: "Skip / defer", lx: PAD.left + PW*0.25, ly: PAD.top + PH*0.75 },
+  { x: PAD.left + PW/2, y: PAD.top + PH/2, w: PW/2, h: PH/2, fill: "#1e1e14", label: "Nice to have", lx: PAD.left + PW*0.75, ly: PAD.top + PH*0.75 },
+];
+const qColors = ["#193a30", "#1a2e1a", "#161616", "#1e1e10"];
+const qTextColors = ["#60a5fa88", "#4ade8055", "#47556944", "#facc1533"];
+
+quads.forEach((q, i) => {
+  svg.appendChild(el("rect", { x: q.x, y: q.y, width: q.w, height: q.h, fill: qColors[i] }));
+  const t = el("text", {
+    x: q.lx, y: q.ly,
+    "text-anchor": "middle",
+    "dominant-baseline": "middle",
+    fill: qTextColors[i],
+    "font-size": "13",
+    "font-weight": "600",
+    "letter-spacing": "0.5",
+    "font-family": "-apple-system, sans-serif",
+    "pointer-events": "none",
+  }, q.label);
+  svg.appendChild(t);
+});
+
+// Grid lines
+for (let i = 1; i < 10; i++) {
+  const x = PAD.left + (i/10) * PW;
+  const y = PAD.top  + (i/10) * PH;
+  svg.appendChild(el("line", { x1: x, y1: PAD.top, x2: x, y2: PAD.top+PH, stroke: "#222", "stroke-width": "1" }));
+  svg.appendChild(el("line", { x1: PAD.left, y1: y, x2: PAD.left+PW, y2: y, stroke: "#222", "stroke-width": "1" }));
+}
+
+// Divider lines (quadrant boundaries)
+const mx = PAD.left + PW/2, my = PAD.top + PH/2;
+svg.appendChild(el("line", { x1: mx, y1: PAD.top, x2: mx, y2: PAD.top+PH, stroke: "#333", "stroke-width": "1.5" }));
+svg.appendChild(el("line", { x1: PAD.left, y1: my, x2: PAD.left+PW, y2: my, stroke: "#333", "stroke-width": "1.5" }));
+
+// Axis labels
+const axisStyle = { fill: "#555", "font-size": "11", "font-family": "-apple-system, sans-serif", "pointer-events": "none" };
+
+// X axis ticks + label
+["Hard", "", "", "", "", "Easy"][0]; // just label ends
+svg.appendChild(el("text", { ...axisStyle, x: PAD.left, y: PAD.top+PH+24, "text-anchor": "middle" }, "Hard ←"));
+svg.appendChild(el("text", { ...axisStyle, x: PAD.left+PW, y: PAD.top+PH+24, "text-anchor": "middle" }, "→ Easy"));
+svg.appendChild(el("text", { ...axisStyle, x: PAD.left+PW/2, y: PAD.top+PH+46, "text-anchor": "middle", fill: "#666", "font-size": "12", "font-weight": "500" }, "EASINESS"));
+
+// Y axis label
+const yLabel = el("text", { ...axisStyle, x: 16, y: PAD.top+PH/2, "text-anchor": "middle", fill: "#666", "font-size": "12", "font-weight": "500", transform: `rotate(-90, 16, ${PAD.top+PH/2})` }, "IMPORTANCE");
+svg.appendChild(yLabel);
+svg.appendChild(el("text", { ...axisStyle, x: PAD.left-10, y: PAD.top, "text-anchor": "end" }, "↑ High"));
+svg.appendChild(el("text", { ...axisStyle, x: PAD.left-10, y: PAD.top+PH, "text-anchor": "end" }, "Low ↓"));
+
+// Border
+svg.appendChild(el("rect", { x: PAD.left, y: PAD.top, width: PW, height: PH, fill: "none", stroke: "#333", "stroke-width": "1" }));
+
+// Dots + labels
+const tooltip = document.getElementById("tooltip");
+const tipTitle = document.getElementById("tip-title");
+const tipMeta  = document.getElementById("tip-meta");
+
+items.forEach((item, i) => {
+  const [label, full, easy, imp, note] = item;
+  const { x, y } = positions[i];
+  const color = getColor(easy, imp);
+  const r = 7;
+
+  const g = el("g", { style: "cursor:pointer" });
+
+  // glow
+  g.appendChild(el("circle", { cx: x, cy: y, r: r+4, fill: color, opacity: "0.12" }));
+  // dot
+  const dot = el("circle", { cx: x, cy: y, r: r, fill: color, opacity: "0.9" });
+  g.appendChild(dot);
+
+  // label — nudge so it doesn't overlap dot
+  const tx = x + (x > W/2 ? -r-4 : r+4);
+  const anchor = x > W/2 ? "end" : "start";
+  const t = el("text", {
+    x: tx, y: y + 4,
+    "text-anchor": anchor,
+    fill: "#ccc",
+    "font-size": "10.5",
+    "font-family": "-apple-system, sans-serif",
+    "pointer-events": "none",
+  }, label);
+  g.appendChild(t);
+
+  g.addEventListener("mouseenter", (e) => {
+    dot.setAttribute("r", r + 2);
+    dot.setAttribute("opacity", "1");
+    tipTitle.textContent = full;
+    tipMeta.textContent  = note;
+    tooltip.style.opacity = "1";
+  });
+  g.addEventListener("mousemove", (e) => {
+    tooltip.style.left = (e.clientX + 14) + "px";
+    tooltip.style.top  = (e.clientY - 10) + "px";
+  });
+  g.addEventListener("mouseleave", () => {
+    dot.setAttribute("r", r);
+    dot.setAttribute("opacity", "0.9");
+    tooltip.style.opacity = "0";
+  });
+
+  svg.appendChild(g);
+});
+</script>
 </body>
 </html>
