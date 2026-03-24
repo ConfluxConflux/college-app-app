@@ -71,7 +71,8 @@
 <body>
   <div class="center">
     <p>Sorry, this feature doesn't exist yet!</p>
-    <a href="{% url 'core:home' %}">View as test user</a>
+    <a href="{% url 'core:switch_applicant' 1 %}">View as test user (Jacob)</a>
+    <a href="{% url 'core:switch_applicant' 2 %}">View as test user (Hedgie Wedgie)</a>
     <a href="{% url 'core:landing' %}" class="secondary">Go home</a>
   </div>
 </body>
