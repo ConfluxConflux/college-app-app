@@ -21,7 +21,7 @@ def resources(request):
             'source': 'collegevine.com',
         },
         {
-            'title': "MIT Admissions Blog",
+            'title': "MIT Admissions Blog (pretty fun I think!)",
             'url': 'https://mitadmissions.org/blogs/',
             'source': 'mitadmissions.org',
         },
