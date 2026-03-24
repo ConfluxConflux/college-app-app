@@ -21,24 +21,24 @@ def resources(request):
             'source': 'collegevine.com',
         },
         {
-            'title': "The Notorious A2C (but don't get sucked down the distraction hole)",
-            'url': 'https://www.applyingto.college/home',
-            'source': 'applyingto.college',
-        },
-        {
-            'title': "3Blue1Brown Soundtrack (my favorite music for focusing)",
-            'url': 'https://vincerubinetti.bandcamp.com/album/the-music-of-3blue1brown',
-            'source': 'vincerubinetti.bandcamp.com',
-        },
-        {
             'title': "MIT Admissions Blog",
             'url': 'https://mitadmissions.org/blogs/',
             'source': 'mitadmissions.org',
         },
         {
+            'title': "The Notorious A2C (but don't get sucked down the distraction hole)",
+            'url': 'https://www.applyingto.college/home',
+            'source': 'applyingto.college',
+        },
+        {
             'title': "Admissions Matters (supposedly comprehensive book that I've never read)",
             'url': 'https://www.amazon.com/Admission-Matters-Students-Parents-Getting/dp/1119885736/',
             'source': 'amazon.com',
+        },
+        {
+            'title': "3Blue1Brown Soundtrack (my favorite music for focusing)",
+            'url': 'https://vincerubinetti.bandcamp.com/album/the-music-of-3blue1brown',
+            'source': 'vincerubinetti.bandcamp.com',
         },
     ]
     return render(request, 'widgets/resources.html', {'links': links})
