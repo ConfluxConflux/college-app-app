@@ -159,22 +159,31 @@ def college_list(request):
 
 
 def _build_platform_tracker(applicant):
-    ACTIVE_STATUSES = {'applying', 'considering', 'applied', 'deferred', 'waitlisted', 'accepted', 'enrolled'}
-    active_platforms = set(
-        College.objects.filter(applicant=applicant, apply_status__in=ACTIVE_STATUSES)
+    APPLYING_STATUSES = {'applying', 'applied', 'deferred', 'waitlisted', 'accepted', 'enrolled'}
+    CONSIDERING_STATUSES = {'considering'}
+    applying_platforms = set(
+        College.objects.filter(applicant=applicant, apply_status__in=APPLYING_STATUSES)
         .values_list('app_platform', flat=True)
     )
-    def _needs(keyword):
-        return any(keyword.lower() in (p or '').lower() for p in active_platforms)
+    considering_platforms = set(
+        College.objects.filter(applicant=applicant, apply_status__in=CONSIDERING_STATUSES)
+        .values_list('app_platform', flat=True)
+    )
+    def _state(keyword):
+        if any(keyword.lower() in (p or '').lower() for p in applying_platforms):
+            return 'applying'
+        if any(keyword.lower() in (p or '').lower() for p in considering_platforms):
+            return 'considering'
+        return 'none'
     return [
-        {'label': 'Common App', 'active': _needs('common'),     'supported': True},
-        {'label': 'UC App',     'active': _needs('uc'),         'supported': True},
-        {'label': 'MIT App',    'active': _needs('mit'),        'supported': True},
-        {'label': 'CSU App',    'active': _needs('csu'),        'supported': False},
-        {'label': 'UCAS',       'active': _needs('ucas'),       'supported': False},
-        {'label': 'Canadian',   'active': _needs('canada'),     'supported': False},
-        {'label': 'Georgetown', 'active': _needs('georgetown'), 'supported': False},
-        {'label': 'Minerva',    'active': _needs('minerva'),    'supported': False},
+        {'label': 'Common App', 'state': _state('common'),     'supported': True},
+        {'label': 'UC App',     'state': _state('uc'),         'supported': True},
+        {'label': 'MIT App',    'state': _state('mit'),        'supported': True},
+        {'label': 'CSU App',    'state': _state('csu'),        'supported': False},
+        {'label': 'UCAS',       'state': _state('ucas'),       'supported': False},
+        {'label': 'Canadian',   'state': _state('canada'),     'supported': False},
+        {'label': 'Georgetown', 'state': _state('georgetown'), 'supported': False},
+        {'label': 'Minerva',    'state': _state('minerva'),    'supported': False},
     ]
 
 
