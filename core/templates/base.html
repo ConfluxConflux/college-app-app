@@ -56,6 +56,10 @@
         </a>
       </div>
       <div class="navbar-end">
+        <a class="navbar-item {% if request.resolver_match.url_name == 'feedback' %}is-active{% endif %}"
+           href="{% url 'core:feedback' %}">
+          Feedback
+        </a>
         <a class="navbar-item {% if request.resolver_match.url_name == 'profile' %}is-active{% endif %}"
            href="{% url 'core:profile' %}"
            style="gap: 0.6rem;">

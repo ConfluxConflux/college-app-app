@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Feedback - College App App{% endblock %}
+
+{% block content %}
+<div style="max-width: 480px; margin: 4rem auto; text-align: center;">
+  <h1 class="title">Feedback</h1>
+  <p class="subtitle" style="margin-bottom: 2.5rem;">Got thoughts? Love to hear them.</p>
+
+  <div style="display: flex; flex-direction: column; gap: 1rem; align-items: center;">
+    <a href="https://tinyurl.com/caa-feedback-form" target="_blank" rel="noopener noreferrer"
+       class="button is-primary is-medium" style="width: 260px;">
+      Feedback Form
+    </a>
+
+    <a href="mailto:chromaticconflux@gmail.com?subject=College%20App%20App%20Feedback&body=Hey%20Jacob!%20This%20is%20just%20a%20quick%20email%20with%20some%20quick%20feedback%20about%20the%20College%20App%20App.%20I%27m%20not%20gonna%20be%20perfectionistic%2C%20I%27m%20just%20gonna%20quickly%20write%20my%20feedback%20and%20then%20hit%20send"
+       class="button is-light" style="width: 260px;">
+      Email Jacob
+    </a>
+  </div>
+</div>
+{% endblock %}

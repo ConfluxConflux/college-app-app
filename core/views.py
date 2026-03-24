@@ -39,6 +39,10 @@ def landing(request):
     return render(request, 'core/landing.html')
 
 
+def feedback(request):
+    return render(request, 'core/feedback.html')
+
+
 def not_yet(request):
     return render(request, 'core/not_yet.html')
 
