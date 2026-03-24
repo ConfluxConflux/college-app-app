@@ -199,8 +199,6 @@
     ajaxURL: jsonUrl(),
     layout: 'fitDataStretch',
     columns: COLUMN_DEFS,
-    persistenceID: 'college-' + currentView,
-    persistence: { columns: ['visible', 'width'] },
     movableColumns: true,
     resizableColumns: true,
     height: 'calc(100vh - 340px)',
@@ -228,7 +226,34 @@
     },
   });
 
+  // ── Manual column visibility persistence (replaces Tabulator's built-in, which conflicts) ──
+  var COL_STORAGE_KEY = 'college-list-cols';
+
+  function loadSavedColVisibility() {
+    var saved;
+    try { saved = JSON.parse(localStorage.getItem(COL_STORAGE_KEY) || '{}'); } catch(e) { saved = {}; }
+    OPTIONAL_FIELDS.forEach(function(field) {
+      var col = table.getColumn(field);
+      if (!col) return;
+      if (saved[field] === true) {
+        table.showColumn(field);
+      } else {
+        table.hideColumn(field);
+      }
+    });
+  }
+
+  function saveColVisibility() {
+    var state = {};
+    OPTIONAL_FIELDS.forEach(function(field) {
+      var col = table.getColumn(field);
+      if (col) state[field] = col.isVisible();
+    });
+    try { localStorage.setItem(COL_STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+  }
+
   table.on('tableBuilt', function() {
+    loadSavedColVisibility();
     buildColToggle();
   });
 
@@ -265,7 +290,6 @@
       a.addEventListener('click', function(e) {
         e.stopPropagation();
         var freshCol = table.getColumn(field);
-        console.log('[col-toggle] field:', field, '| found:', freshCol, '| visible:', freshCol && freshCol.isVisible());
         if (!freshCol) return;
         if (freshCol.isVisible()) {
           table.hideColumn(field);
@@ -274,6 +298,7 @@
           table.showColumn(field);
           check.textContent = '✓';
         }
+        saveColVisibility();
       });
 
       list.appendChild(a);
@@ -298,8 +323,6 @@
       document.getElementById('college-search').value = '';
     }
 
-    // Rebuild table with new persistence ID and data
-    table.options.persistenceID = 'college-' + currentView;
     table.setData(jsonUrl());
   });
 
