@@ -6,7 +6,7 @@ def seed_hedgie_wedgie(apps, schema_editor):
     Applicant.objects.create(
         first_name='Hedgie',
         last_name='Wedgie',
-        email='hedgie@wedgie.com',
+        email='hedgiewedgie@proofschool.org',
     )
 
 
