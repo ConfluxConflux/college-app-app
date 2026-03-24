@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_POST, require_http_methods
 
 from colleges.models import College
+from core.utils import get_applicant
 from .models import EssayCategory, SupplementEssay
 
 
@@ -32,8 +33,9 @@ def _augment_essays(essays):
 
 
 def supplements_home(request):
+    applicant = get_applicant(request)
     all_essays = list(
-        SupplementEssay.objects.select_related('college', 'category').order_by('sort_order')
+        SupplementEssay.objects.filter(applicant=applicant).select_related('college', 'category').order_by('sort_order')
     )
     _augment_essays(all_essays)
 
@@ -54,10 +56,10 @@ def supplements_home(request):
         essay_map[(e.college_id, e.category_id)].append(e)
 
     matrix_colleges = list(
-        College.objects.filter(essays__isnull=False).distinct().order_by('name')
+        College.objects.filter(essays__applicant=applicant).distinct().order_by('name')
     )
     categories = list(
-        EssayCategory.objects.filter(essays__isnull=False).distinct()
+        EssayCategory.objects.filter(essays__applicant=applicant).distinct()
     )
 
     matrix_rows = []
