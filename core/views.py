@@ -51,15 +51,6 @@ def profile(request):
     return render(request, 'core/profile.html', {'applicant': applicant})
 
 
-@require_POST
-def profile_picture_upload(request):
-    applicant = _get_applicant(request)
-    if 'picture' in request.FILES:
-        applicant.uploaded_picture = request.FILES['picture']
-        applicant.save()
-    from django.http import JsonResponse
-    return JsonResponse({'avatar_url': applicant.avatar_url})
-
 
 # ── CoreActivity cell editing ──
 

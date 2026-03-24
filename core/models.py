@@ -7,16 +7,7 @@ class Applicant(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(blank=True)
-    # Static file path (e.g. 'img/profile.jpeg') or external URL
-    profile_picture = models.CharField(max_length=300, blank=True, default='img/default_profile.png')
-    uploaded_picture = models.ImageField(upload_to='avatars/', blank=True)
     brainstorm = models.TextField(blank=True)
-
-    @property
-    def avatar_url(self):
-        if self.uploaded_picture:
-            return self.uploaded_picture.url
-        return f"/static/{self.profile_picture or 'img/default_profile.png'}"
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'

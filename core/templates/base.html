@@ -60,10 +60,7 @@
            href="{% url 'core:profile' %}"
            style="gap: 0.6rem;">
           {{ applicant.first_name }}
-          <img src="{{ applicant.avatar_url }}"
-               alt="Profile"
-               data-pfp-nav
-               style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+          {% include "core/_avatar.html" with size=32 %}
         </a>
       </div>
     </div>

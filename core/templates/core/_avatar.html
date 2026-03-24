@@ -1,0 +1,13 @@
+{# Usage: {% include "core/_avatar.html" with size=32 %} — size in px #}
+{% with initial=applicant.first_name|slice:":1"|upper %}
+<svg width="{{ size }}" height="{{ size }}" viewBox="0 0 {{ size }} {{ size }}" xmlns="http://www.w3.org/2000/svg"
+     style="border-radius:50%;flex-shrink:0;display:block;">
+  <circle cx="{{ size|floatformat:0 }}" cy="{{ size|floatformat:0 }}" r="{{ size|floatformat:0 }}" fill="#5bc8b8"/>
+  <text x="50%" y="50%"
+        dominant-baseline="central"
+        text-anchor="middle"
+        font-family="'Libre Baskerville', Georgia, serif"
+        font-size="{% widthratio size 2 1 %}"
+        fill="white">{{ initial }}</text>
+</svg>
+{% endwith %}
