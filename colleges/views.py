@@ -77,20 +77,21 @@ APP_PROGRESS_STATUS_ORDER = Case(
     output_field=IntegerField(),
 )
 
-# Sort order for "All Colleges" view — most likely to apply first
+# Sort order for "All Colleges" view
 STATUS_ORDER = Case(
-    When(apply_status='applying', then=Value(1)),
-    When(apply_status='likely', then=Value(2)),
-    When(apply_status='considering', then=Value(3)),
-    When(apply_status='unlikely', then=Value(4)),
-    When(apply_status='not_applying', then=Value(5)),
+    When(apply_status='not_applying', then=Value(1)),
+    When(apply_status='considering', then=Value(2)),
+    When(apply_status='unlikely', then=Value(3)),
+    When(apply_status='applying', then=Value(4)),
+    When(apply_status='likely', then=Value(5)),
     When(apply_status='applied', then=Value(6)),
     When(apply_status='deferred', then=Value(7)),
     When(apply_status='waitlisted', then=Value(8)),
     When(apply_status='rejected', then=Value(9)),
-    When(apply_status='enrolled', then=Value(10)),
-    When(apply_status='withdrawn', then=Value(11)),
-    default=Value(12),
+    When(apply_status='accepted', then=Value(10)),
+    When(apply_status='enrolled', then=Value(11)),
+    When(apply_status='withdrawn', then=Value(12)),
+    default=Value(13),
     output_field=IntegerField(),
 )
 
