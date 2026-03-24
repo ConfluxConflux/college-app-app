@@ -17,4 +17,5 @@ urlpatterns = [
     path('signup/', views.not_yet, name='signup'),
     path('login/', views.not_yet, name='login'),
     path('switch-applicant/<int:pk>/', views.switch_applicant, name='switch_applicant'),
+    path('profile/upload-picture/', views.profile_picture_upload, name='profile_picture_upload'),
 ]

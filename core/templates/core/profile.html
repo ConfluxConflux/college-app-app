@@ -7,9 +7,31 @@
 <h1 class="title">Profile</h1>
 
 <div style="display: flex; align-items: center; gap: 2rem; margin-top: 1.5rem;">
-  <img src="{% static applicant.profile_picture|default:'img/default_profile.png' %}"
-       alt="Profile picture"
-       style="width: 120px; height: 120px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
+  <div style="position:relative; width:120px; height:120px; flex-shrink:0; cursor:pointer;"
+       title="Click to change photo"
+       onclick="document.getElementById('pfp-input').click()">
+    <img id="pfp-img"
+         src="{{ applicant.avatar_url }}"
+         alt="Profile picture"
+         style="width:120px; height:120px; border-radius:50%; object-fit:cover; display:block;">
+    <div style="position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.15s;"
+         onmouseenter="this.style.opacity=1" onmouseleave="this.style.opacity=0">
+      <span style="color:#fff;font-size:0.8rem;font-weight:600;">Change</span>
+    </div>
+  </div>
+  <input id="pfp-input" type="file" accept="image/*" style="display:none" onchange="uploadPfp(this)">
+  <script>
+    function uploadPfp(input) {
+      if (!input.files.length) return;
+      const form = new FormData();
+      form.append('picture', input.files[0]);
+      form.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+      fetch('{% url "core:profile_picture_upload" %}', { method: 'POST', body: form })
+        .then(r => r.json())
+        .then(d => { document.getElementById('pfp-img').src = d.avatar_url;
+                     document.querySelectorAll('img[data-pfp-nav]').forEach(el => el.src = d.avatar_url); });
+    }
+  </script>
   <div>
     <p class="title is-4" style="margin-bottom: 0.25rem;">{{ applicant.first_name }} {{ applicant.last_name }}</p>
     <p class="subtitle is-6 has-text-grey">{{ applicant.email }}</p>
