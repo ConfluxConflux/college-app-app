@@ -1,5 +1,10 @@
 /* College App App - Custom Styles */
 
+/* Opt out of browser auto dark mode — preserves intentional pastel status colors */
+:root {
+  color-scheme: light;
+}
+
 /* Color palette */
 :root {
   --periwinkle-light: #e4f4f2;
