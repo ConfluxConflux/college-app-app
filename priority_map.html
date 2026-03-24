@@ -263,22 +263,25 @@ items.forEach((item, i) => {
   const dot = el("circle", { cx: x, cy: y, r: r, fill: color, opacity: "0.9" });
   g.appendChild(dot);
 
-  // label — nudge so it doesn't overlap dot
-  const tx = x + (x > W/2 ? -r-4 : r+4);
-  const anchor = x > W/2 ? "end" : "start";
-  const t = el("text", {
+  // hover label (hidden by default)
+  const tx = x + (x > PAD.left + PW/2 ? -r-6 : r+6);
+  const anchor = x > PAD.left + PW/2 ? "end" : "start";
+  const hoverLabel = el("text", {
     x: tx, y: y + 4,
     "text-anchor": anchor,
-    fill: "#ccc",
-    "font-size": "10.5",
+    fill: "#fff",
+    "font-size": "11",
+    "font-weight": "500",
     "font-family": "-apple-system, sans-serif",
     "pointer-events": "none",
+    opacity: "0",
   }, label);
-  g.appendChild(t);
+  g.appendChild(hoverLabel);
 
   g.addEventListener("mouseenter", (e) => {
     dot.setAttribute("r", r + 2);
     dot.setAttribute("opacity", "1");
+    hoverLabel.setAttribute("opacity", "1");
     tipTitle.textContent = full;
     tipMeta.textContent  = note;
     tooltip.style.opacity = "1";
@@ -290,6 +293,7 @@ items.forEach((item, i) => {
   g.addEventListener("mouseleave", () => {
     dot.setAttribute("r", r);
     dot.setAttribute("opacity", "0.9");
+    hoverLabel.setAttribute("opacity", "0");
     tooltip.style.opacity = "0";
   });
 
