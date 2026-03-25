@@ -32,8 +32,8 @@
   <div x-show="showBackPrompt" @click.self="showBackPrompt = false" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;">
     <div style="position:relative;background:#fff;border-radius:12px;padding:2rem;max-width:360px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.2);font-family:'Libre Baskerville',Georgia,serif;">
       <button @click="showBackPrompt = false" style="position:absolute;top:0.6rem;right:0.75rem;background:none;border:none;font-size:1.2rem;line-height:1;color:#9ca3af;cursor:pointer;font-family:'Libre Baskerville',Georgia,serif;" aria-label="Dismiss">&times;</button>
-      <p style="font-size:1.1rem;font-weight:600;margin:0 0 0.5rem;">Copy your writing somewhere else!</p>
-      <p style="font-size:0.9rem;color:#666;margin:0 0 1.5rem;">Your text won't be saved when you leave.</p>
+      <p style="font-size:1.1rem;font-weight:600;margin:0 0 0.5rem;">Copy your writing<br>somewhere else!</p>
+      <p style="font-size:0.9rem;color:#666;margin:0 0 1.5rem;font-style:italic;">Your text won't be saved<br>when you leave.</p>
       <div style="display:flex;gap:0.75rem;justify-content:center;">
         <div style="position:relative;">
           <button @click="copyText()" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:0.6rem 1.25rem;font-size:0.95rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Libre Baskerville',Georgia,serif;">Ok wait lemme do that</button>
