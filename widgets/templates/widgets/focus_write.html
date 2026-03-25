@@ -39,7 +39,7 @@
           <button @click="copyText()" style="background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:0.6rem 1.25rem;font-size:0.95rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Libre Baskerville',Georgia,serif;">Copy all text</button>
           <span x-show="copied" style="position:absolute;left:50%;transform:translateX(-50%);top:calc(100% + 0.3rem);font-size:0.8rem;color:#16a34a;white-space:nowrap;">Copied to clipboard!</span>
         </div>
-        <button @click="goBack()" style=":style="copied ? 'background:#00d1b2' : 'background:#dc2626'" style="color:#fff;border:none;border-radius:8px;padding:0.6rem 1.25rem;font-size:0.95rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Libre Baskerville',Georgia,serif;transition:background 0.2s;">Leave</button>
+        <button @click="goBack()" :style="copied ? 'background:#00d1b2' : 'background:#dc2626'" style="color:#fff;border:none;border-radius:8px;padding:0.6rem 1.25rem;font-size:0.95rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:'Libre Baskerville',Georgia,serif;transition:background 0.2s;">Leave</button>
       </div>
     </div>
   </div>
