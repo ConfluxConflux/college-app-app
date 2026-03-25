@@ -399,7 +399,7 @@ def _build_dropdown_colleges(applicant):
     colleges = list(
         UserCollege.objects.filter(applicant=applicant)
         .annotate(status_order=APP_PROGRESS_STATUS_ORDER)
-        .order_by('status_order', 'name')
+        .order_by('status_order', 'college__name', 'display_name')
     )
 
     APPLYING_STATUSES = {'applying', 'applied', 'deferred', 'waitlisted', 'accepted', 'enrolled'}
