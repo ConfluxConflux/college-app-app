@@ -153,6 +153,8 @@
   document.addEventListener('htmx:afterSettle', function(e) {
     if (e.target.id === 'college-table-wrapper' || e.target.closest('#college-table-wrapper')) {
       applyVisibility();
+      var sel = document.querySelector('[data-auto-open]');
+      if (sel) sel.click();
     }
   });
 })();
