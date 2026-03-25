@@ -2493,3 +2493,12 @@ unitid,name,city,state,country,latitude,longitude,control,tuition_instate,fees_i
 498915,Agora University,Burke,VA,USA,38.775104,-77.265929,private nonprofit,,,,,,,,,trimester,,,0
 499149,Herzing University-Nashville,Nashville,TN,USA,36.154732,-86.634530,private nonprofit,12360,1060,12360,1060,,,13420,,semester,91.2%,,0
 499635,EDP University of Puerto Rico-Caguas,Caguas,PR,USA,18.242649,-66.025309,private nonprofit,5550,1500,12025,2100,,,7050,,semester,,,0
+,Deep Springs College,Dyer,NV,USA,,,,,,,,,,,,,,,0
+,McGill University,Montreal,QC,Canada,,,,,,,,,,,,,,,2
+,University of Toronto,Toronto,ON,Canada,,,,,,,,,,,,,,,4
+,University of Waterloo,Waterloo,ON,Canada,,,,,,,,,,,,,,,3
+,Oxford University,Oxford,,UK,,,,,,,,,,,,,,,0
+,Cambridge University,Cambridge,,UK,,,,,,,,,,,,,,,0
+,Durham University,Durham,,UK,,,,,,,,,,,,,,,0
+,University of Warwick,Coventry,,UK,,,,,,,,,,,,,,,1
+,TU Delft,Delft,,Netherlands,,,,,,,,,,,,,,,0
