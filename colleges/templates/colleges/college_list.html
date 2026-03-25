@@ -138,13 +138,14 @@
   });
 
 
-  // Click row in "Your List" view → Applications page (shift+click name to edit)
+  // Click col-name in "Your List" view → Applications page (modifier+click to edit name)
   document.getElementById('college-table-wrapper').addEventListener('click', function(e) {
     if (document.getElementById('view-hidden').value !== 'applications') return;
     var tr = e.target.closest('tr[data-pk]');
     if (!tr) return;
+    if (!e.target.closest('td.col-name')) return;
+    if (e.shiftKey || e.ctrlKey || e.altKey) return;
     if (e.target.closest('input, select, button, textarea')) return;
-    if ((e.shiftKey || e.ctrlKey || e.altKey) && e.target.closest('td.col-name')) return;
     window.location.href = '{% url "colleges:applications" %}?college=' + tr.dataset.pk;
   });
 
