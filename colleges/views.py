@@ -361,18 +361,83 @@ def college_delete(request, pk):
     return redirect('colleges:list')
 
 
+APP_STATUS_ORDER_MAP = {
+    'applying': 1, 'likely': 2, 'considering': 3, 'unlikely': 4,
+    'deferred': 5, 'waitlisted': 6, 'applied': 7, 'accepted': 8,
+    'rejected': 9, 'enrolled': 10, 'not_applying': 11, 'withdrawn': 12,
+}
+
+
+class SpecialAppEntry:
+    """Synthetic dropdown entry for Common App / UC App."""
+    def __init__(self, pk, name):
+        self.pk = pk
+        self.name = name
+
+
+def _build_dropdown_colleges(applicant):
+    """Returns ordered list for the Applications dropdown, with Common App and UC App
+    inserted at the top of their respective status category."""
+    colleges = list(
+        College.objects.filter(applicant=applicant)
+        .annotate(status_order=APP_PROGRESS_STATUS_ORDER)
+        .order_by('status_order', 'name')
+    )
+
+    APPLYING_STATUSES = {'applying', 'applied', 'deferred', 'waitlisted', 'accepted', 'enrolled'}
+    CONSIDERING_STATUSES = {'considering'}
+    applying_platforms = set(
+        College.objects.filter(applicant=applicant, apply_status__in=APPLYING_STATUSES)
+        .values_list('app_platform', flat=True)
+    )
+    considering_platforms = set(
+        College.objects.filter(applicant=applicant, apply_status__in=CONSIDERING_STATUSES)
+        .values_list('app_platform', flat=True)
+    )
+
+    def _state(keyword):
+        if any(keyword.lower() in (p or '').lower() for p in applying_platforms):
+            return 'applying'
+        if any(keyword.lower() in (p or '').lower() for p in considering_platforms):
+            return 'considering'
+        return 'none'
+
+    common_order = APP_STATUS_ORDER_MAP.get(_state('common'), 13)
+    uc_order = APP_STATUS_ORDER_MAP.get(_state('uc'), 13)
+
+    result = []
+    common_inserted = False
+    uc_inserted = False
+
+    for college in colleges:
+        col_order = APP_STATUS_ORDER_MAP.get(college.apply_status, 13)
+        if not common_inserted and common_order <= col_order:
+            result.append(SpecialAppEntry('__common__', 'Common App'))
+            common_inserted = True
+        if not uc_inserted and uc_order <= col_order:
+            result.append(SpecialAppEntry('__uc__', 'UC App'))
+            uc_inserted = True
+        result.append(college)
+
+    if not common_inserted:
+        result.append(SpecialAppEntry('__common__', 'Common App'))
+    if not uc_inserted:
+        result.append(SpecialAppEntry('__uc__', 'UC App'))
+
+    return result
+
+
 def applications(request):
     applicant = get_applicant(request)
-    colleges = College.objects.filter(applicant=applicant).annotate(
-        status_order=APP_PROGRESS_STATUS_ORDER
-    ).order_by('status_order', 'name')
+    colleges = _build_dropdown_colleges(applicant)
 
     selected = None
     selected_pk = request.GET.get('college')
     if selected_pk:
         try:
-            selected = colleges.get(pk=int(selected_pk))
-        except (College.DoesNotExist, ValueError):
+            pk_int = int(selected_pk)
+            selected = College.objects.filter(applicant=applicant, pk=pk_int).first()
+        except (ValueError, TypeError):
             pass
 
     # Status choices for the status badge dropdown
@@ -522,7 +587,7 @@ def applications(request):
 
 def applications_uc(request):
     applicant = get_applicant(request)
-    colleges = College.objects.filter(applicant=applicant).order_by('order', 'name')
+    colleges = _build_dropdown_colleges(applicant)
 
     # UC activities
     uc_entries = list(UCEntry.objects.filter(applicant=applicant).order_by('order'))
@@ -553,7 +618,7 @@ def applications_uc(request):
 
 def applications_common(request):
     applicant = get_applicant(request)
-    colleges = College.objects.filter(applicant=applicant).order_by('order', 'name')
+    colleges = _build_dropdown_colleges(applicant)
 
     # Common App activities + honors
     ca_activities = list(CommonAppActivity.objects.filter(applicant=applicant).order_by('order'))

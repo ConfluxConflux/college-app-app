@@ -9,10 +9,8 @@
   <div class="select" style="font-size:2rem; font-family:'Libre Baskerville',Georgia,serif; flex:1;">
     <select style="font-size:inherit; font-family:inherit; font-weight:bold; height:auto; padding:0.15rem 3.5rem 0.15rem 0.5rem; width:100%;"
             onchange="var v=this.value; if(v==='__common__'){ window.location='/applications/common/'; } else if(v==='__uc__'){ window.location='/applications/uc/'; } else if(v){ localStorage.setItem('applications_college', v); window.location='/applications/?college='+v; }">
-      <option value="__common__" selected>Common App</option>
-      <option value="__uc__">UC App</option>
       {% for college in colleges %}
-      <option value="{{ college.pk }}">{{ college.name }}</option>
+      <option value="{{ college.pk }}" {% if college.pk == '__common__' %}selected{% endif %}>{{ college.name }}</option>
       {% endfor %}
     </select>
   </div>
