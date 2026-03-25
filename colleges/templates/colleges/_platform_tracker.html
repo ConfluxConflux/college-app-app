@@ -3,10 +3,17 @@
     <div style="font-size:0.7rem; color:#999; font-family:'Open Sans',sans-serif; font-style:italic; margin-bottom:0.4rem; text-align:right;">supported by College App App!</div>
     <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
       {% for p in platform_tracker %}{% if p.supported %}
+        {% if p.pk %}
+        <a href="{% url 'colleges:applications' %}?college={{ p.pk }}" style="padding:0.3rem 0.85rem; border-radius:999px; font-size:0.82rem; font-weight:600; font-family:'Open Sans',sans-serif; text-decoration:none;
+          {% if p.state == 'applying' %}background:#3b82f6; color:#fff;
+          {% elif p.state == 'considering' %}background:#7c3aed; color:#fff;
+          {% else %}background:#e8e8e8; color:#aaa;{% endif %}">{{ p.label }}</a>
+        {% else %}
         <span style="padding:0.3rem 0.85rem; border-radius:999px; font-size:0.82rem; font-weight:600; font-family:'Open Sans',sans-serif;
           {% if p.state == 'applying' %}background:#3b82f6; color:#fff;
           {% elif p.state == 'considering' %}background:#7c3aed; color:#fff;
           {% else %}background:#e8e8e8; color:#aaa;{% endif %}">{{ p.label }}</span>
+        {% endif %}
       {% endif %}{% endfor %}
     </div>
   </div>

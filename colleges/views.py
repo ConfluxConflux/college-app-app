@@ -163,6 +163,11 @@ def college_list(request):
 def _build_platform_tracker(applicant):
     APPLYING_STATUSES = {'applying', 'applied', 'deferred', 'waitlisted', 'accepted', 'enrolled'}
     CONSIDERING_STATUSES = {'considering'}
+    platform_colleges = {
+        row['app_platform']: row['pk']
+        for row in College.objects.filter(applicant=applicant)
+        .values('app_platform', 'pk')
+    }
     applying_platforms = set(
         College.objects.filter(applicant=applicant, apply_status__in=APPLYING_STATUSES)
         .values_list('app_platform', flat=True)
@@ -177,15 +182,17 @@ def _build_platform_tracker(applicant):
         if any(keyword.lower() in (p or '').lower() for p in considering_platforms):
             return 'considering'
         return 'none'
+    def _pk(platform_key):
+        return platform_colleges.get(platform_key)
     return [
-        {'label': 'Common App', 'state': _state('common'),     'supported': True},
-        {'label': 'UC App',     'state': _state('uc'),         'supported': True},
-        {'label': 'MIT App',    'state': _state('mit'),        'supported': True},
-        {'label': 'CSU App',    'state': _state('csu'),        'supported': False},
-        {'label': 'UCAS',       'state': _state('ucas'),       'supported': False},
-        {'label': 'Canadian',   'state': _state('canada'),     'supported': False},
-        {'label': 'Georgetown', 'state': _state('georgetown'), 'supported': False},
-        {'label': 'Minerva',    'state': _state('minerva'),    'supported': False},
+        {'label': 'Common App', 'state': _state('common'),     'supported': True,  'pk': None},
+        {'label': 'UC App',     'state': _state('uc'),         'supported': True,  'pk': None},
+        {'label': 'MIT App',    'state': _state('mit'),        'supported': True,  'pk': _pk('mit')},
+        {'label': 'CSU App',    'state': _state('csu'),        'supported': False, 'pk': None},
+        {'label': 'UCAS',       'state': _state('ucas'),       'supported': False, 'pk': None},
+        {'label': 'Canadian',   'state': _state('canada'),     'supported': False, 'pk': None},
+        {'label': 'Georgetown', 'state': _state('georgetown'), 'supported': False, 'pk': None},
+        {'label': 'Minerva',    'state': _state('minerva'),    'supported': False, 'pk': None},
     ]
 
 
