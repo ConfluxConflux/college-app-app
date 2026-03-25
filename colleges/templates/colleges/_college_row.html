@@ -11,6 +11,10 @@
       <strong>{{ college.name }}</strong>
     {% elif field_name == 'apply_status' %}
       <span class="tag {{ college.status_color }} is-light">{{ college.get_apply_status_display|default:"—" }}</span>
+    {% elif field_name == 'difficulty' %}
+      {% if college.difficulty %}
+        <span class="tag" style="{{ college.difficulty_color }}">{{ college.get_difficulty_display }}</span>
+      {% else %}—{% endif %}
     {% elif field_name == 'applicant_notes' %}
       {{ college.applicant_notes|truncatewords:12 }}
     {% else %}

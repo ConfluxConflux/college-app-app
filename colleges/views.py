@@ -24,6 +24,7 @@ DEFAULT_FIELDS = [
 # Optional columns the user can toggle on
 OPTIONAL_FIELDS = [
     ('tier', 'Tier'),
+    ('difficulty', 'Difficulty'),
     ('acceptance_rate', 'Acc. Rate'),
     ('collegevine_chance', 'CV Chance'),
     ('sat_avg', 'SAT Avg'),
@@ -234,6 +235,13 @@ def college_edit_cell(request, pk, field):
         return render(request, 'colleges/_cell_edit_select.html', {
             'college': college, 'field': field, 'field_label': field_label,
             'current_value': current_value, 'choices': choices,
+            'table_fields': ALL_TABLE_FIELDS,
+        })
+
+    if field == 'difficulty':
+        return render(request, 'colleges/_cell_edit_select.html', {
+            'college': college, 'field': field, 'field_label': field_label,
+            'current_value': current_value, 'choices': College.DIFFICULTY_CHOICES,
             'table_fields': ALL_TABLE_FIELDS,
         })
 

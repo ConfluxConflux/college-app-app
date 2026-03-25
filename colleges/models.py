@@ -17,6 +17,12 @@ class College(models.Model):
         ('withdrawn', 'Withdrawn'),
     ]
 
+    DIFFICULTY_CHOICES = [
+        ('safety', 'Safety'),
+        ('target', 'Target'),
+        ('reach', 'Reach'),
+    ]
+
     APP_PLATFORM_CHOICES = [
         ('common', 'Common App'),
         ('uc', 'UC Application'),
@@ -35,6 +41,7 @@ class College(models.Model):
     )
     name = models.CharField(max_length=200)
     apply_status = models.CharField(max_length=20, choices=APPLY_STATUS_CHOICES, default='not_applying')
+    difficulty = models.CharField(max_length=10, choices=DIFFICULTY_CHOICES, blank=True)
     tier = models.CharField(max_length=10, blank=True)
     acceptance_rate = models.CharField(max_length=10, blank=True)
     collegevine_chance = models.CharField(max_length=10, blank=True)
@@ -94,6 +101,14 @@ class College(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def difficulty_color(self):
+        return {
+            'safety': 'background:#bbf7d0;color:#14532d;',
+            'target': 'background:#bfdbfe;color:#1e3a8a;',
+            'reach': 'background:#e9d5ff;color:#581c87;',
+        }.get(self.difficulty, '')
 
     @property
     def status_color(self):
