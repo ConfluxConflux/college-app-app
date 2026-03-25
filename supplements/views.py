@@ -6,7 +6,7 @@ from django.views.decorators.http import require_POST, require_http_methods
 
 from colleges.models import College
 from core.utils import get_applicant
-from .models import EssayCategory, SupplementEssay
+from .models import EssayCategory, SupplementEssay, UCPersonalInsightQuestion, CommonAppEssay
 
 
 def _augment_essays(essays):
@@ -134,3 +134,40 @@ def essay_focus(request, pk):
     essay = get_object_or_404(SupplementEssay, pk=pk)
     _augment_essays([essay])
     return render(request, 'supplements/focus.html', {'essay': essay})
+
+
+@require_POST
+def uc_piq_status_edit(request, pk):
+    piq = get_object_or_404(UCPersonalInsightQuestion, pk=pk)
+    status = request.POST.get('status', '')
+    if status in {v for v, _ in UCPersonalInsightQuestion.STATUS_CHOICES}:
+        piq.status = status
+        piq.save()
+    return HttpResponse(status=204)
+
+
+@require_POST
+def uc_piq_save(request, pk):
+    piq = get_object_or_404(UCPersonalInsightQuestion, pk=pk)
+    piq.response = request.POST.get('response', '')
+    piq.save()
+    return JsonResponse({'word_count': piq.word_count})
+
+
+@require_POST
+def common_essay_status_edit(request, pk):
+    essay = get_object_or_404(CommonAppEssay, pk=pk)
+    status = request.POST.get('status', '')
+    if status in {v for v, _ in CommonAppEssay.STATUS_CHOICES}:
+        essay.status = status
+        essay.save()
+    return HttpResponse(status=204)
+
+
+@require_POST
+def common_essay_save(request, pk):
+    essay = get_object_or_404(CommonAppEssay, pk=pk)
+    essay.response = request.POST.get('response', '')
+    essay.prompt_choice = request.POST.get('prompt_choice') or None
+    essay.save()
+    return JsonResponse({'word_count': essay.word_count})

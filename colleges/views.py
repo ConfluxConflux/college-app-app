@@ -11,7 +11,7 @@ from .models import College
 from activities.models import UCEntry, CommonAppActivity, CommonAppHonor, MITEntry
 from core.models import Applicant
 from core.utils import get_applicant
-from supplements.models import SupplementEssay
+from supplements.models import SupplementEssay, UCPersonalInsightQuestion, CommonAppEssay, UC_PIQ_PROMPTS, COMMON_APP_PROMPTS
 
 
 # Always-visible columns
@@ -179,14 +179,14 @@ def _build_platform_tracker(applicant):
         return 'none'
     mit = College.objects.filter(applicant=applicant, app_platform__iexact='mit').first()
     return [
-        {'label': 'Common App', 'state': _state('common'),     'supported': True,  'pk': None},
-        {'label': 'UC App',     'state': _state('uc'),         'supported': True,  'pk': None},
-        {'label': 'MIT App',    'state': _state('mit'),        'supported': True,  'pk': mit.pk if mit else None},
-        {'label': 'CSU App',    'state': _state('csu'),        'supported': False, 'pk': None},
-        {'label': 'UCAS',       'state': _state('ucas'),       'supported': False, 'pk': None},
-        {'label': 'Canadian',   'state': _state('canada'),     'supported': False, 'pk': None},
-        {'label': 'Georgetown', 'state': _state('georgetown'), 'supported': False, 'pk': None},
-        {'label': 'Minerva',    'state': _state('minerva'),    'supported': False, 'pk': None},
+        {'label': 'Common App', 'state': _state('common'),     'supported': True,  'href': '/colleges/applications/common/'},
+        {'label': 'UC App',     'state': _state('uc'),         'supported': True,  'href': '/colleges/applications/uc/'},
+        {'label': 'MIT App',    'state': _state('mit'),        'supported': True,  'href': f'/colleges/applications/?college={mit.pk}' if mit else None},
+        {'label': 'CSU App',    'state': _state('csu'),        'supported': False, 'href': None},
+        {'label': 'UCAS',       'state': _state('ucas'),       'supported': False, 'href': None},
+        {'label': 'Canadian',   'state': _state('canada'),     'supported': False, 'href': None},
+        {'label': 'Georgetown', 'state': _state('georgetown'), 'supported': False, 'href': None},
+        {'label': 'Minerva',    'state': _state('minerva'),    'supported': False, 'href': None},
     ]
 
 
@@ -517,5 +517,57 @@ def applications(request):
         'mit_count': mit_count,
         'act_filled': act_filled,
         'act_max': act_max,
+    })
+
+
+def applications_uc(request):
+    applicant = get_applicant(request)
+
+    # UC activities
+    uc_entries = list(UCEntry.objects.filter(applicant=applicant).order_by('order'))
+    uc_count = len(uc_entries)
+
+    # Ensure all 8 PIQs exist for this applicant
+    existing = {piq.question_number for piq in UCPersonalInsightQuestion.objects.filter(applicant=applicant)}
+    for n in range(1, 9):
+        if n not in existing:
+            UCPersonalInsightQuestion.objects.create(applicant=applicant, question_number=n)
+    piqs = list(UCPersonalInsightQuestion.objects.filter(applicant=applicant).order_by('question_number'))
+
+    piq_done = sum(1 for p in piqs if p.status == 'done')
+    piq_wip = sum(1 for p in piqs if p.status == 'wip')
+    piq_maybe = sum(1 for p in piqs if p.status == 'maybe')
+
+    return render(request, 'colleges/applications_uc.html', {
+        'uc_entries': uc_entries,
+        'uc_count': uc_count,
+        'piqs': piqs,
+        'piq_done': piq_done,
+        'piq_wip': piq_wip,
+        'piq_maybe': piq_maybe,
+        'status_choices': UCPersonalInsightQuestion.STATUS_CHOICES,
+    })
+
+
+def applications_common(request):
+    applicant = get_applicant(request)
+
+    # Common App activities + honors
+    ca_activities = list(CommonAppActivity.objects.filter(applicant=applicant).order_by('order'))
+    ca_honors = list(CommonAppHonor.objects.filter(applicant=applicant).order_by('order'))
+    ca_count = len(ca_activities)
+    honor_count = len(ca_honors)
+
+    # Personal essay (get or create)
+    essay, _ = CommonAppEssay.objects.get_or_create(applicant=applicant)
+
+    return render(request, 'colleges/applications_common.html', {
+        'ca_activities': ca_activities,
+        'ca_honors': ca_honors,
+        'ca_count': ca_count,
+        'honor_count': honor_count,
+        'essay': essay,
+        'prompts': [(i + 1, p) for i, p in enumerate(COMMON_APP_PROMPTS)],
+        'status_choices': CommonAppEssay.STATUS_CHOICES,
     })
 

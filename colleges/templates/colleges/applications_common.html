@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}Common App - College App App{% endblock %}
+
+{% block content %}
+
+<div style="display:flex; align-items:baseline; gap:0.75em; margin-bottom:1rem;">
+  <h1 class="title mb-0">Common App</h1>
+</div>
+
+{# ── Progress summary tiles ── #}
+<div class="columns is-variable is-3 mb-5">
+
+  <div class="column is-one-third">
+    <a href="/activities/common/" class="box is-block" style="text-decoration:none; color:inherit; height:100%;">
+      <p class="app-tile-heading">Activities</p>
+      <p class="app-tile-stat">{{ ca_count }}<span class="app-tile-denom">/10 activities</span></p>
+      <p style="font-size:0.9rem; color:#555; margin-bottom:0.4rem;">{{ honor_count }}<span style="color:#888;">/5 honors</span></p>
+      <span class="tag is-light" style="font-size:0.7rem;">Common App</span>
+      <p class="app-tile-link">→ edit in Activities</p>
+    </a>
+  </div>
+
+  <div class="column is-one-third">
+    <div class="box" style="height:100%;">
+      <p class="app-tile-heading">Personal Essay</p>
+      {% if essay.status %}
+        <p class="app-tile-stat" style="font-size:1.5rem;">
+          {% if essay.status == 'done' %}<span class="tag is-success">Done</span>
+          {% elif essay.status == 'wip' %}<span class="tag is-warning">WIP</span>
+          {% elif essay.status == 'maybe' %}<span class="tag is-info">Maybe</span>
+          {% endif %}
+        </p>
+      {% else %}
+        <p class="app-tile-stat" style="color:#bbb;">—</p>
+      {% endif %}
+      <p style="font-size:0.82rem; color:#888; margin-top:0.25rem;">650 words</p>
+    </div>
+  </div>
+
+  <div class="column is-one-third">
+    <div class="box" style="height:100%;">
+      <p class="app-tile-heading">Essay Progress</p>
+      <div class="app-progress-bar" style="margin:0.6rem 0 0.3rem;">
+        <div style="width:{{ essay.progress_pct }}%; height:100%;
+                    background:{% if essay.status == 'done' %}#48c78e{% elif essay.progress_pct >= 60 %}#ffe08a{% else %}#74b9d8{% endif %};
+                    transition:width 0.3s;"></div>
+      </div>
+      <p style="font-size:0.85rem; color:#555;">{{ essay.word_count }}/650 words</p>
+    </div>
+  </div>
+
+</div>
+
+{# ── Activities ── #}
+<div id="activities-section" class="box mb-4">
+  <div class="level mb-3">
+    <div class="level-left">
+      <h2 class="subtitle mb-0" style="font-weight:700; font-size:1.1rem;">
+        Activities List
+        <span class="tag is-light ml-2" style="font-size:0.72rem; vertical-align:middle; font-weight:400;">Common App</span>
+      </h2>
+    </div>
+    <div class="level-right">
+      <a href="/activities/common/" class="is-size-7 has-text-grey">Edit in Activities →</a>
+    </div>
+  </div>
+
+  <p class="app-section-label">Activities ({{ ca_count }}/10)</p>
+  {% if ca_activities %}
+  <table class="table is-fullwidth is-narrow mb-4" style="font-size:0.875rem;">
+    <tbody>
+      {% for act in ca_activities %}
+      <tr>
+        <td style="width:130px;">
+          <span class="tag is-light" style="font-size:0.7rem;">{{ act.get_activity_type_display|truncatechars:22 }}</span>
+        </td>
+        <td style="font-weight:600; max-width:200px;">{{ act.organization|truncatechars:40 }}</td>
+        <td style="color:#555;">{{ act.description|truncatechars:70 }}</td>
+        <td style="color:#aaa; font-size:0.8rem; white-space:nowrap; text-align:right;">
+          {% if act.hours_per_week %}{{ act.hours_per_week }}h/wk{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="has-text-grey is-size-7 mb-4">No activities added yet.</p>
+  {% endif %}
+
+  <p class="app-section-label">Honors ({{ honor_count }}/5)</p>
+  {% if ca_honors %}
+  <table class="table is-fullwidth is-narrow" style="font-size:0.875rem;">
+    <tbody>
+      {% for hon in ca_honors %}
+      <tr>
+        <td>{{ hon.title }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="has-text-grey is-size-7">No honors added yet.</p>
+  {% endif %}
+</div>
+
+{# ── Personal Essay ── #}
+<div id="essay-section" class="box mb-4">
+  <div class="level mb-2">
+    <div class="level-left">
+      <div>
+        <h2 class="subtitle mb-1" style="font-weight:700; font-size:1.1rem;">Personal Essay</h2>
+        <p style="font-size:0.82rem; color:#888;">650 words · Choose one prompt</p>
+      </div>
+    </div>
+    <div class="level-right">
+      <div style="display:flex; align-items:center; gap:0.75rem;" x-data="{ s: '{{ essay.status }}' }">
+        <select x-model="s" name="status"
+                :class="s === 'done' ? 'essay-status-pill done' : s === 'wip' ? 'essay-status-pill wip' : s === 'maybe' ? 'essay-status-pill maybe' : 'essay-status-pill blank'"
+                hx-post="{% url 'supplements:common_essay_status' essay.pk %}"
+                hx-trigger="change" hx-swap="none">
+          {% for val, label in status_choices %}
+          <option value="{{ val }}" {% if val == essay.status %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <table class="table is-fullwidth mt-2" style="font-size:0.875rem;">
+    <thead>
+      <tr>
+        <th style="width:40px;">#</th>
+        <th>Prompt</th>
+        <th style="width:80px; text-align:center;">Selected</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for num, prompt in prompts %}
+      <tr style="{% if essay.prompt_choice == num %}background:#f0fdf4;{% endif %}">
+        <td style="color:#aaa; font-weight:600;">{{ num }}</td>
+        <td style="color:#444;">{{ prompt }}</td>
+        <td style="text-align:center;">
+          {% if essay.prompt_choice == num %}
+          <span class="tag is-success is-light" style="font-size:0.72rem;">✓</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if essay.response %}
+  <div class="mt-3" style="border-top:1px solid #eee; padding-top:1rem;">
+    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem;">
+      <p class="app-section-label" style="margin:0;">Response</p>
+      <span style="font-size:0.75rem; color:#888;">{{ essay.word_count }}/650 words</span>
+      <div style="flex:1; height:5px; border-radius:3px; background:#e8e8e8; overflow:hidden;">
+        <div style="width:{{ essay.progress_pct }}%; height:100%;
+                    background:{% if essay.status == 'done' %}#48c78e{% elif essay.progress_pct >= 60 %}#ffe08a{% else %}#74b9d8{% endif %};"></div>
+      </div>
+    </div>
+    <p style="font-size:0.875rem; color:#555; white-space:pre-wrap;">{{ essay.response|truncatewords:60 }}{% if essay.word_count > 60 %} <span style="color:#aaa;">…</span>{% endif %}</p>
+  </div>
+  {% else %}
+  <p class="has-text-grey is-size-7 mt-3">No response written yet.</p>
+  {% endif %}
+</div>
+
+{% endblock %}
