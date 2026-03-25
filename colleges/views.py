@@ -1,13 +1,13 @@
 import json
 from collections import defaultdict
 
-from django.db.models import Case, When, Value, IntegerField
+from django.db.models import Case, When, Value, IntegerField, Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST, require_http_methods
 
 from .forms import CollegeForm
-from .models import College
+from .models import UserCollege
 from activities.models import UCEntry, CommonAppActivity, CommonAppHonor, MITEntry
 from core.models import Applicant
 from core.utils import get_applicant
@@ -104,25 +104,41 @@ def college_list(request):
 
     applicant = get_applicant(request)
     view_config = VIEWS[current_view]
-    colleges = College.objects.filter(applicant=applicant)
+    colleges = UserCollege.objects.filter(applicant=applicant)
 
     # Apply view filter
     if view_config['statuses']:
         colleges = colleges.filter(apply_status__in=view_config['statuses'])
 
     # Sorting — "all" defaults to likelihood order; others default to model ordering
+    # Map UI field names to actual DB field names for ORM ordering
+    SORT_FIELD_MAP = {
+        'name': 'college__name',
+        'acceptance_rate': 'acceptance_rate_override',
+        'app_platform': 'app_platform_override',
+        'terms': 'academic_calendar_override',
+        'ea_deadline': 'ea_deadline_override',
+        'ed1_deadline': 'ed1_deadline_override',
+        'ed2_deadline': 'ed2_deadline_override',
+        'rd_deadline': 'rd_deadline_override',
+        'sat_avg': 'sat_avg_override',
+        'undergrad_enrollment': 'undergrad_enrollment_override',
+    }
     sort = request.GET.get('sort', '')
     sort_dir = request.GET.get('dir', 'asc')
     if sort in EDITABLE_FIELDS:
-        order = sort if sort_dir == 'asc' else f'-{sort}'
+        db_field = SORT_FIELD_MAP.get(sort, sort)
+        order = db_field if sort_dir == 'asc' else f'-{db_field}'
         colleges = colleges.order_by(order)
     elif current_view == 'all':
-        colleges = colleges.annotate(status_order=STATUS_ORDER).order_by('status_order', 'name')
+        colleges = colleges.annotate(status_order=STATUS_ORDER).order_by('status_order', 'college__name')
 
-    # Search
+    # Search (display_name if set, else canonical name)
     search = request.GET.get('q', '')
     if search:
-        colleges = colleges.filter(name__icontains=search)
+        colleges = colleges.filter(
+            Q(display_name__icontains=search) | Q(college__name__icontains=search)
+        )
 
     # Status sub-filter (within the current view's statuses)
     status_filter = request.GET.get('status', '')
@@ -133,11 +149,11 @@ def college_list(request):
 
     # Status choices for the filter dropdown — limit to current view's statuses, exclude hidden statuses
     HIDDEN_STATUSES = {'likely', 'unlikely'}
-    all_choices = dict(College.APPLY_STATUS_CHOICES)
+    all_choices = dict(UserCollege.APPLY_STATUS_CHOICES)
     if view_config['statuses']:
         view_status_choices = [(v, all_choices[v]) for v in view_config['statuses'] if v in all_choices and v not in HIDDEN_STATUSES]
     else:
-        view_status_choices = [(v, l) for v, l in College.APPLY_STATUS_CHOICES if v not in HIDDEN_STATUSES]
+        view_status_choices = [(v, l) for v, l in UserCollege.APPLY_STATUS_CHOICES if v not in HIDDEN_STATUSES]
 
     context = {
         'colleges': colleges,
@@ -164,12 +180,12 @@ def _build_platform_tracker(applicant):
     APPLYING_STATUSES = {'applying', 'applied', 'deferred', 'waitlisted', 'accepted', 'enrolled'}
     CONSIDERING_STATUSES = {'considering'}
     applying_platforms = set(
-        College.objects.filter(applicant=applicant, apply_status__in=APPLYING_STATUSES)
-        .values_list('app_platform', flat=True)
+        UserCollege.objects.filter(applicant=applicant, apply_status__in=APPLYING_STATUSES)
+        .values_list('app_platform_override', flat=True)
     )
     considering_platforms = set(
-        College.objects.filter(applicant=applicant, apply_status__in=CONSIDERING_STATUSES)
-        .values_list('app_platform', flat=True)
+        UserCollege.objects.filter(applicant=applicant, apply_status__in=CONSIDERING_STATUSES)
+        .values_list('app_platform_override', flat=True)
     )
     def _state(keyword):
         if any(keyword.lower() in (p or '').lower() for p in applying_platforms):
@@ -177,7 +193,7 @@ def _build_platform_tracker(applicant):
         if any(keyword.lower() in (p or '').lower() for p in considering_platforms):
             return 'considering'
         return 'none'
-    mit = College.objects.filter(applicant=applicant, app_platform__iexact='mit').first()
+    mit = UserCollege.objects.filter(applicant=applicant, app_platform_override__iexact='mit').first()
     return [
         {'label': 'Common App', 'state': _state('common'),     'supported': True,  'href': '/applications/common/'},
         {'label': 'UC App',     'state': _state('uc'),         'supported': True,  'href': '/applications/uc/'},
@@ -191,7 +207,7 @@ def _build_platform_tracker(applicant):
 
 
 def college_detail(request, pk):
-    college = get_object_or_404(College, pk=pk)
+    college = get_object_or_404(UserCollege, pk=pk)
     if request.method == 'POST':
         form = CollegeForm(request.POST, instance=college)
         if form.is_valid():
@@ -211,7 +227,7 @@ def college_detail(request, pk):
 
 def college_edit_cell(request, pk, field):
     """Inline cell editing via htmx."""
-    college = get_object_or_404(College, pk=pk)
+    college = get_object_or_404(UserCollege, pk=pk)
 
     if field not in EDITABLE_FIELDS:
         return HttpResponse('Invalid field', status=400)
@@ -232,7 +248,7 @@ def college_edit_cell(request, pk, field):
 
     if field == 'apply_status':
         hidden = {'likely', 'unlikely'}
-        choices = [(v, l) for v, l in College.APPLY_STATUS_CHOICES if v not in hidden]
+        choices = [(v, l) for v, l in UserCollege.APPLY_STATUS_CHOICES if v not in hidden]
         return render(request, 'colleges/_cell_edit_select.html', {
             'college': college, 'field': field, 'field_label': field_label,
             'current_value': current_value, 'choices': choices,
@@ -242,7 +258,7 @@ def college_edit_cell(request, pk, field):
     if field == 'difficulty':
         return render(request, 'colleges/_cell_edit_select.html', {
             'college': college, 'field': field, 'field_label': field_label,
-            'current_value': current_value, 'choices': College.DIFFICULTY_CHOICES,
+            'current_value': current_value, 'choices': UserCollege.DIFFICULTY_CHOICES,
             'table_fields': ALL_TABLE_FIELDS,
         })
 
@@ -255,11 +271,11 @@ def college_edit_cell(request, pk, field):
 @require_POST
 def college_add_row(request):
     applicant = get_applicant(request)
-    college = College.objects.create(
+    college = UserCollege.objects.create(
         applicant=applicant,
-        name='',
+        display_name='',
         apply_status='applying',
-        order=College.objects.filter(applicant=applicant).count(),
+        order=UserCollege.objects.filter(applicant=applicant).count(),
     )
     return render(request, 'colleges/_cell_edit.html', {
         'college': college,
@@ -276,7 +292,7 @@ def college_add(request):
         if form.is_valid():
             college = form.save(commit=False)
             college.applicant = get_applicant(request)
-            college.order = College.objects.filter(applicant=college.applicant).count()
+            college.order = UserCollege.objects.filter(applicant=college.applicant).count()
             college.save()
             return redirect('colleges:list')
     else:
@@ -293,19 +309,21 @@ def college_json(request):
 
     applicant = get_applicant(request)
     view_config = VIEWS[current_view]
-    colleges = College.objects.filter(applicant=applicant)
+    colleges = UserCollege.objects.filter(applicant=applicant)
 
     if view_config['statuses']:
         colleges = colleges.filter(apply_status__in=view_config['statuses'])
 
     search = request.GET.get('q', '')
     if search:
-        colleges = colleges.filter(name__icontains=search)
+        colleges = colleges.filter(
+            Q(display_name__icontains=search) | Q(college__name__icontains=search)
+        )
 
     if current_view == 'all':
-        colleges = colleges.annotate(status_order=STATUS_ORDER).order_by('status_order', 'name')
+        colleges = colleges.annotate(status_order=STATUS_ORDER).order_by('status_order', 'college__name')
 
-    status_display = dict(College.APPLY_STATUS_CHOICES)
+    status_display = dict(UserCollege.APPLY_STATUS_CHOICES)
     data = []
     for c in colleges:
         data.append({
@@ -336,7 +354,7 @@ def college_json(request):
 @require_http_methods(['POST'])
 def college_update(request, pk):
     """Save a single field edit from Tabulator's cellEdited callback."""
-    college = get_object_or_404(College, pk=pk)
+    college = get_object_or_404(UserCollege, pk=pk)
     try:
         body = json.loads(request.body)
         field = body.get('field')
@@ -354,7 +372,7 @@ def college_update(request, pk):
 
 @require_POST
 def college_delete(request, pk):
-    college = get_object_or_404(College, pk=pk)
+    college = get_object_or_404(UserCollege, pk=pk)
     college.delete()
     if request.headers.get('HX-Request'):
         return HttpResponse('')
@@ -379,7 +397,7 @@ def _build_dropdown_colleges(applicant):
     """Returns ordered list for the Applications dropdown, with Common App and UC App
     inserted at the top of their respective status category."""
     colleges = list(
-        College.objects.filter(applicant=applicant)
+        UserCollege.objects.filter(applicant=applicant)
         .annotate(status_order=APP_PROGRESS_STATUS_ORDER)
         .order_by('status_order', 'name')
     )
@@ -387,12 +405,12 @@ def _build_dropdown_colleges(applicant):
     APPLYING_STATUSES = {'applying', 'applied', 'deferred', 'waitlisted', 'accepted', 'enrolled'}
     CONSIDERING_STATUSES = {'considering'}
     applying_platforms = set(
-        College.objects.filter(applicant=applicant, apply_status__in=APPLYING_STATUSES)
-        .values_list('app_platform', flat=True)
+        UserCollege.objects.filter(applicant=applicant, apply_status__in=APPLYING_STATUSES)
+        .values_list('app_platform_override', flat=True)
     )
     considering_platforms = set(
-        College.objects.filter(applicant=applicant, apply_status__in=CONSIDERING_STATUSES)
-        .values_list('app_platform', flat=True)
+        UserCollege.objects.filter(applicant=applicant, apply_status__in=CONSIDERING_STATUSES)
+        .values_list('app_platform_override', flat=True)
     )
 
     def _state(keyword):
@@ -436,7 +454,7 @@ def applications(request):
     if selected_pk:
         try:
             pk_int = int(selected_pk)
-            selected = College.objects.filter(applicant=applicant, pk=pk_int).first()
+            selected = UserCollege.objects.select_related('college').filter(applicant=applicant, pk=pk_int).first()
         except (ValueError, TypeError):
             pass
 
@@ -505,7 +523,7 @@ def applications(request):
 
         # Platform-aware activities data
         platform = selected.app_platform
-        platform_display = dict(College.APP_PLATFORM_CHOICES).get(platform, '') if platform else ''
+        platform_display = dict(UserCollege.APP_PLATFORM_CHOICES).get(platform, '') if platform else ''
 
         try:
             applicant = get_applicant(request)

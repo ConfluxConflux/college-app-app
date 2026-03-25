@@ -1,7 +1,8 @@
 import csv
 from django.core.management.base import BaseCommand
 from supplements.models import EssayCategory, SupplementEssay
-from colleges.models import College
+from colleges.models import UserCollege
+from django.db.models import Q
 
 
 class Command(BaseCommand):
@@ -30,13 +31,15 @@ class Command(BaseCommand):
         header = rows[1]
         college_names = [h.strip() for h in header[3:] if h.strip()]
 
-        # Get or create College objects for the supplement colleges
+        # Get UserCollege objects for the supplement colleges
         college_map = {}
         for cname in college_names:
-            college = College.objects.filter(name__icontains=cname).first()
+            college = UserCollege.objects.filter(
+                Q(display_name__icontains=cname) | Q(college__name__icontains=cname)
+            ).first()
             if not college:
-                college = College.objects.create(name=cname)
-                self.stdout.write(f'Created college: {cname}')
+                self.stdout.write(self.style.WARNING(f'No UserCollege found for: {cname} — skipping'))
+                continue
             college_map[cname] = college
 
         # Row 2: Status row - overall status per college

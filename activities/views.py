@@ -60,12 +60,12 @@ def estimator_redirect(request):
 
 def _platform_state(applicant, keyword):
     """Return 'applying', 'considering', or 'none' for a given platform keyword."""
-    from colleges.models import College
+    from colleges.models import UserCollege
     applying = {'applying', 'applied', 'deferred', 'waitlisted', 'accepted', 'enrolled'}
     considering = {'considering'}
-    platforms = College.objects.filter(applicant=applicant).values_list('app_platform', flat=True)
-    applying_set = set(College.objects.filter(applicant=applicant, apply_status__in=applying).values_list('app_platform', flat=True))
-    considering_set = set(College.objects.filter(applicant=applicant, apply_status__in=considering).values_list('app_platform', flat=True))
+    platforms = UserCollege.objects.filter(applicant=applicant).values_list('app_platform_override', flat=True)
+    applying_set = set(UserCollege.objects.filter(applicant=applicant, apply_status__in=applying).values_list('app_platform_override', flat=True))
+    considering_set = set(UserCollege.objects.filter(applicant=applicant, apply_status__in=considering).values_list('app_platform_override', flat=True))
     kw = keyword.lower()
     if any(kw in (p or '').lower() for p in applying_set):
         return 'applying'

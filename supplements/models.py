@@ -50,7 +50,7 @@ class SupplementEssay(models.Model):
         on_delete=models.CASCADE, related_name='essays'
     )
     college = models.ForeignKey(
-        'colleges.College', on_delete=models.CASCADE,
+        'colleges.UserCollege', on_delete=models.CASCADE,
         related_name='essays'
     )
     category = models.ForeignKey(

@@ -1,6 +1,6 @@
 import csv
 from django.core.management.base import BaseCommand
-from colleges.models import College
+from colleges.models import UserCollege
 
 
 # Map Jacob's idiosyncratic Apply? values to standardized choices
@@ -31,7 +31,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         if options['clear']:
-            College.objects.all().delete()
+            UserCollege.objects.all().delete()
             self.stdout.write('Cleared existing colleges.')
 
         with open(options['csv_file'], newline='', encoding='utf-8') as f:
@@ -47,7 +47,7 @@ class Command(BaseCommand):
                 apply_raw = row[1].strip().lower() if len(row) > 1 else ''
                 apply_status = APPLY_STATUS_MAP.get(apply_raw, '')
 
-                college = College(
+                college = UserCollege(
                     name=name,
                     apply_status=apply_status,
                     tier=row[2].strip() if len(row) > 2 else '',

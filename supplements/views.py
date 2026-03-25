@@ -4,7 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_POST, require_http_methods
 
-from colleges.models import College
+from colleges.models import UserCollege
 from core.utils import get_applicant
 from .models import EssayCategory, SupplementEssay, UCPersonalInsightQuestion, CommonAppEssay
 
@@ -45,9 +45,9 @@ def supplements_home(request):
     college_essays = []
     if selected_college_pk:
         try:
-            selected_college = College.objects.get(pk=int(selected_college_pk))
+            selected_college = UserCollege.objects.get(pk=int(selected_college_pk))
             college_essays = [e for e in all_essays if e.college_id == selected_college.pk]
-        except (College.DoesNotExist, ValueError):
+        except (UserCollege.DoesNotExist, ValueError):
             pass
 
     # Matrix: colleges and categories that have at least one essay
@@ -56,7 +56,7 @@ def supplements_home(request):
         essay_map[(e.college_id, e.category_id)].append(e)
 
     matrix_colleges = list(
-        College.objects.filter(essays__applicant=applicant).distinct().order_by('name')
+        UserCollege.objects.filter(essays__applicant=applicant).distinct().order_by('college__name')
     )
     categories = list(
         EssayCategory.objects.filter(essays__applicant=applicant).distinct()

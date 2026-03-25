@@ -7,14 +7,14 @@ Fix Stanford supplemental essay data:
 """
 from django.core.management.base import BaseCommand
 from supplements.models import EssayCategory, SupplementEssay
-from colleges.models import College
+from colleges.models import UserCollege
 
 
 class Command(BaseCommand):
     help = 'Fix Stanford supplemental essay data'
 
     def handle(self, *args, **options):
-        stanford = College.objects.filter(name__icontains='stanford').first()
+        stanford = UserCollege.objects.filter(college__name__icontains='stanford').first()
         if not stanford:
             self.stdout.write(self.style.ERROR('Stanford not found in DB.'))
             return

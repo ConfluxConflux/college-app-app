@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from colleges.models import College
+from colleges.models import UserCollege
 from activities.models import UCEntry, CommonAppActivity, CommonAppHonor, MITEntry
 from supplements.models import SupplementEssay
 from .models import Applicant, CoreActivity
@@ -184,16 +184,16 @@ def core_activity_mit_cell(request, pk, field):
 
 def home(request):
     applicant = _get_applicant(request)
-    college_count = College.objects.filter(applicant=applicant).count()
-    applying_count = College.objects.filter(applicant=applicant, apply_status='applying').count()
-    applying_considering_count = College.objects.filter(applicant=applicant).exclude(apply_status__in=['', 'not_applying', 'unlikely']).count()
+    college_count = UserCollege.objects.filter(applicant=applicant).count()
+    applying_count = UserCollege.objects.filter(applicant=applicant, apply_status='applying').count()
+    applying_considering_count = UserCollege.objects.filter(applicant=applicant).exclude(apply_status__in=['', 'not_applying', 'unlikely']).count()
     uc_count = UCEntry.objects.filter(applicant=applicant).count()
     common_app_activity_count = CommonAppActivity.objects.filter(applicant=applicant).count()
     common_app_honor_count = CommonAppHonor.objects.filter(applicant=applicant).count()
     mit_count = MITEntry.objects.filter(applicant=applicant).count()
     essay_count = SupplementEssay.objects.filter(applicant=applicant).count()
     essay_done_count = SupplementEssay.objects.filter(applicant=applicant, status='done').count()
-    submitted_count = College.objects.filter(applicant=applicant, apply_status__in=['applied', 'accepted', 'deferred', 'waitlisted', 'rejected', 'enrolled', 'withdrawn']).count()
+    submitted_count = UserCollege.objects.filter(applicant=applicant, apply_status__in=['applied', 'accepted', 'deferred', 'waitlisted', 'rejected', 'enrolled', 'withdrawn']).count()
     context = {
         'applicant': applicant,
         'college_count': college_count,
