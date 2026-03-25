@@ -8,7 +8,7 @@
   <h1 class="title mb-0" style="white-space:nowrap;">Application:</h1>
   <div class="select" style="font-size:2rem; font-family:'Libre Baskerville',Georgia,serif; flex:1;">
     <select style="font-size:inherit; font-family:inherit; font-weight:bold; height:auto; padding:0.15rem 3.5rem 0.15rem 0.5rem; width:100%;"
-            onchange="var v=this.value; if(v==='__common__'){ window.location='/colleges/applications/common/'; } else if(v==='__uc__'){ window.location='/colleges/applications/uc/'; } else if(v){ localStorage.setItem('applications_college', v); window.location='/colleges/applications/?college='+v; }">
+            onchange="var v=this.value; if(v==='__common__'){ window.location='/applications/common/'; } else if(v==='__uc__'){ window.location='/applications/uc/'; } else if(v){ localStorage.setItem('applications_college', v); window.location='/applications/?college='+v; }">
       <option value="__uc__" selected>UC App</option>
       <option value="__common__">Common App</option>
       {% for college in colleges %}

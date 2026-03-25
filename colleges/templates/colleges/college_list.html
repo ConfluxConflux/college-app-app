@@ -146,7 +146,7 @@
     if (!e.target.closest('td.col-name')) return;
     if (e.shiftKey || e.ctrlKey || e.altKey) return;
     if (e.target.closest('input, select, button, textarea')) return;
-    window.location.href = '{% url "colleges:applications" %}?college=' + tr.dataset.pk;
+    window.location.href = '{% url "applications:home" %}?college=' + tr.dataset.pk;
   });
 
   // Re-apply visibility after any HTMX update to the table

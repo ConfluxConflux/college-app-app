@@ -193,7 +193,7 @@ function fireConfetti() {
   <div x-show="selectedCollege === {{ item.college.pk }}" x-cloak>
 
     <div style="margin-bottom:1.5rem; margin-top:0.5rem;">
-      <a href="{% url 'colleges:applications' %}?college={{ item.college.pk }}"
+      <a href="{% url 'applications:home' %}?college={{ item.college.pk }}"
          style="font-size:0.78rem; color:#aaa;">
         ↗ View {{ item.college.name }} on Applications dashboard
       </a>

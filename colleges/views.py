@@ -179,9 +179,9 @@ def _build_platform_tracker(applicant):
         return 'none'
     mit = College.objects.filter(applicant=applicant, app_platform__iexact='mit').first()
     return [
-        {'label': 'Common App', 'state': _state('common'),     'supported': True,  'href': '/colleges/applications/common/'},
-        {'label': 'UC App',     'state': _state('uc'),         'supported': True,  'href': '/colleges/applications/uc/'},
-        {'label': 'MIT App',    'state': _state('mit'),        'supported': True,  'href': f'/colleges/applications/?college={mit.pk}' if mit else None},
+        {'label': 'Common App', 'state': _state('common'),     'supported': True,  'href': '/applications/common/'},
+        {'label': 'UC App',     'state': _state('uc'),         'supported': True,  'href': '/applications/uc/'},
+        {'label': 'MIT App',    'state': _state('mit'),        'supported': True,  'href': f'/applications/?college={mit.pk}' if mit else None},
         {'label': 'CSU App',    'state': _state('csu'),        'supported': False, 'href': None},
         {'label': 'UCAS',       'state': _state('ucas'),       'supported': False, 'href': None},
         {'label': 'Canadian',   'state': _state('canada'),     'supported': False, 'href': None},

@@ -12,7 +12,4 @@ urlpatterns = [
     path('<int:pk>/delete/', views.college_delete, name='delete'),
     path('<int:pk>/update/', views.college_update, name='update'),
     path('<int:pk>/edit/<str:field>/', views.college_edit_cell, name='edit_cell'),
-    path('applications/', views.applications, name='applications'),
-    path('applications/uc/', views.applications_uc, name='applications_uc'),
-    path('applications/common/', views.applications_common, name='applications_common'),
 ]

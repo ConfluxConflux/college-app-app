@@ -1,0 +1,9 @@
+unitid,name,city,state,country,latitude,longitude,control,tuition_instate,fees_instate,tuition_outofstate,fees_outofstate,room,board,total_cost_tuition_fees_room_board,avg_grant_aid,meets_full_need,academic_calendar,acceptance_rate,undergrad_enrollment,test_policy_sat_act,app_platform,num_bachelor_cip_codes,majors_url
+243744,Stanford University,Stanford,CA,USA,37.429434,-122.167359,private nonprofit,61731,753,61731,753,12597,7325,82406,58688,,quarter,3.9%,8049,not considered,,65,
+166683,Massachusetts Institute of Technology,Cambridge,MA,USA,42.359243,-71.093226,private nonprofit,59750,406,59750,406,12380,7010,79546,55629,,4-1-4,4.7%,4657,required,,42,
+110635,University of California-Berkeley,Berkeley,CA,USA,37.871918,-122.260463,public,11834,3016,42611,3016,,,14850,22996,,semester,11.7%,32479,neither required nor recommended,,108,
+110705,University of California-Santa Barbara,Santa Barbara,CA,USA,34.416297,-119.846426,public,11834,3131,42611,3131,,,14965,19022,,quarter,27.8%,23459,neither required nor recommended,,80,
+209922,Reed College,Portland,OR,USA,45.480959,-122.630348,private nonprofit,66710,310,66710,310,8700,8120,83840,46260,,semester,27.2%,1523,not considered,,35,
+115409,Harvey Mudd College,Claremont,CA,USA,34.106515,-117.709837,private nonprofit,65954,301,65954,301,11566,10144,87965,41737,,semester,13.1%,922,not considered,,32,
+196097,Stony Brook University,Stony Brook,NY,USA,40.914760,-73.120460,public,7070,3490,26860,3490,10612,7050,28222,9940,,semester,49.0%,17509,not considered,,77,
+153603,Iowa State University,Ames,IA,USA,42.026212,-93.648504,public,8982,1515,26168,1515,4862,4864,20223,9680,,semester,89.1%,25241,not considered,,115,
