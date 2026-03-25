@@ -98,11 +98,6 @@
     });
   }
 
-  (function() {
-    var style = document.createElement('style');
-    style.textContent = '#college-table-wrapper[data-view="applications"] tr[data-pk] { cursor:pointer; } #college-table-wrapper[data-view="applications"] tr[data-pk]:hover { background:#f0f8f7 !important; }';
-    document.head.appendChild(style);
-  })();
 
   document.addEventListener('DOMContentLoaded', function() {
     applyVisibility();
@@ -142,15 +137,6 @@
     });
   });
 
-  // Click row in "Your List" view → Applications tab for that college (name cell only)
-  document.getElementById('college-table-wrapper').addEventListener('click', function(e) {
-    if (document.getElementById('view-hidden').value !== 'applications') return;
-    var tr = e.target.closest('tr[data-pk]');
-    if (!tr) return;
-    if (!e.target.closest('td.col-name')) return;
-    e.preventDefault();
-    window.location.href = '{% url "colleges:applications" %}?college=' + tr.dataset.pk;
-  });
 
   // Re-apply visibility after any HTMX update to the table
   document.addEventListener('htmx:afterSettle', function(e) {
