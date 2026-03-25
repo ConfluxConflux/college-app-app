@@ -44,6 +44,10 @@ def resources(request):
     return render(request, 'widgets/resources.html', {'links': links})
 
 
+def about(request):
+    return render(request, 'widgets/about.html')
+
+
 def advice(request):
     links = [
         {

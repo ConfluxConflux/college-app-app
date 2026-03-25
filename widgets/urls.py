@@ -10,4 +10,5 @@ urlpatterns = [
     path('word-counter/', views.word_counter, name='word_counter'),
     path('advice/', views.advice, name='advice'),
     path('resources/', views.resources, name='resources'),
+    path('about/', views.about, name='about'),
 ]

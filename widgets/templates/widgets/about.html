@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}Activity Time Calculator - College App App{% endblock %}
+{% block title %}About - College App App{% endblock %}
 
 {% block content %}
 <div class="tabs is-boxed is-medium">
   <ul>
-    <li class="is-active">
+    <li>
       <a href="{% url 'widgets:estimator' %}">Time Calculator</a>
     </li>
     <li>
@@ -20,11 +20,9 @@
     <li>
       <a href="{% url 'widgets:resources' %}">Resources</a>
     </li>
-    <li>
+    <li class="is-active">
       <a href="{% url 'widgets:about' %}">About</a>
     </li>
   </ul>
 </div>
-
-{% include "activities/_estimator_content.html" %}
 {% endblock %}
