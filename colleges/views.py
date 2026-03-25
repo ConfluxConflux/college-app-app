@@ -522,6 +522,7 @@ def applications(request):
 
 def applications_uc(request):
     applicant = get_applicant(request)
+    colleges = College.objects.filter(applicant=applicant).order_by('order', 'name')
 
     # UC activities
     uc_entries = list(UCEntry.objects.filter(applicant=applicant).order_by('order'))
@@ -539,6 +540,7 @@ def applications_uc(request):
     piq_maybe = sum(1 for p in piqs if p.status == 'maybe')
 
     return render(request, 'colleges/applications_uc.html', {
+        'colleges': colleges,
         'uc_entries': uc_entries,
         'uc_count': uc_count,
         'piqs': piqs,
@@ -551,6 +553,7 @@ def applications_uc(request):
 
 def applications_common(request):
     applicant = get_applicant(request)
+    colleges = College.objects.filter(applicant=applicant).order_by('order', 'name')
 
     # Common App activities + honors
     ca_activities = list(CommonAppActivity.objects.filter(applicant=applicant).order_by('order'))
@@ -562,6 +565,7 @@ def applications_common(request):
     essay, _ = CommonAppEssay.objects.get_or_create(applicant=applicant)
 
     return render(request, 'colleges/applications_common.html', {
+        'colleges': colleges,
         'ca_activities': ca_activities,
         'ca_honors': ca_honors,
         'ca_count': ca_count,
