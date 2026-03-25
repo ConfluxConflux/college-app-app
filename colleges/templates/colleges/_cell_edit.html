@@ -7,21 +7,10 @@
           hx-target="#college-row-{{ college.pk }}"
           hx-swap="outerHTML">
       {% csrf_token %}
-      <div class="field has-addons">
-        <div class="control">
-          <input class="input is-small" type="text" name="value"
-                 value="{{ current_value }}" autofocus
-                 onkeydown="if(event.key==='Escape'){htmx.ajax('GET','{% url 'colleges:list' %}','#college-table-wrapper')}">
-        </div>
-        <div class="control">
-          <button type="submit" class="button is-small is-success">&#10003;</button>
-        </div>
-        <div class="control">
-          <button type="button" class="button is-small is-light"
-                  hx-get="{% url 'colleges:list' %}"
-                  hx-target="#college-table-wrapper">&#10005;</button>
-        </div>
-      </div>
+      <input class="input is-small" type="text" name="value"
+             value="{{ current_value }}" autofocus
+             onblur="this.form.requestSubmit()"
+             onkeydown="if(event.key==='Escape'){event.preventDefault();htmx.ajax('GET','{% url 'colleges:list' %}','#college-table-wrapper')}">
     </form>
     {% elif field_name == 'name' %}
       <strong>{{ college.name }}</strong>
