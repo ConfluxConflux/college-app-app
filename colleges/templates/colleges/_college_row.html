@@ -2,20 +2,74 @@
 <tr id="college-row-{{ college.pk }}" class="status-{{ college.apply_status }}" data-pk="{{ college.pk }}">
   {% for field_name, field_label in table_fields %}
   <td class="col-{{ field_name }}"
+      {% if field_name != 'apply_status' and field_name != 'difficulty' %}
       hx-get="{% url 'colleges:edit_cell' college.pk field_name %}"
       hx-target="#college-row-{{ college.pk }}"
       hx-swap="outerHTML"
       {% if field_name == 'name' %}hx-trigger="click[event.shiftKey||event.ctrlKey||event.altKey]"{% endif %}
-      style="cursor:pointer;{% if field_name in optional_field_names %} display:none;{% endif %}"
+      {% endif %}
+      style="position:relative;cursor:pointer;{% if field_name in optional_field_names %} display:none;{% endif %}"
       title="{% if field_name == 'name' %}Shift-click to edit name{% else %}Click to edit {{ field_label }}{% endif %}">
     {% if field_name == 'name' %}
       <strong>{{ college.name }}</strong>
     {% elif field_name == 'apply_status' %}
       <span class="tag {{ college.status_color }} is-light">{{ college.get_apply_status_display|default:"—" }}</span>
+      {% if 'cornell college' in college.name|lower %}
+      <div x-data="{ cornellWarning: false }" style="position:absolute;inset:0;">
+        <div x-show="cornellWarning" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:1000;display:flex;align-items:center;justify-content:center;">
+          <div style="background:white;border-radius:8px;padding:1.5rem 2rem;max-width:480px;box-shadow:0 8px 32px rgba(0,0,0,0.2);">
+            <p class="has-text-weight-bold mb-3">Did you mean to select Cornell University instead?</p>
+            <p style="font-size:0.92rem;line-height:1.6;">Cornell College seems to be a perfectly fine school; it's in Iowa and you only take one course at a time; but it gets lots of applicants who think they're applying to Cornell University — the famous Ivy League school.</p>
+            <div class="mt-4" style="display:flex;gap:0.75rem;">
+              <button type="button" class="button is-light" @click="cornellWarning = false">No, I meant Cornell College</button>
+              <button type="button" class="button is-warning" @click="cornellWarning = false">Got it, thanks</button>
+            </div>
+          </div>
+        </div>
+        <form style="position:absolute;inset:0;margin:0;padding:0;"
+              hx-post="{% url 'colleges:edit_cell' college.pk 'apply_status' %}"
+              hx-target="#college-row-{{ college.pk }}"
+              hx-swap="outerHTML">
+          {% csrf_token %}
+          <select name="value" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;"
+                  onchange="if(['applying','likely','considering','applied','accepted','enrolled'].includes(this.value)){ this.closest('[x-data]').__x.$data.cornellWarning = true; return; } this.form.requestSubmit()">
+            <option value="">—</option>
+            {% for val, label in college.APPLY_STATUS_CHOICES %}{% if val != 'likely' and val != 'unlikely' %}
+            <option value="{{ val }}" {% if val == college.apply_status %}selected{% endif %}>{{ label }}</option>
+            {% endif %}{% endfor %}
+          </select>
+        </form>
+      </div>
+      {% else %}
+      <form style="position:absolute;inset:0;margin:0;padding:0;"
+            hx-post="{% url 'colleges:edit_cell' college.pk 'apply_status' %}"
+            hx-target="#college-row-{{ college.pk }}"
+            hx-swap="outerHTML">
+        {% csrf_token %}
+        <select name="value" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;"
+                onchange="this.form.requestSubmit()">
+          <option value="">—</option>
+          {% for val, label in college.APPLY_STATUS_CHOICES %}{% if val != 'likely' and val != 'unlikely' %}
+          <option value="{{ val }}" {% if val == college.apply_status %}selected{% endif %}>{{ label }}</option>
+          {% endif %}{% endfor %}
+        </select>
+      </form>
+      {% endif %}
     {% elif field_name == 'difficulty' %}
-      {% if college.difficulty %}
-        <span class="tag" style="{{ college.difficulty_color }}">{{ college.get_difficulty_display }}</span>
-      {% else %}—{% endif %}
+      {% if college.difficulty %}<span class="tag" style="{{ college.difficulty_color }}">{{ college.get_difficulty_display }}</span>{% else %}<span>—</span>{% endif %}
+      <form style="position:absolute;inset:0;margin:0;padding:0;"
+            hx-post="{% url 'colleges:edit_cell' college.pk 'difficulty' %}"
+            hx-target="#college-row-{{ college.pk }}"
+            hx-swap="outerHTML">
+        {% csrf_token %}
+        <select name="value" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;"
+                onchange="this.form.requestSubmit()">
+          <option value="">—</option>
+          {% for val, label in college.DIFFICULTY_CHOICES %}
+          <option value="{{ val }}" {% if val == college.difficulty %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </form>
     {% elif field_name == 'applicant_notes' %}
       {{ college.applicant_notes|truncatewords:12 }}
     {% else %}
