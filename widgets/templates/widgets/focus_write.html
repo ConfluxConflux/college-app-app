@@ -39,7 +39,7 @@
 
   <!-- Back bar -->
   <div class="focus-topbar">
-    <button @click="showBackPrompt = true" class="focus-back-btn">← Back</button>
+    <button @click="text.length >= 2 ? showBackPrompt = true : goBack()" class="focus-back-btn">← Back</button>
     <span class="focus-college-label">Focus Write</span>
     <div style="display:flex; align-items:center; gap:0.75rem;">
       <span x-show="showCount" class="focus-counter" style="font-size:0.8rem;">
