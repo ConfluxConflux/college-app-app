@@ -10,7 +10,8 @@
       <input class="input is-small" type="text" name="value"
              value="{{ current_value }}" autofocus
              onblur="this.form.requestSubmit()"
-             onkeydown="if(event.key==='Escape'){event.preventDefault();htmx.ajax('GET','{% url 'colleges:list' %}','#college-table-wrapper')}">
+             onkeydown="if(event.key==='Escape'){event.preventDefault();htmx.ajax('GET','{% url 'colleges:list' %}','#college-table-wrapper')}"
+             {% if field == 'name' %}onclick="window.location.href='{% url 'colleges:applications' %}?college={{ college.pk }}'"{% endif %}>
     </form>
     {% elif field_name == 'name' %}
       <strong>{{ college.name }}</strong>
