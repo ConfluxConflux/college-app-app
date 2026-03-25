@@ -5,7 +5,7 @@
       hx-get="{% url 'colleges:edit_cell' college.pk field_name %}"
       hx-target="#college-row-{{ college.pk }}"
       hx-swap="outerHTML"
-      {% if field_name == 'name' %}hx-trigger="click[event.shiftKey]"{% endif %}
+      {% if field_name == 'name' %}hx-trigger="click[event.shiftKey||event.ctrlKey||event.altKey]"{% endif %}
       style="cursor:pointer;{% if field_name in optional_field_names %} display:none;{% endif %}"
       title="{% if field_name == 'name' %}Shift-click to edit name{% else %}Click to edit {{ field_label }}{% endif %}">
     {% if field_name == 'name' %}
