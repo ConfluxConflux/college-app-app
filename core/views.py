@@ -1,4 +1,6 @@
+from django.contrib.auth import login as auth_login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
@@ -28,6 +30,23 @@ def landing(request):
     if request.user.is_authenticated:
         return redirect('core:home')
     return render(request, 'core/landing.html')
+
+
+def switch_applicant(request, pk):
+    """Dev shortcut: log in as the user linked to the given Applicant pk."""
+    applicant = get_object_or_404(Applicant, pk=pk)
+    if applicant.user is None:
+        # Create a placeholder User for this test applicant
+        username = f'testuser_{pk}'
+        user, _ = User.objects.get_or_create(username=username, defaults={
+            'first_name': applicant.first_name,
+            'last_name': applicant.last_name,
+            'email': applicant.email or f'{username}@test.local',
+        })
+        applicant.user = user
+        applicant.save()
+    auth_login(request, applicant.user, backend='django.contrib.auth.backends.ModelBackend')
+    return redirect('core:home')
 
 
 def feedback(request):

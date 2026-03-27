@@ -17,6 +17,9 @@ class LoginRequiredMiddleware:
     def __call__(self, request):
         if not request.user.is_authenticated:
             path = request.path
-            if path not in self.EXEMPT_EXACT and not path.startswith('/accounts/') and not path.startswith('/admin/'):
+            if (path not in self.EXEMPT_EXACT
+                    and not path.startswith('/accounts/')
+                    and not path.startswith('/admin/')
+                    and not path.startswith('/switch-applicant/')):
                 return redirect(f'/accounts/login/?next={path}')
         return self.get_response(request)

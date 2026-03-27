@@ -89,6 +89,29 @@
       background: #228879;
       border-color: #228879;
     }
+
+    .btn-secondary {
+      background: transparent;
+      color: #1a1a1a;
+    }
+    .btn-secondary:hover {
+      background: #1a1a1a;
+      border-color: #1a1a1a;
+      color: #fff;
+    }
+
+    .dev-links {
+      margin-top: 1rem;
+      display: flex;
+      gap: 1rem;
+      font-size: 0.95rem;
+      font-family: 'Open Sans', sans-serif;
+      color: #999;
+    }
+    .dev-links a {
+      color: #999;
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
@@ -97,6 +120,10 @@
     <p class="tagline">An actually-good interface for managing college apps.<br>In theory, anyway ...</p>
     <div class="buttons">
       <a href="/accounts/google/login/" class="btn btn-primary">Sign in with Google</a>
+    </div>
+    <div class="dev-links">
+      <a href="{% url 'core:switch_applicant' 1 %}">View as Jacob (dev)</a>
+      <a href="{% url 'core:switch_applicant' 2 %}">View as Hedgie (dev)</a>
     </div>
   </div>
   <footer>Made by Jacob Cohen with Claude Code and a passionate hatred of the college application industrial complex</footer>
