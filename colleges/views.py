@@ -10,7 +10,6 @@ from .forms import CollegeForm
 from .models import UserCollege
 from activities.models import UCEntry, CommonAppActivity, CommonAppHonor, MITEntry
 from core.models import Applicant
-from core.utils import get_applicant
 from supplements.models import SupplementEssay, UCPersonalInsightQuestion, CommonAppEssay, UC_PIQ_PROMPTS, COMMON_APP_PROMPTS
 
 
@@ -102,7 +101,7 @@ def college_list(request):
     if current_view not in VIEWS:
         current_view = 'applications'
 
-    applicant = get_applicant(request)
+    applicant = request.user.applicant
     view_config = VIEWS[current_view]
     colleges = UserCollege.objects.filter(applicant=applicant)
 
@@ -238,7 +237,7 @@ def college_edit_cell(request, pk, field):
         college.save()
         ctx = {'college': college, 'table_fields': ALL_TABLE_FIELDS, 'optional_field_names': {f[0] for f in OPTIONAL_FIELDS}}
         if field == 'apply_status':
-            applicant = get_applicant(request)
+            applicant = request.user.applicant
             ctx['platform_tracker'] = _build_platform_tracker(applicant)
             return render(request, 'colleges/_college_row_with_tracker.html', ctx)
         return render(request, 'colleges/_college_row.html', ctx)
@@ -270,7 +269,7 @@ def college_edit_cell(request, pk, field):
 
 @require_POST
 def college_add_row(request):
-    applicant = get_applicant(request)
+    applicant = request.user.applicant
     college = UserCollege.objects.create(
         applicant=applicant,
         display_name='',
@@ -291,7 +290,7 @@ def college_add(request):
         form = CollegeForm(request.POST)
         if form.is_valid():
             college = form.save(commit=False)
-            college.applicant = get_applicant(request)
+            college.applicant = request.user.applicant
             college.order = UserCollege.objects.filter(applicant=college.applicant).count()
             college.save()
             return redirect('colleges:list')
@@ -307,7 +306,7 @@ def college_json(request):
     if current_view not in VIEWS:
         current_view = 'applications'
 
-    applicant = get_applicant(request)
+    applicant = request.user.applicant
     view_config = VIEWS[current_view]
     colleges = UserCollege.objects.filter(applicant=applicant)
 
@@ -446,7 +445,7 @@ def _build_dropdown_colleges(applicant):
 
 
 def applications(request):
-    applicant = get_applicant(request)
+    applicant = request.user.applicant
     colleges = _build_dropdown_colleges(applicant)
 
     selected = None
@@ -526,7 +525,7 @@ def applications(request):
         platform_display = dict(UserCollege.APP_PLATFORM_CHOICES).get(platform, '') if platform else ''
 
         try:
-            applicant = get_applicant(request)
+            applicant = request.user.applicant
         except Applicant.DoesNotExist:
             applicant = None
 
@@ -604,7 +603,7 @@ def applications(request):
 
 
 def applications_uc(request):
-    applicant = get_applicant(request)
+    applicant = request.user.applicant
     colleges = _build_dropdown_colleges(applicant)
 
     # UC activities
@@ -635,7 +634,7 @@ def applications_uc(request):
 
 
 def applications_common(request):
-    applicant = get_applicant(request)
+    applicant = request.user.applicant
     colleges = _build_dropdown_colleges(applicant)
 
     # Common App activities + honors

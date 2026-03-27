@@ -5,7 +5,6 @@ from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_POST, require_http_methods
 
 from colleges.models import UserCollege
-from core.utils import get_applicant
 from .models import EssayCategory, SupplementEssay, UCPersonalInsightQuestion, CommonAppEssay
 
 
@@ -33,7 +32,7 @@ def _augment_essays(essays):
 
 
 def supplements_home(request):
-    applicant = get_applicant(request)
+    applicant = request.user.applicant
     all_essays = list(
         SupplementEssay.objects.filter(applicant=applicant).select_related('college', 'category').order_by('sort_order')
     )

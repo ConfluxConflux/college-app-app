@@ -1,10 +1,10 @@
-from .utils import get_applicant
+from .models import Applicant
 
 
 def applicant(request):
-    """Inject the current applicant into every template context.
-    Swap this for request.user.applicant once real auth exists."""
+    if not request.user.is_authenticated:
+        return {'applicant': None}
     try:
-        return {'applicant': get_applicant(request)}
-    except Exception:
+        return {'applicant': request.user.applicant}
+    except Applicant.DoesNotExist:
         return {'applicant': None}

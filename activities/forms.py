@@ -23,14 +23,14 @@ class UCEntryForm(forms.ModelForm):
             }),
             'hours_per_week': forms.TextInput(attrs={'class': 'input is-small', 'size': 6}),
             'weeks_per_year': forms.TextInput(attrs={'class': 'input is-small', 'size': 6}),
-            'recognition_level': forms.TextInput(attrs={'class': 'input is-small'}),
             'earnings_usage': forms.Textarea(attrs={'class': 'textarea is-small', 'rows': 2, 'maxlength': 250}),
             'personal_notes': forms.Textarea(attrs={'class': 'textarea is-small', 'rows': 2}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, applicant=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['core_activity'].queryset = CoreActivity.objects.all()
+        qs = CoreActivity.objects.filter(applicant=applicant) if applicant else CoreActivity.objects.none()
+        self.fields['core_activity'].queryset = qs
         self.fields['core_activity'].required = False
         self.fields['core_activity'].empty_label = '— Link to activity hub —'
 
@@ -59,9 +59,10 @@ class CommonAppActivityForm(forms.ModelForm):
             'personal_notes': forms.Textarea(attrs={'class': 'textarea is-small', 'rows': 2}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, applicant=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['core_activity'].queryset = CoreActivity.objects.all()
+        qs = CoreActivity.objects.filter(applicant=applicant) if applicant else CoreActivity.objects.none()
+        self.fields['core_activity'].queryset = qs
         self.fields['core_activity'].required = False
         self.fields['core_activity'].empty_label = '— Link to activity hub —'
 
@@ -76,9 +77,10 @@ class CommonAppHonorForm(forms.ModelForm):
             'personal_notes': forms.Textarea(attrs={'class': 'textarea is-small', 'rows': 2}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, applicant=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['core_activity'].queryset = CoreActivity.objects.all()
+        qs = CoreActivity.objects.filter(applicant=applicant) if applicant else CoreActivity.objects.none()
+        self.fields['core_activity'].queryset = qs
         self.fields['core_activity'].required = False
         self.fields['core_activity'].empty_label = '— Link to activity hub —'
 
@@ -102,8 +104,9 @@ class MITEntryForm(forms.ModelForm):
             'personal_notes': forms.Textarea(attrs={'class': 'textarea is-small', 'rows': 2}),
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, applicant=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['core_activity'].queryset = CoreActivity.objects.all()
+        qs = CoreActivity.objects.filter(applicant=applicant) if applicant else CoreActivity.objects.none()
+        self.fields['core_activity'].queryset = qs
         self.fields['core_activity'].required = False
         self.fields['core_activity'].empty_label = '— Link to activity hub —'

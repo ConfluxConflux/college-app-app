@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
@@ -6,18 +7,6 @@ from colleges.models import UserCollege
 from activities.models import UCEntry, CommonAppActivity, CommonAppHonor, MITEntry
 from supplements.models import SupplementEssay
 from .models import Applicant, CoreActivity
-
-
-# Temporary: test applicant switcher until real auth is wired up.
-# When auth exists, replace with: applicant = request.user.applicant
-def _get_applicant(request):
-    from .utils import get_applicant
-    return get_applicant(request)
-
-
-def switch_applicant(request, pk):
-    request.session['applicant_pk'] = pk
-    return redirect('core:home')
 
 
 def _core_row_ctx(activity, editing=None):
@@ -36,6 +25,8 @@ def _core_row_ctx(activity, editing=None):
 
 
 def landing(request):
+    if request.user.is_authenticated:
+        return redirect('core:home')
     return render(request, 'core/landing.html')
 
 
@@ -43,17 +34,13 @@ def feedback(request):
     return render(request, 'core/feedback.html')
 
 
-def not_yet(request):
-    return render(request, 'core/not_yet.html')
-
-
+@login_required
 def profile(request):
-    applicant = _get_applicant(request)
+    applicant = request.user.applicant
     if request.method == 'POST':
         applicant.brainstorm = request.POST.get('brainstorm', '')
         applicant.save()
     return render(request, 'core/profile.html', {'applicant': applicant})
-
 
 
 # ── CoreActivity cell editing ──
@@ -61,8 +48,9 @@ def profile(request):
 CORE_TEXT_FIELDS = {'name', 'full_description', 'personal_notes', 'hours_per_week', 'weeks_per_year'}
 
 
+@login_required
 def core_activity_cell(request, pk, field):
-    activity = get_object_or_404(CoreActivity, pk=pk)
+    activity = get_object_or_404(CoreActivity, pk=pk, applicant=request.user.applicant)
     if request.method == 'POST':
         if field in CORE_TEXT_FIELDS:
             setattr(activity, field, request.POST.get('value', ''))
@@ -77,8 +65,9 @@ def core_activity_cell(request, pk, field):
     return render(request, 'core/_core_activity_row.html', _core_row_ctx(activity, editing=field))
 
 
+@login_required
 def core_activity_add(request):
-    applicant = _get_applicant(request)
+    applicant = request.user.applicant
     activity = CoreActivity.objects.create(
         applicant=applicant,
         name='',
@@ -89,9 +78,10 @@ def core_activity_add(request):
     return response
 
 
+@login_required
 @require_POST
 def core_activity_delete(request, pk):
-    get_object_or_404(CoreActivity, pk=pk).delete()
+    get_object_or_404(CoreActivity, pk=pk, applicant=request.user.applicant).delete()
     if request.headers.get('HX-Request'):
         return HttpResponse('')
     return redirect('activities:home')
@@ -99,8 +89,9 @@ def core_activity_delete(request, pk):
 
 # ── Format-specific cell editing (get-or-create linked entry) ──
 
+@login_required
 def core_activity_uc_cell(request, pk, field):
-    activity = get_object_or_404(CoreActivity, pk=pk)
+    activity = get_object_or_404(CoreActivity, pk=pk, applicant=request.user.applicant)
     uc = activity.uc_entries.first()
     if request.method == 'POST':
         if uc is None:
@@ -119,8 +110,9 @@ def core_activity_uc_cell(request, pk, field):
     return render(request, 'core/_core_activity_row.html', _core_row_ctx(activity, editing=f'uc_{field}'))
 
 
+@login_required
 def core_activity_ca_cell(request, pk, field):
-    activity = get_object_or_404(CoreActivity, pk=pk)
+    activity = get_object_or_404(CoreActivity, pk=pk, applicant=request.user.applicant)
     ca = activity.common_app_activities.first()
     if request.method == 'POST':
         if ca is None:
@@ -139,8 +131,9 @@ def core_activity_ca_cell(request, pk, field):
     return render(request, 'core/_core_activity_row.html', _core_row_ctx(activity, editing=f'ca_{field}'))
 
 
+@login_required
 def core_activity_honor_cell(request, pk, field):
-    activity = get_object_or_404(CoreActivity, pk=pk)
+    activity = get_object_or_404(CoreActivity, pk=pk, applicant=request.user.applicant)
     honor = activity.common_app_honors.first()
     if request.method == 'POST':
         if honor is None:
@@ -162,8 +155,9 @@ def core_activity_honor_cell(request, pk, field):
     return render(request, 'core/_core_activity_row.html', _core_row_ctx(activity, editing=f'honor_{field}'))
 
 
+@login_required
 def core_activity_mit_cell(request, pk, field):
-    activity = get_object_or_404(CoreActivity, pk=pk)
+    activity = get_object_or_404(CoreActivity, pk=pk, applicant=request.user.applicant)
     mit = activity.mit_entries.first()
     if request.method == 'POST':
         if mit is None:
@@ -182,8 +176,9 @@ def core_activity_mit_cell(request, pk, field):
     return render(request, 'core/_core_activity_row.html', _core_row_ctx(activity, editing=f'mit_{field}'))
 
 
+@login_required
 def home(request):
-    applicant = _get_applicant(request)
+    applicant = request.user.applicant
     college_count = UserCollege.objects.filter(applicant=applicant).count()
     applying_count = UserCollege.objects.filter(applicant=applicant, apply_status='applying').count()
     applying_considering_count = UserCollege.objects.filter(applicant=applicant).exclude(apply_status__in=['', 'not_applying', 'unlikely']).count()
@@ -206,7 +201,6 @@ def home(request):
         'essay_count': essay_count,
         'essay_done_count': essay_done_count,
         'submitted_count': submitted_count,
-        # Auto-detection flags for the dashboard checklist
         'auto_has_college_list': college_count >= 4,
         'auto_has_big_college_list': college_count >= 8,
         'auto_has_activities': uc_count > 0 or common_app_activity_count > 0,

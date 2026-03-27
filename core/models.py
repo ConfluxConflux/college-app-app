@@ -1,9 +1,11 @@
+from django.contrib.auth.models import User
 from django.db import models
 
 
 class Applicant(models.Model):
-    """Represents one applicant (future: linked to a real auth user).
+    """Represents one applicant, linked to a Django auth user.
     All application data — colleges, activities, essays — belongs to an Applicant."""
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name='applicant')
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(blank=True)

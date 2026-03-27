@@ -9,8 +9,7 @@ from django.views.decorators.http import require_POST
 
 from .forms import UCEntryForm, CommonAppActivityForm, CommonAppHonorForm, MITEntryForm
 from .models import UCEntry, CommonAppActivity, CommonAppHonor, MITEntry
-from core.models import CoreActivity, Applicant
-from core.utils import get_applicant
+from core.models import CoreActivity
 
 
 def _get_cross_links(core_activity, exclude_model=None, exclude_pk=None):
@@ -75,7 +74,7 @@ def _platform_state(applicant, keyword):
 
 
 def activities_home(request, tab='uc'):
-    applicant = get_applicant(request)
+    applicant = request.user.applicant
     uc_entries_list = list(UCEntry.objects.filter(applicant=applicant).order_by('order').select_related('core_activity'))
     uc_slots = uc_entries_list[:20]
     while len(uc_slots) < 20:
@@ -131,8 +130,8 @@ def activities_home(request, tab='uc'):
 # ── UC Entry CRUD ──
 
 def uc_add(request):
+    applicant = request.user.applicant
     if request.method == 'POST' and request.headers.get('HX-Request'):
-        applicant = get_applicant(request)
         entry = UCEntry.objects.create(
             applicant=applicant,
             category='extracurricular',
@@ -146,14 +145,15 @@ def uc_add(request):
         response['HX-Trigger'] = 'confetti'
         return response
     if request.method == 'POST':
-        form = UCEntryForm(request.POST)
+        form = UCEntryForm(request.POST, applicant=applicant)
         if form.is_valid():
             entry = form.save(commit=False)
-            entry.order = UCEntry.objects.count()
+            entry.applicant = applicant
+            entry.order = UCEntry.objects.filter(applicant=applicant).count()
             entry.save()
             return redirect('activities:home_uc')
     else:
-        form = UCEntryForm()
+        form = UCEntryForm(applicant=applicant)
     return render(request, 'activities/entry_form.html', {
         'form': form, 'title': 'Add UC Activity/Award',
         'back_href': reverse('activities:home_uc'), 'back_tab': 'uc',
@@ -162,14 +162,15 @@ def uc_add(request):
 
 
 def uc_edit(request, pk):
-    entry = get_object_or_404(UCEntry, pk=pk)
+    applicant = request.user.applicant
+    entry = get_object_or_404(UCEntry, pk=pk, applicant=applicant)
     if request.method == 'POST':
-        form = UCEntryForm(request.POST, instance=entry)
+        form = UCEntryForm(request.POST, instance=entry, applicant=applicant)
         if form.is_valid():
             form.save()
             return redirect('activities:home_uc')
     else:
-        form = UCEntryForm(instance=entry)
+        form = UCEntryForm(instance=entry, applicant=applicant)
 
     linked = _get_cross_links(entry.core_activity, 'uc', entry.pk)
 
@@ -182,7 +183,7 @@ def uc_edit(request, pk):
 
 
 def uc_cell(request, pk, field):
-    entry = get_object_or_404(UCEntry, pk=pk)
+    entry = get_object_or_404(UCEntry, pk=pk, applicant=request.user.applicant)
     ctx = {'entry': entry, 'uc_category_choices': UCEntry.CATEGORY_CHOICES}
     if request.method == 'POST':
         if field in ('name', 'background', 'description', 'hours_per_week', 'weeks_per_year', 'personal_notes'):
@@ -217,7 +218,7 @@ def uc_cell(request, pk, field):
 
 @require_POST
 def uc_delete(request, pk):
-    get_object_or_404(UCEntry, pk=pk).delete()
+    get_object_or_404(UCEntry, pk=pk, applicant=request.user.applicant).delete()
     if request.headers.get('HX-Request'):
         return HttpResponse('')
     return redirect('activities:home_uc')
@@ -227,7 +228,7 @@ def uc_delete(request, pk):
 def uc_slot_add(request, slot):
     """Create a new UCEntry for an empty slot, returned in edit mode."""
     field = request.POST.get('field', 'name')
-    applicant = get_applicant(request)
+    applicant = request.user.applicant
     entry = UCEntry.objects.create(
         applicant=applicant,
         order=slot,
@@ -268,7 +269,7 @@ def uc_set_time(request, pk):
 
 @require_POST
 def uc_reorder(request):
-    applicant = get_applicant(request)
+    applicant = request.user.applicant
     data = json.loads(request.body)
     for i, pk in enumerate(data.get('order', []), start=1):
         UCEntry.objects.filter(pk=pk, applicant=applicant).update(order=i)
@@ -278,15 +279,17 @@ def uc_reorder(request):
 # ── Common App Activity CRUD ──
 
 def ca_add(request):
+    applicant = request.user.applicant
     if request.method == 'POST':
-        form = CommonAppActivityForm(request.POST)
+        form = CommonAppActivityForm(request.POST, applicant=applicant)
         if form.is_valid():
             entry = form.save(commit=False)
-            entry.order = CommonAppActivity.objects.count()
+            entry.applicant = applicant
+            entry.order = CommonAppActivity.objects.filter(applicant=applicant).count()
             entry.save()
             return redirect('activities:home_common')
     else:
-        form = CommonAppActivityForm()
+        form = CommonAppActivityForm(applicant=applicant)
     return render(request, 'activities/entry_form.html', {
         'form': form, 'title': 'Add Common App Activity',
         'back_href': reverse('activities:home_common'), 'back_tab': 'common_app',
@@ -295,14 +298,15 @@ def ca_add(request):
 
 
 def ca_edit(request, pk):
-    entry = get_object_or_404(CommonAppActivity, pk=pk)
+    applicant = request.user.applicant
+    entry = get_object_or_404(CommonAppActivity, pk=pk, applicant=applicant)
     if request.method == 'POST':
-        form = CommonAppActivityForm(request.POST, instance=entry)
+        form = CommonAppActivityForm(request.POST, instance=entry, applicant=applicant)
         if form.is_valid():
             form.save()
             return redirect('activities:home_common')
     else:
-        form = CommonAppActivityForm(instance=entry)
+        form = CommonAppActivityForm(instance=entry, applicant=applicant)
 
     linked = _get_cross_links(entry.core_activity, 'ca', entry.pk)
 
@@ -315,7 +319,7 @@ def ca_edit(request, pk):
 
 
 def ca_cell(request, pk, field):
-    activity = get_object_or_404(CommonAppActivity, pk=pk)
+    activity = get_object_or_404(CommonAppActivity, pk=pk, applicant=request.user.applicant)
     ctx = {'activity': activity, 'ca_type_choices': CommonAppActivity.ACTIVITY_TYPE_CHOICES}
     if request.method == 'POST':
         if field in ('position', 'organization', 'description', 'personal_notes'):
@@ -353,7 +357,7 @@ def ca_cell(request, pk, field):
 @require_POST
 def ca_slot_add(request, slot):
     field = request.POST.get('field', 'organization')
-    applicant = get_applicant(request)
+    applicant = request.user.applicant
     activity = CommonAppActivity.objects.create(
         applicant=applicant,
         order=slot,
@@ -369,7 +373,7 @@ def ca_slot_add(request, slot):
 
 @require_POST
 def ca_reorder(request):
-    applicant = get_applicant(request)
+    applicant = request.user.applicant
     data = json.loads(request.body)
     for i, pk in enumerate(data.get('order', []), start=1):
         CommonAppActivity.objects.filter(pk=pk, applicant=applicant).update(order=i)
@@ -378,7 +382,7 @@ def ca_reorder(request):
 
 @require_POST
 def ca_delete(request, pk):
-    get_object_or_404(CommonAppActivity, pk=pk).delete()
+    get_object_or_404(CommonAppActivity, pk=pk, applicant=request.user.applicant).delete()
     if request.headers.get('HX-Request'):
         return HttpResponse('')
     return redirect('activities:home_common')
@@ -387,8 +391,8 @@ def ca_delete(request, pk):
 # ── Common App Honor CRUD ──
 
 def honor_add(request):
+    applicant = request.user.applicant
     if request.method == 'POST' and request.headers.get('HX-Request'):
-        applicant = get_applicant(request)
         honor = CommonAppHonor.objects.create(
             applicant=applicant,
             order=CommonAppHonor.objects.filter(applicant=applicant).count(),
@@ -397,14 +401,15 @@ def honor_add(request):
         response['HX-Trigger'] = 'confetti'
         return response
     if request.method == 'POST':
-        form = CommonAppHonorForm(request.POST)
+        form = CommonAppHonorForm(request.POST, applicant=applicant)
         if form.is_valid():
             entry = form.save(commit=False)
-            entry.order = CommonAppHonor.objects.count()
+            entry.applicant = applicant
+            entry.order = CommonAppHonor.objects.filter(applicant=applicant).count()
             entry.save()
             return redirect('activities:home_common')
     else:
-        form = CommonAppHonorForm()
+        form = CommonAppHonorForm(applicant=applicant)
     return render(request, 'activities/entry_form.html', {
         'form': form, 'title': 'Add Common App Honor',
         'back_href': reverse('activities:home_common'), 'back_tab': 'honors',
@@ -413,14 +418,15 @@ def honor_add(request):
 
 
 def honor_edit(request, pk):
-    entry = get_object_or_404(CommonAppHonor, pk=pk)
+    applicant = request.user.applicant
+    entry = get_object_or_404(CommonAppHonor, pk=pk, applicant=applicant)
     if request.method == 'POST':
-        form = CommonAppHonorForm(request.POST, instance=entry)
+        form = CommonAppHonorForm(request.POST, instance=entry, applicant=applicant)
         if form.is_valid():
             form.save()
             return redirect('activities:home_common')
     else:
-        form = CommonAppHonorForm(instance=entry)
+        form = CommonAppHonorForm(instance=entry, applicant=applicant)
 
     linked = _get_cross_links(entry.core_activity, 'honor', entry.pk)
 
@@ -433,7 +439,7 @@ def honor_edit(request, pk):
 
 
 def honor_cell(request, pk, field):
-    honor = get_object_or_404(CommonAppHonor, pk=pk)
+    honor = get_object_or_404(CommonAppHonor, pk=pk, applicant=request.user.applicant)
     ctx = {'honor': honor}
     if request.method == 'POST':
         if field in ('title', 'personal_notes'):
@@ -457,7 +463,7 @@ def honor_cell(request, pk, field):
 
 @require_POST
 def honor_delete(request, pk):
-    get_object_or_404(CommonAppHonor, pk=pk).delete()
+    get_object_or_404(CommonAppHonor, pk=pk, applicant=request.user.applicant).delete()
     if request.headers.get('HX-Request'):
         return HttpResponse('')
     return redirect('activities:home_common')
@@ -466,15 +472,17 @@ def honor_delete(request, pk):
 # ── MIT Entry CRUD ──
 
 def mit_add(request):
+    applicant = request.user.applicant
     if request.method == 'POST':
-        form = MITEntryForm(request.POST)
+        form = MITEntryForm(request.POST, applicant=applicant)
         if form.is_valid():
             entry = form.save(commit=False)
-            entry.order = MITEntry.objects.filter(category=entry.category).count()
+            entry.applicant = applicant
+            entry.order = MITEntry.objects.filter(applicant=applicant, category=entry.category).count()
             entry.save()
             return redirect('activities:home_mit')
     else:
-        form = MITEntryForm()
+        form = MITEntryForm(applicant=applicant)
     return render(request, 'activities/entry_form.html', {
         'form': form, 'title': 'Add MIT Entry',
         'back_href': reverse('activities:home_mit'), 'back_tab': 'mit',
@@ -484,14 +492,15 @@ def mit_add(request):
 
 
 def mit_edit(request, pk):
-    entry = get_object_or_404(MITEntry, pk=pk)
+    applicant = request.user.applicant
+    entry = get_object_or_404(MITEntry, pk=pk, applicant=applicant)
     if request.method == 'POST':
-        form = MITEntryForm(request.POST, instance=entry)
+        form = MITEntryForm(request.POST, instance=entry, applicant=applicant)
         if form.is_valid():
             form.save()
             return redirect('activities:home_mit')
     else:
-        form = MITEntryForm(instance=entry)
+        form = MITEntryForm(instance=entry, applicant=applicant)
 
     linked = _get_cross_links(entry.core_activity, 'mit', entry.pk)
 
@@ -505,7 +514,7 @@ def mit_edit(request, pk):
 
 
 def mit_cell(request, pk, field):
-    entry = get_object_or_404(MITEntry, pk=pk)
+    entry = get_object_or_404(MITEntry, pk=pk, applicant=request.user.applicant)
     ctx = {'entry': entry, 'mit_category_choices': MITEntry.CATEGORY_CHOICES}
     if request.method == 'POST':
         if field in ('org_name', 'role_award', 'participation_period', 'description'):
@@ -524,7 +533,7 @@ def mit_cell(request, pk, field):
 
 @require_POST
 def mit_delete(request, pk):
-    get_object_or_404(MITEntry, pk=pk).delete()
+    get_object_or_404(MITEntry, pk=pk, applicant=request.user.applicant).delete()
     if request.headers.get('HX-Request'):
         return HttpResponse('')
     return redirect('activities:home_mit')
@@ -542,7 +551,7 @@ def _grades(obj):
 
 
 def export_uc(request):
-    applicant = get_applicant(request)
+    applicant = request.user.applicant
     entries = UCEntry.objects.filter(applicant=applicant)
     lines = ['UC ACTIVITIES & AWARDS EXPORT', '=' * 40, '']
     for i, e in enumerate(entries, 1):
@@ -585,7 +594,7 @@ def export_uc(request):
 
 
 def export_uc_csv(request):
-    applicant = get_applicant(request)
+    applicant = request.user.applicant
     entries = UCEntry.objects.filter(applicant=applicant).order_by('order')
 
     buf = io.StringIO()
@@ -629,7 +638,7 @@ def export_uc_csv(request):
 
 
 def export_ca_txt(request):
-    applicant = get_applicant(request)
+    applicant = request.user.applicant
     activities = CommonAppActivity.objects.filter(applicant=applicant).order_by('order')
     lines = [f'COMMON APP ACTIVITIES ({activities.count()}/10)', '=' * 40, '']
     for i, a in enumerate(activities, 1):
@@ -662,7 +671,7 @@ def export_ca_txt(request):
 
 
 def export_ca_csv(request):
-    applicant = get_applicant(request)
+    applicant = request.user.applicant
     activities = CommonAppActivity.objects.filter(applicant=applicant).order_by('order')
     buf = io.StringIO()
     writer = csv.writer(buf)
@@ -698,7 +707,7 @@ def export_ca_csv(request):
 
 
 def export_honors_txt(request):
-    applicant = get_applicant(request)
+    applicant = request.user.applicant
     honors = CommonAppHonor.objects.filter(applicant=applicant).order_by('order')
     lines = [f'COMMON APP HONORS ({honors.count()}/5)', '=' * 40, '']
     for i, h in enumerate(honors, 1):
@@ -722,7 +731,7 @@ def export_honors_txt(request):
 
 
 def export_honors_csv(request):
-    applicant = get_applicant(request)
+    applicant = request.user.applicant
     honors = CommonAppHonor.objects.filter(applicant=applicant).order_by('order')
     buf = io.StringIO()
     writer = csv.writer(buf)
@@ -756,7 +765,7 @@ def export_common_app(request):
 
 
 def export_mit(request):
-    applicant = get_applicant(request)
+    applicant = request.user.applicant
     entries = MITEntry.objects.filter(applicant=applicant)
     lines = ['MIT ENTRIES EXPORT', '=' * 40, '']
     category_order = ['job', 'activity', 'summer', 'scholastic', 'non_scholastic']
