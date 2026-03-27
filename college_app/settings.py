@@ -120,6 +120,7 @@ LOGOUT_REDIRECT_URL = '/'
 
 # django-allauth
 SOCIALACCOUNT_LOGIN_ON_GET = True  # Skip the "confirm" interstitial
+SOCIALACCOUNT_AUTO_SIGNUP = True   # Skip email confirmation form for social logins
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*']
 

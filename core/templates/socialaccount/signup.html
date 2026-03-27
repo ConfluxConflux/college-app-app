@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="columns is-centered">
+  <div class="column is-narrow has-text-centered" style="padding-top: 4rem;">
+    <h2 class="title is-4 mb-4">One more step</h2>
+    <p class="mb-4">Confirm your email to create your account.</p>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit" class="button is-dark">Create account</button>
+      <a href="/" class="button ml-2">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

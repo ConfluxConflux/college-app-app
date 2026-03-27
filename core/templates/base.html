@@ -66,10 +66,20 @@
           {{ applicant.first_name }}
           {% include "core/_avatar.html" with size=32 %}
         </a>
-        <form method="post" action="/accounts/logout/" style="display:contents">
-          {% csrf_token %}
-          <button type="submit" class="navbar-item" style="background:none;border:none;cursor:pointer;font-size:inherit;font-family:inherit;color:inherit;">Sign out</button>
-        </form>
+        <div x-data="{ open: false }" style="position:relative;">
+          <button @click="open = !open" class="navbar-item" style="background:none;border:none;cursor:pointer;font-size:inherit;font-family:inherit;color:inherit;">
+            Sign out
+          </button>
+          <div x-show="open" @click.outside="open = false" x-transition
+               style="position:absolute;right:0;top:100%;background:#fff;border:1px solid #ddd;border-radius:8px;padding:1rem 1.25rem;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,0.12);z-index:100;font-family:'Libre Baskerville',Georgia,serif;color:#1a1a1a;">
+            <p style="margin-bottom:0.75rem;font-size:0.95rem;">Sign out of your account?</p>
+            <form method="post" action="/accounts/logout/" style="display:flex;gap:0.5rem;align-items:center;">
+              {% csrf_token %}
+              <button type="submit" style="font-family:'Libre Baskerville',Georgia,serif;font-size:0.9rem;background:#1a1a1a;color:#fff;border:none;border-radius:4px;padding:0.3rem 0.75rem;cursor:pointer;">Yes, sign out</button>
+              <button type="button" @click="open = false" style="font-family:'Libre Baskerville',Georgia,serif;font-size:0.9rem;background:none;border:1px solid #ccc;border-radius:4px;padding:0.3rem 0.75rem;cursor:pointer;color:#666;">Cancel</button>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   </nav>
