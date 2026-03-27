@@ -1,6 +1,20 @@
 from django.shortcuts import redirect
 
 
+class WwwRedirectMiddleware:
+    """Redirect www.collegeappapp.com → collegeappapp.com (permanent)."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        host = request.get_host().split(':')[0]
+        if host.startswith('www.'):
+            bare = host[4:]
+            return redirect(f'https://{bare}{request.get_full_path()}', permanent=True)
+        return self.get_response(request)
+
+
 class LoginRequiredMiddleware:
     """Redirect unauthenticated users to login for all URLs except the whitelist."""
 
