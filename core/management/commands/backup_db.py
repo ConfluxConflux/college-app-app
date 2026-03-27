@@ -14,7 +14,9 @@ class Command(BaseCommand):
     help = "pg_dump the production database and email it as a gzipped attachment."
 
     def handle(self, *args, **options):
-        database_url = os.environ.get("DATABASE_URL")
+        # Use public URL for pg_dump — the internal railway.internal hostname
+        # is only reachable from within Railway's network.
+        database_url = os.environ.get("DATABASE_PUBLIC_URL") or os.environ.get("DATABASE_URL")
         if not database_url:
             raise CommandError("DATABASE_URL is not set — nothing to back up.")
 
