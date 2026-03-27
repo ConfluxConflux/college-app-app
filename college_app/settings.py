@@ -117,6 +117,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
+# Email (Gmail SMTP for DB backups)
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'chromaticconflux@gmail.com'
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_APP_PASSWORD', '')
+BACKUP_EMAIL = 'chromaticconflux@gmail.com'
+
 # Auth
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
