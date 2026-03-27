@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="columns is-centered">
+  <div class="column is-narrow has-text-centered" style="padding-top: 4rem;">
+    <p class="mb-4">Are you sure you want to sign out?</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="button is-dark">Sign out</button>
+      <a href="/" class="button ml-2">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}
