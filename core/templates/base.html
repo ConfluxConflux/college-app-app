@@ -66,8 +66,8 @@
           {{ applicant.first_name }}
           {% include "core/_avatar.html" with size=32 %}
         </a>
-        <div x-data="{ open: false }" class="navbar-item" style="position:relative;padding:0;">
-          <button @click="open = !open" style="background:none;border:none;cursor:pointer;font-size:0.875rem;font-family:inherit;color:rgba(255,255,255,0.7);padding:0.5rem 0.75rem;height:100%;">
+        <div x-data="{ open: false }" style="position:relative;display:flex;align-items:stretch;">
+          <button @click="open = !open" style="background:transparent;border:none;cursor:pointer;font-size:1rem;font-family:inherit;color:#fff;padding:0.5rem 0.75rem;height:100%;line-height:1.5;">
             Sign out
           </button>
           <div x-show="open" @click.outside="open = false" x-transition
