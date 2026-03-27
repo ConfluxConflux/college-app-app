@@ -1,7 +1,7 @@
 {% load static %}
 {# Usage: {% include "core/_avatar.html" with size=32 %} — size in px #}
 {% if applicant.profile_picture %}
-<img src="{% static applicant.profile_picture %}"
+<img src="{{ applicant.profile_picture }}"
      alt="{{ applicant.first_name }}"
      style="width:{{ size }}px;height:{{ size }}px;border-radius:50%;object-fit:cover;display:block;flex-shrink:0;">
 {% else %}
