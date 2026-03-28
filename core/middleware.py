@@ -34,6 +34,7 @@ class LoginRequiredMiddleware:
             if (path not in self.EXEMPT_EXACT
                     and not path.startswith('/accounts/')
                     and not path.startswith('/admin/')
-                    and not path.startswith('/switch-applicant/')):
+                    and not path.startswith('/switch-applicant/')
+                    and path not in ('/widgets/time-calculator/', '/widgets/word-counter/')):
                 return redirect(f'/accounts/login/?next={path}')
         return self.get_response(request)

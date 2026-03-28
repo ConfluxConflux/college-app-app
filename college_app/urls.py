@@ -4,6 +4,7 @@ from django.views.generic import RedirectView
 
 urlpatterns = [
     path('time', RedirectView.as_view(url='/widgets/time-calculator/', permanent=True)),
+    path('words', RedirectView.as_view(url='/widgets/word-counter/', permanent=True)),
     # Redirects for old applications URLs
     path('colleges/applications/', RedirectView.as_view(url='/applications/', permanent=True, query_string=True)),
     path('colleges/applications/uc/', RedirectView.as_view(url='/applications/uc/', permanent=True)),

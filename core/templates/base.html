@@ -29,6 +29,7 @@
       </a>
     </div>
     <div id="mainNav" class="navbar-menu">
+      {% if request.user.is_authenticated %}
       <div class="navbar-start">
         <a class="navbar-item {% if request.resolver_match.url_name == 'home' and request.resolver_match.app_name == 'core' %}is-active{% endif %}"
            href="{% url 'core:home' %}">
@@ -67,6 +68,19 @@
           {% include "core/_avatar.html" with size=32 %}
         </a>
       </div>
+      {% else %}
+      <div class="navbar-start">
+        <a class="navbar-item" href="{% url 'core:landing' %}">Dashboard</a>
+        <a class="navbar-item" href="{% url 'core:landing' %}">Colleges</a>
+        <a class="navbar-item" href="{% url 'core:landing' %}">Applications</a>
+        <a class="navbar-item" href="{% url 'core:landing' %}">Activities</a>
+        <a class="navbar-item" href="{% url 'core:landing' %}">Essays</a>
+        <a class="navbar-item" href="{% url 'core:landing' %}">Widgets</a>
+      </div>
+      <div class="navbar-end">
+        <a class="navbar-item" href="{% url 'account_login' %}">Sign in</a>
+      </div>
+      {% endif %}
     </div>
   </nav>
 
