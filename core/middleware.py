@@ -35,6 +35,7 @@ class LoginRequiredMiddleware:
                     and not path.startswith('/accounts/')
                     and not path.startswith('/admin/')
                     and not path.startswith('/switch-applicant/')
-                    and path not in ('/widgets/time-calculator/', '/widgets/word-counter/', '/time', '/words')):
+                    and not path.startswith('/widgets/')
+                    and path not in ('/time', '/words')):
                 return redirect(f'/accounts/login/?next={path}')
         return self.get_response(request)
