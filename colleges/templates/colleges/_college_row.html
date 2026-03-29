@@ -13,7 +13,7 @@
     {% if field_name == 'name' %}
       <strong>{{ college.name }}</strong>
     {% elif field_name == 'apply_status' %}
-      <span class="tag {{ college.status_color }} is-light">{{ college.get_apply_status_display|default:"—" }}</span>
+      <span class="tag {{ college.status_color|default:'pill-not_applying' }} is-light">{{ college.get_apply_status_display|default:"Not Applying" }}</span>
       {% if 'cornell college' in college.name|lower %}
       <div x-data="{ cornellWarning: false }" style="position:absolute;inset:0;">
         <div x-show="cornellWarning" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:1000;display:flex;align-items:center;justify-content:center;">
@@ -33,7 +33,6 @@
           {% csrf_token %}
           <select name="value" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;"
                   onchange="if(['applying','likely','considering','applied','accepted','enrolled'].includes(this.value)){ this.closest('[x-data]').__x.$data.cornellWarning = true; return; } this.form.requestSubmit()">
-            <option value="">—</option>
             {% for val, label in college.APPLY_STATUS_CHOICES %}{% if val != 'likely' and val != 'unlikely' and val != 'enrolled' and val != 'withdrawn' %}
             <option value="{{ val }}" {% if val == college.apply_status %}selected{% endif %}>{{ label }}</option>
             {% endif %}{% endfor %}
