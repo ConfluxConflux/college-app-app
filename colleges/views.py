@@ -147,7 +147,7 @@ def college_list(request):
     platform_tracker = _build_platform_tracker(applicant)
 
     # Status choices for the filter dropdown — limit to current view's statuses, exclude hidden statuses
-    HIDDEN_STATUSES = {'likely', 'unlikely'}
+    HIDDEN_STATUSES = {'likely', 'unlikely', 'enrolled', 'withdrawn'}
     all_choices = dict(UserCollege.APPLY_STATUS_CHOICES)
     if view_config['statuses']:
         view_status_choices = [(v, all_choices[v]) for v in view_config['statuses'] if v in all_choices and v not in HIDDEN_STATUSES]
@@ -246,7 +246,7 @@ def college_edit_cell(request, pk, field):
     field_label = ALL_TABLE_FIELDS_DICT.get(field, field)
 
     if field == 'apply_status':
-        hidden = {'likely', 'unlikely'}
+        hidden = {'likely', 'unlikely', 'enrolled', 'withdrawn'}
         choices = [(v, l) for v, l in UserCollege.APPLY_STATUS_CHOICES if v not in hidden]
         return render(request, 'colleges/_cell_edit_select.html', {
             'college': college, 'field': field, 'field_label': field_label,
@@ -459,16 +459,14 @@ def applications(request):
 
     # Status choices for the status badge dropdown
     status_choices = [
-        ('applying', 'Applying'),
-        ('considering', 'Considering'),
         ('not_applying', 'Not Applying'),
+        ('considering', 'Considering'),
+        ('applying', 'Applying'),
         ('applied', 'Submitted'),
         ('deferred', 'Deferred'),
         ('waitlisted', 'Waitlisted'),
-        ('accepted', 'Accepted'),
         ('rejected', 'Rejected'),
-        ('enrolled', 'Enrolled'),
-        ('withdrawn', 'Withdrawn'),
+        ('accepted', 'Accepted'),
     ]
 
     # Per-college dashboard data (only computed when a college is selected)

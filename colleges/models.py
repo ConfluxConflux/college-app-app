@@ -2,16 +2,17 @@ from django.db import models
 
 
 APPLY_STATUS_CHOICES = [
-    ('applying', 'Applying'),
-    ('likely', 'Likely'),
-    ('considering', 'Considering'),
-    ('unlikely', 'Unlikely'),
     ('not_applying', 'Not Applying'),
+    ('considering', 'Considering'),
+    ('applying', 'Applying'),
     ('applied', 'Submitted'),
-    ('accepted', 'Accepted'),
     ('deferred', 'Deferred'),
     ('waitlisted', 'Waitlisted'),
     ('rejected', 'Rejected'),
+    ('accepted', 'Accepted'),
+    # Hidden from UI but kept for legacy data:
+    ('likely', 'Likely'),
+    ('unlikely', 'Unlikely'),
     ('enrolled', 'Enrolled'),
     ('withdrawn', 'Withdrawn'),
 ]

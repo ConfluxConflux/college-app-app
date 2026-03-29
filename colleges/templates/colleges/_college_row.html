@@ -34,7 +34,7 @@
           <select name="value" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;"
                   onchange="if(['applying','likely','considering','applied','accepted','enrolled'].includes(this.value)){ this.closest('[x-data]').__x.$data.cornellWarning = true; return; } this.form.requestSubmit()">
             <option value="">—</option>
-            {% for val, label in college.APPLY_STATUS_CHOICES %}{% if val != 'likely' and val != 'unlikely' %}
+            {% for val, label in college.APPLY_STATUS_CHOICES %}{% if val != 'likely' and val != 'unlikely' and val != 'enrolled' and val != 'withdrawn' %}
             <option value="{{ val }}" {% if val == college.apply_status %}selected{% endif %}>{{ label }}</option>
             {% endif %}{% endfor %}
           </select>
@@ -49,7 +49,7 @@
         <select name="value" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;"
                 onchange="this.form.requestSubmit()">
           <option value="">—</option>
-          {% for val, label in college.APPLY_STATUS_CHOICES %}{% if val != 'likely' and val != 'unlikely' %}
+          {% for val, label in college.APPLY_STATUS_CHOICES %}{% if val != 'likely' and val != 'unlikely' and val != 'enrolled' and val != 'withdrawn' %}
           <option value="{{ val }}" {% if val == college.apply_status %}selected{% endif %}>{{ label }}</option>
           {% endif %}{% endfor %}
         </select>
