@@ -40,17 +40,17 @@
   </td>
 
   {# Description #}
-  <td style="min-width:220px" x-data="{ e:false, v:'{{ activity.full_description|escapejs }}', th:null }">
-    <div x-show="!e" x-ref="d" @click="th=$refs.d.offsetHeight; e=true; $nextTick(()=>$refs.t.focus())" class="is-size-7" style="cursor:pointer; white-space:pre-wrap; min-height:1.2em" x-text="v||'—'"></div>
-    <textarea x-show="e" x-ref="t" class="textarea is-small" name="value" rows="4" x-model="v" :style="th ? 'min-height:'+th+'px' : ''"
+  <td style="min-width:220px" x-data="{ e:false, v:'{{ activity.full_description|escapejs }}' }">
+    <div x-show="!e" x-ref="d" @click="let h=$refs.d.offsetHeight; e=true; $nextTick(()=>{ $refs.t.style.minHeight=h+'px'; $refs.t.focus(); })" class="is-size-7" style="cursor:pointer; white-space:pre-wrap; min-height:1.2em" x-text="v||'—'"></div>
+    <textarea x-show="e" x-ref="t" class="textarea is-small" name="value" rows="4" x-model="v"
       hx-post="{% url 'core:core_activity_cell' activity.pk 'full_description' %}" hx-trigger="blur, input delay:1500ms" hx-swap="none"
       @blur="e=false"></textarea>
   </td>
 
   {# Notes #}
-  <td style="min-width:160px" x-data="{ e:false, v:'{{ activity.personal_notes|escapejs }}', th:null }">
-    <div x-show="!e" x-ref="d" @click="th=$refs.d.offsetHeight; e=true; $nextTick(()=>$refs.t.focus())" class="is-size-7" style="cursor:pointer; white-space:pre-wrap; min-height:1.2em" x-text="v||'—'"></div>
-    <textarea x-show="e" x-ref="t" class="textarea is-small" name="value" rows="4" x-model="v" :style="th ? 'min-height:'+th+'px' : ''"
+  <td style="min-width:160px" x-data="{ e:false, v:'{{ activity.personal_notes|escapejs }}' }">
+    <div x-show="!e" x-ref="d" @click="let h=$refs.d.offsetHeight; e=true; $nextTick(()=>{ $refs.t.style.minHeight=h+'px'; $refs.t.focus(); })" class="is-size-7" style="cursor:pointer; white-space:pre-wrap; min-height:1.2em" x-text="v||'—'"></div>
+    <textarea x-show="e" x-ref="t" class="textarea is-small" name="value" rows="4" x-model="v"
       hx-post="{% url 'core:core_activity_cell' activity.pk 'personal_notes' %}" hx-trigger="blur, input delay:1500ms" hx-swap="none"
       @blur="e=false"></textarea>
   </td>
@@ -70,13 +70,13 @@
 
   {# UC Background (250ch) #}
   <td style="min-width:200px" x-data="{
-    e:false, v:'{{ uc_entry.background|escapejs }}', th:null,
+    e:false, v:'{{ uc_entry.background|escapejs }}',
     get chars(){ return this.v.length; },
     cc(l){ var r=this.chars/l; return r>1?'has-text-danger has-text-weight-semibold':r>=0.9?'has-text-warning-dark':'has-text-grey'; }
   }">
-    <div x-show="!e" x-ref="d" @click="th=$refs.d.offsetHeight; e=true; $nextTick(()=>$refs.t.focus())" class="is-size-7" style="cursor:pointer; white-space:pre-wrap; min-height:1.2em" x-text="v||'—'"></div>
+    <div x-show="!e" x-ref="d" @click="let h=$refs.d.offsetHeight; e=true; $nextTick(()=>{ $refs.t.style.minHeight=h+'px'; $refs.t.focus(); })" class="is-size-7" style="cursor:pointer; white-space:pre-wrap; min-height:1.2em" x-text="v||'—'"></div>
     <div x-show="e">
-      <textarea x-ref="t" class="textarea is-small" name="value" rows="3" x-model="v" maxlength="250" :style="th ? 'min-height:'+th+'px' : ''"
+      <textarea x-ref="t" class="textarea is-small" name="value" rows="3" x-model="v" maxlength="250"
         hx-post="{% url 'core:core_activity_uc_cell' activity.pk 'background' %}" hx-trigger="blur, input delay:1500ms" hx-swap="none"
         @blur="e=false"></textarea>
       <p style="text-align:right;margin-top:0.25rem;font-size:0.75rem;line-height:1;"><span :class="cc(250)" x-text="chars + ' / 250 ' + (chars === 1 ? 'char' : 'chars')"></span></p>
@@ -85,13 +85,13 @@
 
   {# UC Description (350ch) #}
   <td style="min-width:220px" x-data="{
-    e:false, v:'{{ uc_entry.description|escapejs }}', th:null,
+    e:false, v:'{{ uc_entry.description|escapejs }}',
     get chars(){ return this.v.length; },
     cc(l){ var r=this.chars/l; return r>1?'has-text-danger has-text-weight-semibold':r>=0.9?'has-text-warning-dark':'has-text-grey'; }
   }">
-    <div x-show="!e" x-ref="d" @click="th=$refs.d.offsetHeight; e=true; $nextTick(()=>$refs.t.focus())" class="is-size-7" style="cursor:pointer; white-space:pre-wrap; min-height:1.2em" x-text="v||'—'"></div>
+    <div x-show="!e" x-ref="d" @click="let h=$refs.d.offsetHeight; e=true; $nextTick(()=>{ $refs.t.style.minHeight=h+'px'; $refs.t.focus(); })" class="is-size-7" style="cursor:pointer; white-space:pre-wrap; min-height:1.2em" x-text="v||'—'"></div>
     <div x-show="e">
-      <textarea x-ref="t" class="textarea is-small" name="value" rows="3" x-model="v" maxlength="350" :style="th ? 'min-height:'+th+'px' : ''"
+      <textarea x-ref="t" class="textarea is-small" name="value" rows="3" x-model="v" maxlength="350"
         hx-post="{% url 'core:core_activity_uc_cell' activity.pk 'description' %}" hx-trigger="blur, input delay:1500ms" hx-swap="none"
         @blur="e=false"></textarea>
       <p style="text-align:right;margin-top:0.25rem;font-size:0.75rem;line-height:1;"><span :class="cc(350)" x-text="chars + ' / 350 ' + (chars === 1 ? 'char' : 'chars')"></span></p>
@@ -129,13 +129,13 @@
 
   {# CA Description (150ch) #}
   <td style="min-width:200px" x-data="{
-    e:false, v:'{{ ca_entry.description|escapejs }}', th:null,
+    e:false, v:'{{ ca_entry.description|escapejs }}',
     get chars(){ return this.v.length; },
     cc(l){ var r=this.chars/l; return r>1?'has-text-danger has-text-weight-semibold':r>=0.9?'has-text-warning-dark':'has-text-grey'; }
   }">
-    <div x-show="!e" x-ref="d" @click="th=$refs.d.offsetHeight; e=true; $nextTick(()=>$refs.t.focus())" class="is-size-7" style="cursor:pointer; white-space:pre-wrap; min-height:1.2em" x-text="v||'—'"></div>
+    <div x-show="!e" x-ref="d" @click="let h=$refs.d.offsetHeight; e=true; $nextTick(()=>{ $refs.t.style.minHeight=h+'px'; $refs.t.focus(); })" class="is-size-7" style="cursor:pointer; white-space:pre-wrap; min-height:1.2em" x-text="v||'—'"></div>
     <div x-show="e">
-      <textarea x-ref="t" class="textarea is-small" name="value" rows="3" x-model="v" maxlength="150" :style="th ? 'min-height:'+th+'px' : ''"
+      <textarea x-ref="t" class="textarea is-small" name="value" rows="3" x-model="v" maxlength="150"
         hx-post="{% url 'core:core_activity_ca_cell' activity.pk 'description' %}" hx-trigger="blur, input delay:1500ms" hx-swap="none"
         @blur="e=false"></textarea>
       <p style="text-align:right;margin-top:0.25rem;font-size:0.75rem;line-height:1;"><span :class="cc(150)" x-text="chars + ' / 150 ' + (chars === 1 ? 'char' : 'chars')"></span></p>
@@ -195,13 +195,13 @@
 
   {# MIT Description (40 words) #}
   <td style="min-width:200px" x-data="{
-    e:false, v:'{{ mit_entry.description|escapejs }}', th:null,
+    e:false, v:'{{ mit_entry.description|escapejs }}',
     get words(){ return this.v.trim()===''?0:this.v.trim().split(' ').length; },
     wc(l){ var r=this.words/l; return r>1?'has-text-danger has-text-weight-semibold':r>=0.9?'has-text-warning-dark':'has-text-grey'; }
   }">
-    <div x-show="!e" x-ref="d" @click="th=$refs.d.offsetHeight; e=true; $nextTick(()=>$refs.t.focus())" class="is-size-7" style="cursor:pointer; white-space:pre-wrap; min-height:1.2em" x-text="v||'—'"></div>
+    <div x-show="!e" x-ref="d" @click="let h=$refs.d.offsetHeight; e=true; $nextTick(()=>{ $refs.t.style.minHeight=h+'px'; $refs.t.focus(); })" class="is-size-7" style="cursor:pointer; white-space:pre-wrap; min-height:1.2em" x-text="v||'—'"></div>
     <div x-show="e">
-      <textarea x-ref="t" class="textarea is-small" name="value" rows="3" x-model="v" :style="th ? 'min-height:'+th+'px' : ''"
+      <textarea x-ref="t" class="textarea is-small" name="value" rows="3" x-model="v"
         hx-post="{% url 'core:core_activity_mit_cell' activity.pk 'description' %}" hx-trigger="blur, input delay:1500ms" hx-swap="none"
         @blur="e=false"></textarea>
       <p style="text-align:right;margin-top:0.25rem;font-size:0.75rem;line-height:1;"><span :class="wc(40)" x-text="words + ' / 40 ' + (words === 1 ? 'word' : 'words')"></span></p>
