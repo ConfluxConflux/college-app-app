@@ -450,9 +450,9 @@ class UserCollege(models.Model):
     @property
     def status_color(self):
         return {
-            'applying': 'is-success',
+            'applying': 'pill-applying',
             'likely': 'is-info',
-            'considering': 'is-warning',
+            'considering': 'pill-considering',
             'unlikely': 'is-danger-light',
             'not_applying': 'is-light',
             'applied': 'is-link',
