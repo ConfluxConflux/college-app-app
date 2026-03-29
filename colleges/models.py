@@ -450,15 +450,16 @@ class UserCollege(models.Model):
     @property
     def status_color(self):
         return {
-            'applying': 'pill-applying',
-            'likely': 'is-info',
-            'considering': 'pill-considering',
-            'unlikely': 'is-danger-light',
-            'not_applying': 'is-light',
-            'applied': 'is-link',
-            'accepted': 'is-success',
-            'deferred': 'is-warning',
-            'waitlisted': 'is-warning',
-            'rejected': 'is-danger',
-            'enrolled': 'is-primary',
+            'not_applying': 'pill-not_applying',
+            'considering':  'pill-considering',
+            'applying':     'pill-applying',
+            'likely':       'pill-likely',
+            'unlikely':     'pill-unlikely',
+            'applied':      'pill-applied',
+            'accepted':     'pill-accepted',
+            'deferred':     'pill-deferred',
+            'waitlisted':   'pill-waitlisted',
+            'rejected':     'pill-rejected',
+            'enrolled':     'pill-enrolled',
+            'withdrawn':    'pill-withdrawn',
         }.get(self.apply_status, '')

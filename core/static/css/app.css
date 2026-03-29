@@ -57,9 +57,19 @@ body {
 .status-enrolled    { background-color: #90ccd8 !important; color: #222 !important; }
 .status-withdrawn   { background-color: #c8b0a0 !important; color: #222 !important; }
 
-/* Pill overrides for applying/considering — Bulma has no purple, and is-success is wrong green */
-.tag.pill-applying    { background-color: #b8d8fc !important; color: #1a4a8c !important; }
-.tag.pill-considering { background-color: #c5bfed !important; color: #4a3a8c !important; }
+/* Status pill colors — lighter same-hue version of each row background */
+.tag.pill-not_applying { background-color: #eeeeee !important; color: #555555 !important; }
+.tag.pill-considering  { background-color: #e4e0f8 !important; color: #4a3a9c !important; }
+.tag.pill-applying     { background-color: #deeeff !important; color: #1a4a9c !important; }
+.tag.pill-likely       { background-color: #e8f3ff !important; color: #1a5a9c !important; }
+.tag.pill-unlikely     { background-color: #f8e4e4 !important; color: #8c2020 !important; }
+.tag.pill-applied      { background-color: #c4e8c4 !important; color: #1e5c20 !important; }
+.tag.pill-accepted     { background-color: #d4f0d4 !important; color: #246024 !important; }
+.tag.pill-deferred     { background-color: #faecc4 !important; color: #7a6000 !important; }
+.tag.pill-waitlisted   { background-color: #fae0c4 !important; color: #7a4a00 !important; }
+.tag.pill-rejected     { background-color: #f8d4d4 !important; color: #8c1a1a !important; }
+.tag.pill-enrolled     { background-color: #c4ecf8 !important; color: #1a5c70 !important; }
+.tag.pill-withdrawn    { background-color: #e8ddd4 !important; color: #5a4038 !important; }
 
 /* Status badge pill (inside Tabulator status cell) */
 .status-badge {
