@@ -50,7 +50,7 @@
     get words(){ return this.v.trim()===''?0:this.v.trim().split(' ').length; },
     wc(l){ var r=this.words/l; return r>1?'has-text-danger has-text-weight-semibold':r>=0.9?'has-text-warning-dark':'has-text-grey'; }
   }">
-    <div x-show="!e" x-ref="d" @click="let h=$refs.d.offsetHeight; e=true; $nextTick(()=>{ $refs.t.style.minHeight=h+'px'; $refs.t.focus(); })" class="is-size-7" style="cursor:pointer; white-space:pre-wrap; min-height:1.2em" x-text="v||'—'"></div>
+    <div x-show="!e" x-ref="d" @click="let h=$refs.d.offsetHeight; e=true; $nextTick(()=>{ $refs.t.style.minHeight=h+'px'; $refs.t.style.height=$refs.t.scrollHeight+'px'; $refs.t.focus(); })" class="is-size-7" style="cursor:pointer; white-space:pre-wrap; min-height:1.2em" x-text="v||'—'"></div>
     <div x-show="e">
       <textarea x-ref="t" class="textarea is-small" name="value" rows="3" x-model="v"
         hx-post="{% url 'activities:mit_cell' entry.pk 'description' %}" hx-trigger="blur, input delay:1500ms" hx-swap="none"
