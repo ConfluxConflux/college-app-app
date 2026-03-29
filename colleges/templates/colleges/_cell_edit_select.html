@@ -30,7 +30,6 @@
                 style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;"
                 onchange="this._changed=true;{% if 'cornell college' in college.name|lower %}if(['applying','likely','considering','applied','accepted','enrolled'].includes(this.value)){ this.closest('[x-data]').__x.$data.cornellWarning = true; } {% endif %}this.form.requestSubmit()"
                 onkeydown="if(event.key==='Escape'){htmx.ajax('GET',window.location.href,'#college-table-wrapper')}">
-          <option value="">—</option>
           {% for val, label in choices %}
           <option value="{{ val }}" {% if val == current_value %}selected{% endif %}>{{ label }}</option>
           {% endfor %}
