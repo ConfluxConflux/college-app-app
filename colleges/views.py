@@ -59,41 +59,26 @@ VIEWS = {
     },
 }
 
-# Sort order for Applications page
-APP_PROGRESS_STATUS_ORDER = Case(
-    When(apply_status='applying', then=Value(1)),
-    When(apply_status='likely', then=Value(2)),
+# Sort order by relevance: Applying → Considering → Deferred → Waitlisted → Submitted → Accepted → Rejected
+_RELEVANCE_ORDER = Case(
+    When(apply_status='applying',    then=Value(1)),
+    When(apply_status='likely',      then=Value(2)),
     When(apply_status='considering', then=Value(3)),
-    When(apply_status='unlikely', then=Value(4)),
-    When(apply_status='deferred', then=Value(5)),
-    When(apply_status='waitlisted', then=Value(6)),
-    When(apply_status='applied', then=Value(7)),
-    When(apply_status='accepted', then=Value(8)),
-    When(apply_status='rejected', then=Value(9)),
-    When(apply_status='enrolled', then=Value(10)),
-    When(apply_status='not_applying', then=Value(11)),
-    When(apply_status='withdrawn', then=Value(12)),
+    When(apply_status='unlikely',    then=Value(4)),
+    When(apply_status='deferred',    then=Value(5)),
+    When(apply_status='waitlisted',  then=Value(6)),
+    When(apply_status='applied',     then=Value(7)),
+    When(apply_status='accepted',    then=Value(8)),
+    When(apply_status='enrolled',    then=Value(9)),
+    When(apply_status='rejected',    then=Value(10)),
+    When(apply_status='withdrawn',   then=Value(11)),
+    When(apply_status='not_applying',then=Value(12)),
     default=Value(13),
     output_field=IntegerField(),
 )
 
-# Sort order for "All Colleges" view
-STATUS_ORDER = Case(
-    When(apply_status='not_applying', then=Value(1)),
-    When(apply_status='considering', then=Value(2)),
-    When(apply_status='unlikely', then=Value(3)),
-    When(apply_status='applying', then=Value(4)),
-    When(apply_status='likely', then=Value(5)),
-    When(apply_status='applied', then=Value(6)),
-    When(apply_status='deferred', then=Value(7)),
-    When(apply_status='waitlisted', then=Value(8)),
-    When(apply_status='rejected', then=Value(9)),
-    When(apply_status='accepted', then=Value(10)),
-    When(apply_status='enrolled', then=Value(11)),
-    When(apply_status='withdrawn', then=Value(12)),
-    default=Value(13),
-    output_field=IntegerField(),
-)
+APP_PROGRESS_STATUS_ORDER = _RELEVANCE_ORDER
+STATUS_ORDER = _RELEVANCE_ORDER
 
 
 def college_list(request, tab='applications'):
@@ -384,7 +369,7 @@ def college_delete(request, pk):
 APP_STATUS_ORDER_MAP = {
     'applying': 1, 'likely': 2, 'considering': 3, 'unlikely': 4,
     'deferred': 5, 'waitlisted': 6, 'applied': 7, 'accepted': 8,
-    'rejected': 9, 'enrolled': 10, 'not_applying': 11, 'withdrawn': 12,
+    'enrolled': 9, 'rejected': 10, 'withdrawn': 11, 'not_applying': 12,
 }
 
 
