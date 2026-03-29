@@ -5,7 +5,7 @@
         {% for field_name, field_label in table_fields %}
         <th class="col-{{ field_name }}"
             style="white-space:nowrap;{% if field_name in optional_field_names %} display:none;{% endif %}">
-          <a hx-get="{% url 'colleges:list' %}?view={{ current_view }}&sort={{ field_name }}&dir={% if sort == field_name and sort_dir == 'asc' %}desc{% else %}asc{% endif %}{% if search %}&q={{ search }}{% endif %}"
+          <a hx-get="{{ tab_url }}?sort={{ field_name }}&dir={% if sort == field_name and sort_dir == 'asc' %}desc{% else %}asc{% endif %}{% if search %}&q={{ search }}{% endif %}"
              hx-target="#college-table-wrapper"
              hx-push-url="true"
              class="has-text-dark"

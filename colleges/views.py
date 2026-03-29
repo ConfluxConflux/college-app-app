@@ -96,10 +96,8 @@ STATUS_ORDER = Case(
 )
 
 
-def college_list(request):
-    current_view = request.GET.get('view', 'applications')
-    if current_view not in VIEWS:
-        current_view = 'applications'
+def college_list(request, tab='applications'):
+    current_view = tab if tab in VIEWS else 'applications'
 
     applicant = request.user.applicant
     view_config = VIEWS[current_view]
@@ -154,6 +152,10 @@ def college_list(request):
     else:
         view_status_choices = [(v, l) for v, l in UserCollege.APPLY_STATUS_CHOICES if v not in HIDDEN_STATUSES]
 
+    tab_url_map = {'applications': 'colleges:list', 'all': 'colleges:list_all', 'submitted': 'colleges:list_submitted'}
+    from django.urls import reverse
+    tab_url = reverse(tab_url_map.get(current_view, 'colleges:list'))
+
     context = {
         'colleges': colleges,
         'table_fields': ALL_TABLE_FIELDS,
@@ -167,6 +169,7 @@ def college_list(request):
         'current_view': current_view,
         'views': VIEWS,
         'platform_tracker': platform_tracker,
+        'tab_url': tab_url,
     }
 
     if request.headers.get('HX-Request'):

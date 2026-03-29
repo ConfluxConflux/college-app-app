@@ -11,26 +11,24 @@
 {% endif %}
 
 <!-- View tabs -->
-<div class="buttons has-addons mb-3" id="view-tabs">
-  <button class="button {% if current_view == 'applications' %}is-dark is-selected{% endif %}"
-          data-view="applications">Your List</button>
-  <button class="button {% if current_view == 'all' %}is-dark is-selected{% endif %}"
-          data-view="all">All Colleges</button>
-  <button class="button {% if current_view == 'submitted' %}is-dark is-selected{% endif %}"
-          data-view="submitted">Submitted</button>
+<div class="buttons has-addons mb-3">
+  <a class="button {% if current_view == 'applications' %}is-dark is-selected{% endif %}"
+     href="{% url 'colleges:list' %}">Your List</a>
+  <a class="button {% if current_view == 'all' %}is-dark is-selected{% endif %}"
+     href="{% url 'colleges:list_all' %}">All Colleges</a>
+  <a class="button {% if current_view == 'submitted' %}is-dark is-selected{% endif %}"
+     href="{% url 'colleges:list_submitted' %}">Submitted</a>
 </div>
 
 <!-- Search (shown only for All Colleges) -->
 <div id="search-bar" class="mb-3"{% if current_view != 'all' %} style="display:none"{% endif %}>
-  <input type="hidden" id="view-hidden" name="view" value="{{ current_view }}">
   <div class="field" style="max-width:320px;">
     <div class="control">
       <input class="input" type="text" id="college-search" name="q"
              value="{{ search }}" placeholder="Search for a college to add to your list..."
-             hx-get="{% url 'colleges:list' %}"
+             hx-get="{% url 'colleges:list_all' %}"
              hx-trigger="keyup changed delay:300ms"
              hx-target="#college-table-wrapper"
-             hx-include="#view-hidden"
              hx-swap="innerHTML">
     </div>
   </div>
@@ -114,33 +112,12 @@
       applyVisibility();
     });
 
-    // View tab switching
-    document.getElementById('view-tabs').addEventListener('click', function(e) {
-      var btn = e.target.closest('[data-view]');
-      if (!btn) return;
-      var view = btn.dataset.view;
-
-      document.querySelectorAll('#view-tabs button').forEach(function(b) {
-        b.classList.remove('is-dark', 'is-selected');
-      });
-      btn.classList.add('is-dark', 'is-selected');
-
-      document.getElementById('search-bar').style.display = view === 'all' ? '' : 'none';
-      if (view !== 'all') document.getElementById('college-search').value = '';
-      document.getElementById('view-hidden').value = view;
-      document.getElementById('college-table-wrapper').dataset.view = view;
-
-      htmx.ajax('GET', '{% url "colleges:list" %}?view=' + view, {
-        target: '#college-table-wrapper',
-        swap: 'innerHTML'
-      });
-    });
   });
 
 
   // Click col-name in "Your List" view → Applications page (modifier+click to edit name)
   document.getElementById('college-table-wrapper').addEventListener('click', function(e) {
-    if (document.getElementById('view-hidden').value !== 'applications') return;
+    if ('{{ current_view }}' !== 'applications') return;
     var tr = e.target.closest('tr[data-pk]');
     if (!tr) return;
     if (!e.target.closest('td.col-name')) return;
