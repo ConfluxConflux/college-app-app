@@ -100,6 +100,16 @@
       color: #fff;
     }
 
+    .btn-blue {
+      background: #4a7fc1;
+      border-color: #4a7fc1;
+      color: #fff;
+    }
+    .btn-blue:hover {
+      background: #3a6aaa;
+      border-color: #3a6aaa;
+    }
+
     .dev-links {
       margin-top: 1rem;
       display: flex;
@@ -121,7 +131,7 @@
     <div class="buttons">
       <a href="/accounts/google/login/" class="btn btn-primary">Sign up / log in with Google</a>
     </div>
-    <a href="/widgets/" class="btn btn-secondary" style="font-size:1.2rem;">Explore widgets first</a>
+    <a href="/widgets/" class="btn btn-blue" style="font-size:1.2rem;">Explore widgets first</a>
     <div class="dev-links">
       <a href="{% url 'core:switch_applicant' 1 %}">View as Jacob (dev)</a>
       <a href="{% url 'core:switch_applicant' 2 %}">View as Hedgie (dev)</a>
