@@ -2,7 +2,7 @@ from django.shortcuts import redirect
 
 
 class WwwRedirectMiddleware:
-    """Redirect www.collegeappapp.com → collegeappapp.com (permanent)."""
+    """Redirect www.hippocampus.college → hippocampus.college (permanent)."""
 
     def __init__(self, get_response):
         self.get_response = get_response

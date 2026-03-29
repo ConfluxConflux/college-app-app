@@ -47,7 +47,7 @@ class Command(BaseCommand):
         msg["Subject"] = f"College App DB Backup — {timestamp[:10]}"
 
         msg.attach(MIMEText(
-            f"Automated nightly backup from collegeappapp.com.\n\n"
+            f"Automated nightly backup from hippocampus.college.\n\n"
             f"Timestamp: {timestamp}\n"
             f"Compressed size: {len(data) / 1024:.1f} KB\n\n"
             f"Restore with:\n"
