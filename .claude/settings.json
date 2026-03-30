@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "cd /Users/jmc/Desktop/claude/college-app-app && if ! git diff --quiet || ! git diff --cached --quiet || [ -n \"$(git ls-files --others --exclude-standard)\" ]; then git add -A && git commit -m \"Auto-save: $(date +\"%Y-%m-%d %H:%M\")\" && git push origin main; fi",
+            "command": "cd /Users/jmc/Desktop/hippocampus && if ! git diff --quiet || ! git diff --cached --quiet || [ -n \"$(git ls-files --others --exclude-standard)\" ]; then git add -A && git commit -m \"Auto-save: $(date +\"%Y-%m-%d %H:%M\")\" && git push origin main; fi",
             "timeout": 30,
             "statusMessage": "Pushing changes to GitHub..."
           }
