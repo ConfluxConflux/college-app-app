@@ -8,7 +8,7 @@
       @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
     <strong x-show="!e" x-text="v"></strong>
     <div x-show="e" @click.stop>
-      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="100"
+      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="100" style="display:block; width:100%"
         hx-post="{% url 'activities:uc_cell' entry.pk 'name' %}" hx-trigger="blur" hx-swap="none"
         @blur="e=false">
     </div>
@@ -152,7 +152,7 @@
       @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
     <span x-show="!e" class="is-size-7" x-text="v"></span>
     <div x-show="e" @click.stop>
-      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v"
+      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" style="display:block; width:100%"
         hx-post="{% url 'activities:uc_cell' entry.pk 'personal_notes' %}" hx-trigger="blur" hx-swap="none"
         @blur="e=false">
     </div>

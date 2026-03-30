@@ -25,7 +25,7 @@
   }" @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
     <span x-show="!e" style="cursor:pointer; display:block; min-height:1.2em; font-size:0.85rem" x-text="v||'—'"></span>
     <div x-show="e" @click.stop>
-      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="50"
+      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="50" style="display:block; width:100%"
         hx-post="{% url 'activities:ca_cell' activity.pk 'position' %}" hx-trigger="blur" hx-swap="none"
         @blur="e=false">
       <p style="text-align:right;margin-top:0.15rem;font-size:0.72rem;line-height:1;"><span :class="cc(50)" x-text="chars+'/50'"></span></p>
@@ -40,7 +40,7 @@
   }" @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
     <strong x-show="!e" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||'—'"></strong>
     <div x-show="e" @click.stop>
-      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="100"
+      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="100" style="display:block; width:100%"
         hx-post="{% url 'activities:ca_cell' activity.pk 'organization' %}" hx-trigger="blur" hx-swap="none"
         @blur="e=false">
       <p style="text-align:right;margin-top:0.15rem;font-size:0.72rem;line-height:1;"><span :class="cc(100)" x-text="chars+'/100'"></span></p>
@@ -117,7 +117,7 @@
       @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
     <span x-show="!e" class="is-size-7" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||''"></span>
     <div x-show="e" @click.stop>
-      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v"
+      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" style="display:block; width:100%"
         hx-post="{% url 'activities:ca_cell' activity.pk 'personal_notes' %}" hx-trigger="blur" hx-swap="none"
         @blur="e=false">
     </div>

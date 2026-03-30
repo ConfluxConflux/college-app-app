@@ -16,7 +16,7 @@
   <td style="min-width:140px" x-data="{ e:false, v:'{{ entry.org_name|escapejs }}' }">
     <strong x-show="!e" @click="e=true; $nextTick(()=>$refs.i.focus())" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||'—'"></strong>
     <div x-show="e">
-      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="200"
+      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="200" style="display:block; width:100%"
         hx-post="{% url 'activities:mit_cell' entry.pk 'org_name' %}" hx-trigger="blur" hx-swap="none"
         @blur="e=false">
     </div>
@@ -26,7 +26,7 @@
   <td style="min-width:120px" x-data="{ e:false, v:'{{ entry.role_award|escapejs }}' }">
     <span x-show="!e" @click="e=true; $nextTick(()=>$refs.i.focus())" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||'—'"></span>
     <div x-show="e">
-      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="200"
+      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="200" style="display:block; width:100%"
         hx-post="{% url 'activities:mit_cell' entry.pk 'role_award' %}" hx-trigger="blur" hx-swap="none"
         @blur="e=false">
     </div>
@@ -36,7 +36,7 @@
   <td style="min-width:90px" x-data="{ e:false, v:'{{ entry.participation_period|escapejs }}' }">
     <span x-show="!e" @click="e=true; $nextTick(()=>$refs.i.focus())" class="is-size-7" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||'—'"></span>
     <div x-show="e">
-      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="100"
+      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="100" style="display:block; width:100%"
         hx-post="{% url 'activities:mit_cell' entry.pk 'participation_period' %}" hx-trigger="blur" hx-swap="none"
         @blur="e=false">
     </div>
