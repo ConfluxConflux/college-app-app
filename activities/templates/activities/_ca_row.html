@@ -116,9 +116,11 @@
   <td style="min-width:120px" x-data="{ e:false, v:'{{ activity.personal_notes|escapejs }}' }"
       @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
     <span x-show="!e" class="is-size-7" style="cursor:pointer; display:block; min-height:1.2em" x-text="v||''"></span>
-    <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v"
-      hx-post="{% url 'activities:ca_cell' activity.pk 'personal_notes' %}" hx-trigger="blur" hx-swap="none"
-      @blur="e=false" @click.stop>
+    <div x-show="e" @click.stop>
+      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v"
+        hx-post="{% url 'activities:ca_cell' activity.pk 'personal_notes' %}" hx-trigger="blur" hx-swap="none"
+        @blur="e=false">
+    </div>
   </td>
 
   {# Delete #}

@@ -7,9 +7,11 @@
   <td style="min-width:140px; cursor:pointer" x-data="{ e:false, v:'{{ entry.name|escapejs }}' }"
       @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
     <strong x-show="!e" x-text="v"></strong>
-    <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="100"
-      hx-post="{% url 'activities:uc_cell' entry.pk 'name' %}" hx-trigger="blur" hx-swap="none"
-      @blur="e=false" @click.stop>
+    <div x-show="e" @click.stop>
+      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="100"
+        hx-post="{% url 'activities:uc_cell' entry.pk 'name' %}" hx-trigger="blur" hx-swap="none"
+        @blur="e=false">
+    </div>
   </td>
 
   {# Category — swap outerHTML so row background color updates #}
@@ -149,9 +151,11 @@
   <td style="min-width:140px; cursor:pointer" x-data="{ e:false, v:'{{ entry.personal_notes|escapejs }}' }"
       @click="if(!e){ e=true; $nextTick(()=>$refs.i.focus()) }">
     <span x-show="!e" class="is-size-7" x-text="v"></span>
-    <input x-show="e" x-ref="i" class="input is-small" type="text" name="value" x-model="v"
-      hx-post="{% url 'activities:uc_cell' entry.pk 'personal_notes' %}" hx-trigger="blur" hx-swap="none"
-      @blur="e=false" @click.stop>
+    <div x-show="e" @click.stop>
+      <input x-ref="i" class="input is-small" type="text" name="value" x-model="v"
+        hx-post="{% url 'activities:uc_cell' entry.pk 'personal_notes' %}" hx-trigger="blur" hx-swap="none"
+        @blur="e=false">
+    </div>
   </td>
 
   {# Delete #}
