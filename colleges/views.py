@@ -108,7 +108,7 @@ def college_list(request, tab='applications'):
         db_field = SORT_FIELD_MAP.get(sort, sort)
         order = db_field if sort_dir == 'asc' else f'-{db_field}'
         colleges = colleges.order_by(order)
-    elif current_view == 'all':
+    elif current_view in ('all', 'applications'):
         colleges = colleges.annotate(status_order=STATUS_ORDER).order_by('status_order', 'college__name')
 
     # Search (display_name if set, else canonical name)
