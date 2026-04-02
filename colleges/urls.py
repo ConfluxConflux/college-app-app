@@ -6,7 +6,6 @@ app_name = 'colleges'
 urlpatterns = [
     path('', views.college_list, name='list'),
     path('all/', views.college_list, {'tab': 'all'}, name='list_all'),
-    path('submitted/', views.college_list, {'tab': 'submitted'}, name='list_submitted'),
     path('json/', views.college_json, name='json'),
     path('add/', views.college_add, name='add'),
     path('add-row/', views.college_add_row, name='add_row'),

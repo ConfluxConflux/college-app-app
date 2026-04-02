@@ -16,8 +16,6 @@
      href="{% url 'colleges:list' %}">Your List</a>
   <a class="button {% if current_view == 'all' %}is-dark is-selected{% endif %}"
      href="{% url 'colleges:list_all' %}">All Colleges</a>
-  <a class="button {% if current_view == 'submitted' %}is-dark is-selected{% endif %}"
-     href="{% url 'colleges:list_submitted' %}">Submitted</a>
 </div>
 
 <!-- Search (shown only for All Colleges) -->

@@ -43,19 +43,15 @@ ALL_TABLE_FIELDS = DEFAULT_FIELDS + OPTIONAL_FIELDS
 ALL_TABLE_FIELDS_DICT = dict(ALL_TABLE_FIELDS)
 EDITABLE_FIELDS = {f[0] for f in ALL_TABLE_FIELDS}
 
-# The three views and which statuses they show
+# The two views and which statuses they show
 VIEWS = {
     'applications': {
-        'label': 'Your Applications',
-        'statuses': ['applying', 'likely', 'considering', 'unlikely'],  # likely/unlikely kept for legacy data
+        'label': 'Your List',
+        'statuses': ['applying', 'likely', 'considering', 'unlikely', 'applied', 'deferred', 'waitlisted', 'rejected', 'enrolled', 'withdrawn', 'accepted'],  # everything except not_applying
     },
     'all': {
         'label': 'All Colleges',
         'statuses': None,  # no filter
-    },
-    'submitted': {
-        'label': 'Submitted',
-        'statuses': ['applied', 'deferred', 'waitlisted', 'rejected', 'enrolled', 'withdrawn'],
     },
 }
 
@@ -137,7 +133,7 @@ def college_list(request, tab='applications'):
     else:
         view_status_choices = [(v, l) for v, l in UserCollege.APPLY_STATUS_CHOICES if v not in HIDDEN_STATUSES]
 
-    tab_url_map = {'applications': 'colleges:list', 'all': 'colleges:list_all', 'submitted': 'colleges:list_submitted'}
+    tab_url_map = {'applications': 'colleges:list', 'all': 'colleges:list_all'}
     from django.urls import reverse
     tab_url = reverse(tab_url_map.get(current_view, 'colleges:list'))
 
