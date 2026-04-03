@@ -353,6 +353,68 @@ def college_update(request, pk):
     return JsonResponse({'ok': True})
 
 
+def college_search_suggestions(request):
+    """Search canonical College objects for the add-college modal."""
+    from .models import College as CanonicalCollege
+    q = request.GET.get('q', '').strip()
+    applicant = request.user.applicant
+
+    if len(q) < 2:
+        return render(request, 'colleges/_search_suggestions.html', {'suggestions': [], 'q': q})
+
+    already_added = set(
+        UserCollege.objects.filter(applicant=applicant)
+        .exclude(college__isnull=True)
+        .values_list('college_id', flat=True)
+    )
+
+    suggestions = list(
+        CanonicalCollege.objects.filter(name__icontains=q)
+        .exclude(pk__in=already_added)
+        .order_by('name')[:10]
+    )
+
+    return render(request, 'colleges/_search_suggestions.html', {'suggestions': suggestions, 'q': q})
+
+
+@require_POST
+def college_quick_add(request):
+    """Add a canonical college to the user's list from the search modal."""
+    from .models import College as CanonicalCollege
+    applicant = request.user.applicant
+    college_pk = request.POST.get('college_pk')
+
+    try:
+        canonical = CanonicalCollege.objects.get(pk=college_pk)
+    except (CanonicalCollege.DoesNotExist, ValueError, TypeError):
+        return HttpResponse('College not found', status=404)
+
+    uc, created = UserCollege.objects.get_or_create(
+        applicant=applicant,
+        college=canonical,
+        defaults={
+            'apply_status': 'applying',
+            'order': UserCollege.objects.filter(applicant=applicant).count(),
+        }
+    )
+
+    if not created:
+        # Already on the list — close the modal without appending a duplicate row
+        response = HttpResponse('')
+        response['HX-Trigger'] = 'college-added'
+        return response
+
+    ctx = {
+        'college': uc,
+        'table_fields': ALL_TABLE_FIELDS,
+        'optional_field_names': {f[0] for f in OPTIONAL_FIELDS},
+        'platform_tracker': _build_platform_tracker(applicant),
+    }
+    response = render(request, 'colleges/_college_row_with_tracker.html', ctx)
+    response['HX-Trigger'] = 'college-added'
+    return response
+
+
 @require_POST
 def college_delete(request, pk):
     college = get_object_or_404(UserCollege, pk=pk)

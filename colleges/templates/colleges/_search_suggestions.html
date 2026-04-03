@@ -1,0 +1,20 @@
+{% if suggestions %}
+<ul class="add-college-results">
+  {% for college in suggestions %}
+  <li>
+    <button class="add-college-result"
+            hx-post="{% url 'colleges:quick_add' %}"
+            hx-vals='{"college_pk": "{{ college.pk }}"}'
+            hx-target="#college-tbody"
+            hx-swap="beforeend">
+      <span class="add-college-result-name">{{ college.name }}</span>
+      {% if college.city and college.state %}
+      <span class="add-college-result-location">{{ college.city }}, {{ college.state }}</span>
+      {% endif %}
+    </button>
+  </li>
+  {% endfor %}
+</ul>
+{% elif q|length >= 2 %}
+<p class="add-college-no-results">No colleges found for "{{ q }}"</p>
+{% endif %}

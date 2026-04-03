@@ -1006,3 +1006,44 @@ body.focus-mode {
   border-top: 1px solid #eee;
   flex-shrink: 0;
 }
+
+/* Add-college modal results */
+.add-college-results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #dbdbdb;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.add-college-results li + li {
+  border-top: 1px solid #f0f0f0;
+}
+.add-college-result {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0.55rem 0.85rem;
+  background: white;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  gap: 1rem;
+  transition: background 0.1s;
+}
+.add-college-result:hover { background: #f5f8ff; }
+.add-college-result-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+.add-college-result-location {
+  font-size: 0.78rem;
+  color: #888;
+  white-space: nowrap;
+}
+.add-college-no-results {
+  color: #888;
+  font-size: 0.88rem;
+  padding: 0.4rem 0;
+}

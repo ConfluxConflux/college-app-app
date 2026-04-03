@@ -32,6 +32,13 @@
   </div>
 </div>
 
+<!-- Add a college button (Your List only) -->
+{% if current_view == 'applications' %}
+<button class="button is-primary is-small mb-3"
+        x-data
+        @click="$dispatch('open-add-modal')">+ Add a college</button>
+{% endif %}
+
 <!-- Column toggle -->
 <div class="mb-3" x-data="{ open: false }" @click.outside="open = false">
   <div class="dropdown" :class="{ 'is-active': open }">
@@ -56,6 +63,33 @@
 
 <div id="college-table-wrapper" data-view="{{ current_view }}">
   {% include "colleges/_college_table.html" %}
+</div>
+
+<!-- Add-college modal -->
+<div x-data="{ open: false }"
+     @open-add-modal.window="open = true"
+     @college-added.window="open = false"
+     @keyup.escape.window="open = false">
+  <template x-if="open">
+    <div class="est-modal-backdrop" @click.self="open = false">
+      <div class="est-modal-box" style="max-width:480px">
+        <div class="est-modal-header">
+          <span>Add a College</span>
+          <button class="est-modal-close" @click="open = false">&times;</button>
+        </div>
+        <div class="est-modal-body">
+          <input class="input" type="text" name="q"
+                 placeholder="Search for a college..."
+                 hx-get="{% url 'colleges:search_suggestions' %}"
+                 hx-trigger="input changed delay:200ms"
+                 hx-target="#add-college-results"
+                 hx-swap="innerHTML"
+                 x-init="$nextTick(() => $el.focus())">
+          <div id="add-college-results" class="mt-3"></div>
+        </div>
+      </div>
+    </div>
+  </template>
 </div>
 {% endblock %}
 
