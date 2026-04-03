@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Hippocampus</title>
+  <title>HIPPOCAMPUS</title>
   <link rel="icon" type="image/png" href="{% static 'img/hippocampus_firstdraft.png' %}">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +24,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding-top: 4vh;
+      justify-content: center;
+      padding: 4vh 2rem;
     }
 
     footer {
@@ -36,32 +37,61 @@
       text-align: center;
     }
 
-    .center {
-      text-align: center;
+    .hero {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 6rem;
+      padding: 2rem 4rem;
+    }
+
+    /* ── Acrostic ── */
+    .acrostic {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .arow {
+      display: flex;
+      align-items: baseline;
+      line-height: 1.25;
+    }
+
+    .ltr {
+      font-size: 2.4rem;
+      font-weight: 700;
+      font-style: italic;
+      color: var(--periwinkle-dark);
+      width: 2.8rem;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .word {
+      font-size: 1.35rem;
+      font-style: italic;
+      color: #333;
+      padding-left: 0.5rem;
+    }
+
+    .conn {
+      font-size: 0.8rem;
+      font-style: italic;
+      color: #aaa;
+      padding-left: 3.3rem;
+      margin: 0.15rem 0;
+    }
+
+    /* ── CTA column ── */
+    .cta-col {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 1rem;
     }
 
-    h1 {
-      font-size: 4.5rem;
-      font-weight: 700;
-      color: #1a1a1a;
-      line-height: 1.1;
-      letter-spacing: -0.02em;
-      margin-bottom: -0.75rem;
-    }
-
-    .tagline {
-      font-size: 1.75rem;
-      color: #666;
-      font-style: italic;
-      line-height: 1.5;
-    }
-
     .logo {
-      width: min(260px, 85vw);
+      width: min(240px, 85vw);
     }
 
     .buttons {
@@ -94,16 +124,6 @@
       border-color: #228879;
     }
 
-    .btn-secondary {
-      background: transparent;
-      color: #1a1a1a;
-    }
-    .btn-secondary:hover {
-      background: #1a1a1a;
-      border-color: #1a1a1a;
-      color: #fff;
-    }
-
     .btn-blue {
       background: #1a73e8;
       border-color: #1a73e8;
@@ -126,20 +146,43 @@
       color: #999;
       text-decoration: underline;
     }
+
+    @media (max-width: 800px) {
+      .hero {
+        flex-direction: column;
+        gap: 2.5rem;
+        padding: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="center">
-    <h1><i>hippocampus</i></h1>
-    <p class="tagline">An actually-good interface for managing college apps.<br>In theory, anyway ...</p>
-    <img src="{% static 'img/hippocampus_firstdraft.png' %}" alt="Hippocampus logo" class="logo">
-    <div class="buttons">
-      <a href="/accounts/google/login/" class="btn btn-primary">Sign up / log in with Google</a>
+  <div class="hero">
+    <div class="acrostic">
+      <div class="arow"><span class="ltr">H</span><span class="word">ighly</span></div>
+      <div class="arow"><span class="ltr">I</span><span class="word">ntuitive</span></div>
+      <div class="arow"><span class="ltr">P</span><span class="word">latform</span></div>
+      <div class="conn">for</div>
+      <div class="arow"><span class="ltr">P</span><span class="word">roperly</span></div>
+      <div class="arow"><span class="ltr">O</span><span class="word">rganizing</span></div>
+      <div class="arow"><span class="ltr">C</span><span class="word">ollege</span></div>
+      <div class="arow"><span class="ltr">A</span><span class="word">pplication</span></div>
+      <div class="arow"><span class="ltr">M</span><span class="word">aterials</span></div>
+      <div class="conn">to</div>
+      <div class="arow"><span class="ltr">P</span><span class="word">revent</span></div>
+      <div class="arow"><span class="ltr">U</span><span class="word">nnecessary</span></div>
+      <div class="arow"><span class="ltr">S</span><span class="word">uffering</span></div>
     </div>
-    <a href="/widgets/" class="btn btn-blue" style="font-size:1.2rem;">Explore widgets first</a>
-    <div class="dev-links">
-      <a href="{% url 'core:switch_applicant' 1 %}">View as Jacob (dev)</a>
-      <a href="{% url 'core:switch_applicant' 2 %}">View as Hedgie (dev)</a>
+    <div class="cta-col">
+      <img src="{% static 'img/hippocampus_firstdraft.png' %}" alt="HIPPOCAMPUS logo" class="logo">
+      <div class="buttons">
+        <a href="/accounts/google/login/" class="btn btn-primary">Sign up / log in with Google</a>
+      </div>
+      <a href="/widgets/" class="btn btn-blue" style="font-size:1.2rem;">Explore widgets first</a>
+      <div class="dev-links">
+        <a href="{% url 'core:switch_applicant' 1 %}">View as Jacob (dev)</a>
+        <a href="{% url 'core:switch_applicant' 2 %}">View as Hedgie (dev)</a>
+      </div>
     </div>
   </div>
   <footer>Made by Jacob Cohen with Claude Code and a hatred for the college application industrial complex</footer>
