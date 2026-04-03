@@ -1042,6 +1042,21 @@ body.focus-mode {
   color: #888;
   white-space: nowrap;
 }
+.add-college-result--added {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.55rem 0.85rem;
+  gap: 1rem;
+  opacity: 0.5;
+  cursor: default;
+}
+.add-college-result-tag {
+  font-size: 0.74rem;
+  color: #666;
+  white-space: nowrap;
+  font-style: italic;
+}
 .add-college-no-results {
   color: #888;
   font-size: 0.88rem;

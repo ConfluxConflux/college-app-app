@@ -370,11 +370,14 @@ def college_search_suggestions(request):
 
     suggestions = list(
         CanonicalCollege.objects.filter(name__icontains=q)
-        .exclude(pk__in=already_added)
         .order_by('name')[:10]
     )
 
-    return render(request, 'colleges/_search_suggestions.html', {'suggestions': suggestions, 'q': q})
+    return render(request, 'colleges/_search_suggestions.html', {
+        'suggestions': suggestions,
+        'already_added': already_added,
+        'q': q,
+    })
 
 
 @require_POST

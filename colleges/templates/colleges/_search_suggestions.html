@@ -2,6 +2,12 @@
 <ul class="add-college-results">
   {% for college in suggestions %}
   <li>
+    {% if college.pk in already_added %}
+    <div class="add-college-result add-college-result--added">
+      <span class="add-college-result-name">{{ college.name }}</span>
+      <span class="add-college-result-tag">Already on your list</span>
+    </div>
+    {% else %}
     <button class="add-college-result"
             hx-post="{% url 'colleges:quick_add' %}"
             hx-vals='{"college_pk": "{{ college.pk }}"}'
@@ -12,6 +18,7 @@
       <span class="add-college-result-location">{{ college.city }}, {{ college.state }}</span>
       {% endif %}
     </button>
+    {% endif %}
   </li>
   {% endfor %}
 </ul>
