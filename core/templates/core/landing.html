@@ -24,8 +24,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 4vh 2rem;
+      padding-top: 4vh;
     }
 
     footer {
@@ -37,63 +36,38 @@
       text-align: center;
     }
 
-    .hero {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 6rem;
-      padding: 2rem 4rem;
-    }
-
-    /* ── Acrostic ── */
-    .acrostic {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .arow {
-      display: flex;
-      align-items: baseline;
-      line-height: 1.25;
-      margin-bottom: 0.25rem;
-    }
-
-    .ltr {
-      font-size: 2.4rem;
-      font-weight: 700;
-      font-style: normal;
-      color: var(--periwinkle-dark);
-      width: 2.8rem;
-      text-align: right;
-      flex-shrink: 0;
-    }
-
-    .word {
-      font-size: 1.35rem;
-      font-style: normal;
-      color: #333;
-      padding-left: 0.1rem;
-    }
-
-    .conn {
-      font-size: 0.8rem;
-      font-style: italic;
-      line-height: 1;
-      color: #aaa;
-      padding-left: 2.9rem;
-      margin: -0.4rem 0;
-    }
-
-    /* ── CTA column ── */
-    .cta-col {
+    .center {
+      text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 1rem;
     }
 
+    h1 {
+      font-size: 4.5rem;
+      font-weight: 700;
+      font-style: normal;
+      color: #1a1a1a;
+      letter-spacing: 0.08em;
+      line-height: 1.1;
+    }
+
+    .tagline {
+      font-size: 1.25rem;
+      font-style: italic;
+      color: #999;
+      line-height: 1.65;
+      max-width: 520px;
+      text-align: center;
+    }
+
+    .key {
+      color: var(--periwinkle-dark);
+    }
+
     .logo {
-      width: min(240px, 85vw);
+      width: min(260px, 85vw);
     }
 
     .buttons {
@@ -148,43 +122,27 @@
       color: #999;
       text-decoration: underline;
     }
-
-    @media (max-width: 800px) {
-      .hero {
-        flex-direction: column;
-        gap: 2.5rem;
-        padding: 1rem;
-      }
-    }
   </style>
 </head>
 <body>
-  <div class="hero">
-    <div class="acrostic">
-      <div class="arow"><span class="ltr">H</span><span class="word">opefully</span></div>
-      <div class="arow"><span class="ltr">I</span><span class="word">ntuitive</span></div>
-      <div class="arow"><span class="ltr">P</span><span class="word">latform</span></div>
-      <div class="conn">for</div>
-      <div class="arow"><span class="ltr">P</span><span class="word">roperly</span></div>
-      <div class="arow"><span class="ltr">O</span><span class="word">rganizing</span></div>
-      <div class="arow"><span class="ltr">C</span><span class="word">ollege</span></div>
-      <div class="arow"><span class="ltr">A</span><span class="word">pplication</span></div>
-      <div class="arow"><span class="ltr">M</span><span class="word">aterials</span></div>
-      <div class="conn">to</div>
-      <div class="arow"><span class="ltr">P</span><span class="word">revent</span></div>
-      <div class="arow"><span class="ltr">U</span><span class="word">nnecessary</span></div>
-      <div class="arow"><span class="ltr">S</span><span class="word">uffering</span></div>
+  <div class="center">
+    <h1>HIPPOCAMPUS</h1>
+    <p class="tagline">
+      a <span class="key">H</span>opefully <span class="key">I</span>ntuitive
+      <span class="key">P</span>latform for <span class="key">P</span>roperly
+      <span class="key">O</span>rganizing <span class="key">C</span>ollege
+      <span class="key">A</span>pplication <span class="key">M</span>aterials to
+      <span class="key">P</span>revent <span class="key">U</span>nnecessary
+      <span class="key">S</span>uffering
+    </p>
+    <img src="{% static 'img/hippocampus_firstdraft.png' %}" alt="HIPPOCAMPUS logo" class="logo">
+    <div class="buttons">
+      <a href="/accounts/google/login/" class="btn btn-primary">Sign up / log in with Google</a>
     </div>
-    <div class="cta-col">
-      <img src="{% static 'img/hippocampus_firstdraft.png' %}" alt="HIPPOCAMPUS logo" class="logo">
-      <div class="buttons">
-        <a href="/accounts/google/login/" class="btn btn-primary">Sign up / log in with Google</a>
-      </div>
-      <a href="/widgets/" class="btn btn-blue" style="font-size:1.2rem;">Explore widgets first</a>
-      <div class="dev-links">
-        <a href="{% url 'core:switch_applicant' 1 %}">View as Jacob (dev)</a>
-        <a href="{% url 'core:switch_applicant' 2 %}">View as Hedgie (dev)</a>
-      </div>
+    <a href="/widgets/" class="btn btn-blue" style="font-size:1.2rem;">Explore widgets first</a>
+    <div class="dev-links">
+      <a href="{% url 'core:switch_applicant' 1 %}">View as Jacob (dev)</a>
+      <a href="{% url 'core:switch_applicant' 2 %}">View as Hedgie (dev)</a>
     </div>
   </div>
   <footer>Made by Jacob Cohen with Claude Code and a hatred for the college application industrial complex</footer>
