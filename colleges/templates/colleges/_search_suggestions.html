@@ -2,7 +2,7 @@
 <ul class="add-college-results">
   {% for college in suggestions %}
   <li>
-    {% if college.pk in already_added %}
+    {% if college.pk in on_list %}
     <div class="add-college-result add-college-result--added">
       <span class="add-college-result-name">{{ college.name }}</span>
       <span class="add-college-result-tag">Already on your list</span>

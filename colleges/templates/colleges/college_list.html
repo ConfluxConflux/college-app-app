@@ -10,52 +10,54 @@
 {% include "colleges/_platform_tracker.html" %}
 {% endif %}
 
-<!-- View tabs -->
-<div class="buttons has-addons mb-3">
-  <a class="button {% if current_view == 'applications' %}is-dark is-selected{% endif %}"
-     href="{% url 'colleges:list' %}">Your List</a>
-  <a class="button {% if current_view == 'all' %}is-dark is-selected{% endif %}"
-     href="{% url 'colleges:list_all' %}">All Colleges</a>
-</div>
+<!-- Toolbar: tabs left, actions right -->
+<div class="college-toolbar mb-3">
+  <div class="buttons has-addons mb-0">
+    <a class="button {% if current_view == 'applications' %}is-dark is-selected{% endif %}"
+       href="{% url 'colleges:list' %}">Your List</a>
+    <a class="button {% if current_view == 'all' %}is-dark is-selected{% endif %}"
+       href="{% url 'colleges:list_all' %}">All Colleges</a>
+  </div>
 
-<!-- Search (shown only for All Colleges) -->
-<div id="search-bar" class="mb-3"{% if current_view != 'all' %} style="display:none"{% endif %}>
-  <div class="field" style="max-width:320px;">
-    <div class="control">
-      <input class="input" type="text" id="college-search" name="q"
-             value="{{ search }}" placeholder="Search for a college to add to your list..."
+  <div class="college-toolbar-actions">
+    <!-- Search (All Colleges only) -->
+    {% if current_view == 'all' %}
+    <div id="search-bar">
+      <input class="input is-small" type="text" id="college-search" name="q"
+             value="{{ search }}" placeholder="Search colleges…"
              hx-get="{% url 'colleges:list_all' %}"
              hx-trigger="keyup changed delay:300ms"
              hx-target="#college-table-wrapper"
              hx-swap="innerHTML">
     </div>
-  </div>
-</div>
+    {% endif %}
 
-<!-- Add a college button (Your List only) -->
-{% if current_view == 'applications' %}
-<button class="button is-primary is-small mb-3"
-        x-data
-        @click="$dispatch('open-add-modal')">+ Add a college</button>
-{% endif %}
+    <!-- Add button (Your List only) -->
+    {% if current_view == 'applications' %}
+    <button class="button is-primary is-small"
+            x-data
+            @click="$dispatch('open-add-modal')">+ Add a college</button>
+    {% endif %}
 
-<!-- Column toggle -->
-<div class="mb-3" x-data="{ open: false }" @click.outside="open = false">
-  <div class="dropdown" :class="{ 'is-active': open }">
-    <div class="dropdown-trigger">
-      <button class="button is-small" @click="open = !open" aria-haspopup="true">
-        <span>Columns &#9660;</span>
-      </button>
-    </div>
-    <div class="dropdown-menu" style="min-width:180px; z-index:100;">
-      <div class="dropdown-content">
-        {% for field, label in optional_fields %}
-        <a class="dropdown-item col-toggle-item" data-field="{{ field }}"
-           style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-          <span class="col-check" style="width:14px; display:inline-block;"></span>
-          <span>{{ label }}</span>
-        </a>
-        {% endfor %}
+    <!-- Column toggle -->
+    <div x-data="{ open: false }" @click.outside="open = false">
+      <div class="dropdown" :class="{ 'is-active': open }">
+        <div class="dropdown-trigger">
+          <button class="button is-small" @click="open = !open" aria-haspopup="true">
+            <span>Columns &#9660;</span>
+          </button>
+        </div>
+        <div class="dropdown-menu" style="min-width:180px; z-index:100;">
+          <div class="dropdown-content">
+            {% for field, label in optional_fields %}
+            <a class="dropdown-item col-toggle-item" data-field="{{ field }}"
+               style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <span class="col-check" style="width:14px; display:inline-block;"></span>
+              <span>{{ label }}</span>
+            </a>
+            {% endfor %}
+          </div>
+        </div>
       </div>
     </div>
   </div>

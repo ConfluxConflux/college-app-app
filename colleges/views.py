@@ -362,9 +362,11 @@ def college_search_suggestions(request):
     if len(q) < 2:
         return render(request, 'colleges/_search_suggestions.html', {'suggestions': [], 'q': q})
 
-    already_added = set(
+    # "On your list" means any status except not_applying
+    on_list = set(
         UserCollege.objects.filter(applicant=applicant)
         .exclude(college__isnull=True)
+        .exclude(apply_status='not_applying')
         .values_list('college_id', flat=True)
     )
 
@@ -375,7 +377,7 @@ def college_search_suggestions(request):
 
     return render(request, 'colleges/_search_suggestions.html', {
         'suggestions': suggestions,
-        'already_added': already_added,
+        'on_list': on_list,
         'q': q,
     })
 
@@ -392,20 +394,24 @@ def college_quick_add(request):
     except (CanonicalCollege.DoesNotExist, ValueError, TypeError):
         return HttpResponse('College not found', status=404)
 
-    uc, created = UserCollege.objects.get_or_create(
-        applicant=applicant,
-        college=canonical,
-        defaults={
-            'apply_status': 'applying',
-            'order': UserCollege.objects.filter(applicant=applicant).count(),
-        }
-    )
-
-    if not created:
-        # Already on the list — close the modal without appending a duplicate row
-        response = HttpResponse('')
-        response['HX-Trigger'] = 'college-added'
-        return response
+    try:
+        uc = UserCollege.objects.get(applicant=applicant, college=canonical)
+        if uc.apply_status == 'not_applying':
+            # Re-add: promote from "not applying" to "applying"
+            uc.apply_status = 'applying'
+            uc.save()
+        else:
+            # Already actively on list — just close the modal
+            response = HttpResponse('')
+            response['HX-Trigger'] = 'college-added'
+            return response
+    except UserCollege.DoesNotExist:
+        uc = UserCollege.objects.create(
+            applicant=applicant,
+            college=canonical,
+            apply_status='applying',
+            order=UserCollege.objects.filter(applicant=applicant).count(),
+        )
 
     ctx = {
         'college': uc,
