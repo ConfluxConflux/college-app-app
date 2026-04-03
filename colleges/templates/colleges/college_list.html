@@ -84,7 +84,7 @@
                  hx-trigger="input changed delay:200ms"
                  hx-target="#add-college-results"
                  hx-swap="innerHTML"
-                 x-init="$nextTick(() => $el.focus())">
+                 x-init="$nextTick(() => { htmx.process($el); $el.focus(); })">
           <div id="add-college-results" class="mt-3"></div>
         </div>
       </div>
