@@ -752,12 +752,12 @@ body.focus-mode {
 /* Cell styles */
 .compare-cell { font-size: 0.8rem; padding: 0.25rem 0.45rem !important; vertical-align: top !important; }
 .compare-text { white-space: pre-wrap !important; line-height: 1.4; }
-/* Clamp long descriptions in view mode.
-   Alpine overrides with display:none inline style when editing, which wins over CSS,
-   so the max-height only applies in read mode. */
-td.compare-text [x-show="!open"] {
+/* Clamp ALL editable view-spans in the compare table.
+   Targets: name, role, type (selects), background, description, period, hrs/wk, wks/yr.
+   Alpine sets display:none inline when editing (inline > CSS), so this only applies in read mode. */
+td.compare-cell [x-show="!open"] {
   display: block;
-  max-height: 6em;
+  max-height: 3.5em;
   overflow: hidden;
 }
 .compare-muted { color: #c0c0c0 !important; text-align: center; }
