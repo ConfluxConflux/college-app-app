@@ -680,10 +680,10 @@
             </td>
             {# UC Grades #}
             <td class="compare-cell compare-grades">
-              <form hx-post="{% url 'activities:uc_cell' e.pk 'grades' %}" hx-trigger="change" hx-swap="none" style="line-height:1.8">
-                <label><input type="checkbox" name="grade_9" {% if e.grade_9 %}checked{% endif %}> 9</label><br>
-                <label><input type="checkbox" name="grade_10" {% if e.grade_10 %}checked{% endif %}> 10</label><br>
-                <label><input type="checkbox" name="grade_11" {% if e.grade_11 %}checked{% endif %}> 11</label><br>
+              <form hx-post="{% url 'activities:uc_cell' e.pk 'grades' %}" hx-trigger="change" hx-swap="none" style="display:flex;flex-wrap:wrap;gap:1px 5px;align-items:center">
+                <label><input type="checkbox" name="grade_9" {% if e.grade_9 %}checked{% endif %}> 9</label>
+                <label><input type="checkbox" name="grade_10" {% if e.grade_10 %}checked{% endif %}> 10</label>
+                <label><input type="checkbox" name="grade_11" {% if e.grade_11 %}checked{% endif %}> 11</label>
                 <label><input type="checkbox" name="grade_12" {% if e.grade_12 %}checked{% endif %}> 12</label>
               </form>
             </td>
@@ -779,18 +779,18 @@
             </td>
             {# CA Grades #}
             <td class="compare-cell compare-grades">
-              <form hx-post="{% url 'activities:ca_cell' a.pk 'grades' %}" hx-trigger="change" hx-swap="none" style="line-height:1.8">
-                <label><input type="checkbox" name="grade_9" {% if a.grade_9 %}checked{% endif %}> 9</label><br>
-                <label><input type="checkbox" name="grade_10" {% if a.grade_10 %}checked{% endif %}> 10</label><br>
-                <label><input type="checkbox" name="grade_11" {% if a.grade_11 %}checked{% endif %}> 11</label><br>
+              <form hx-post="{% url 'activities:ca_cell' a.pk 'grades' %}" hx-trigger="change" hx-swap="none" style="display:flex;flex-wrap:wrap;gap:1px 5px;align-items:center">
+                <label><input type="checkbox" name="grade_9" {% if a.grade_9 %}checked{% endif %}> 9</label>
+                <label><input type="checkbox" name="grade_10" {% if a.grade_10 %}checked{% endif %}> 10</label>
+                <label><input type="checkbox" name="grade_11" {% if a.grade_11 %}checked{% endif %}> 11</label>
                 <label><input type="checkbox" name="grade_12" {% if a.grade_12 %}checked{% endif %}> 12</label>
               </form>
             </td>
             {# CA Timing #}
             <td class="compare-cell compare-timing">
-              <form hx-post="{% url 'activities:ca_cell' a.pk 'timing' %}" hx-trigger="change" hx-swap="none" style="line-height:1.8">
-                <label><input type="checkbox" name="timing_school" {% if a.timing_school %}checked{% endif %}> School</label><br>
-                <label><input type="checkbox" name="timing_breaks" {% if a.timing_breaks %}checked{% endif %}> Breaks</label><br>
+              <form hx-post="{% url 'activities:ca_cell' a.pk 'timing' %}" hx-trigger="change" hx-swap="none" style="display:flex;flex-wrap:wrap;gap:1px 5px;align-items:center">
+                <label><input type="checkbox" name="timing_school" {% if a.timing_school %}checked{% endif %}> School</label>
+                <label><input type="checkbox" name="timing_breaks" {% if a.timing_breaks %}checked{% endif %}> Breaks</label>
                 <label><input type="checkbox" name="timing_all_year" {% if a.timing_all_year %}checked{% endif %}> All yr</label>
               </form>
             </td>
@@ -989,10 +989,10 @@
             </div>
           </td>
           <td class="compare-cell compare-grades">
-            <form hx-post="{% url 'activities:uc_cell' e.pk 'grades' %}" hx-trigger="change" hx-swap="none" style="line-height:1.8">
-              <label><input type="checkbox" name="grade_9" {% if e.grade_9 %}checked{% endif %}> 9</label><br>
-              <label><input type="checkbox" name="grade_10" {% if e.grade_10 %}checked{% endif %}> 10</label><br>
-              <label><input type="checkbox" name="grade_11" {% if e.grade_11 %}checked{% endif %}> 11</label><br>
+            <form hx-post="{% url 'activities:uc_cell' e.pk 'grades' %}" hx-trigger="change" hx-swap="none" style="display:flex;flex-wrap:wrap;gap:1px 5px;align-items:center">
+              <label><input type="checkbox" name="grade_9" {% if e.grade_9 %}checked{% endif %}> 9</label>
+              <label><input type="checkbox" name="grade_10" {% if e.grade_10 %}checked{% endif %}> 10</label>
+              <label><input type="checkbox" name="grade_11" {% if e.grade_11 %}checked{% endif %}> 11</label>
               <label><input type="checkbox" name="grade_12" {% if e.grade_12 %}checked{% endif %}> 12</label>
             </form>
           </td>
@@ -1077,17 +1077,17 @@
             </div>
           </td>
           <td class="compare-cell compare-grades">
-            <form hx-post="{% url 'activities:ca_cell' a.pk 'grades' %}" hx-trigger="change" hx-swap="none" style="line-height:1.8">
-              <label><input type="checkbox" name="grade_9" {% if a.grade_9 %}checked{% endif %}> 9</label><br>
-              <label><input type="checkbox" name="grade_10" {% if a.grade_10 %}checked{% endif %}> 10</label><br>
-              <label><input type="checkbox" name="grade_11" {% if a.grade_11 %}checked{% endif %}> 11</label><br>
+            <form hx-post="{% url 'activities:ca_cell' a.pk 'grades' %}" hx-trigger="change" hx-swap="none" style="display:flex;flex-wrap:wrap;gap:1px 5px;align-items:center">
+              <label><input type="checkbox" name="grade_9" {% if a.grade_9 %}checked{% endif %}> 9</label>
+              <label><input type="checkbox" name="grade_10" {% if a.grade_10 %}checked{% endif %}> 10</label>
+              <label><input type="checkbox" name="grade_11" {% if a.grade_11 %}checked{% endif %}> 11</label>
               <label><input type="checkbox" name="grade_12" {% if a.grade_12 %}checked{% endif %}> 12</label>
             </form>
           </td>
           <td class="compare-cell compare-timing">
-            <form hx-post="{% url 'activities:ca_cell' a.pk 'timing' %}" hx-trigger="change" hx-swap="none" style="line-height:1.8">
-              <label><input type="checkbox" name="timing_school" {% if a.timing_school %}checked{% endif %}> School</label><br>
-              <label><input type="checkbox" name="timing_breaks" {% if a.timing_breaks %}checked{% endif %}> Breaks</label><br>
+            <form hx-post="{% url 'activities:ca_cell' a.pk 'timing' %}" hx-trigger="change" hx-swap="none" style="display:flex;flex-wrap:wrap;gap:1px 5px;align-items:center">
+              <label><input type="checkbox" name="timing_school" {% if a.timing_school %}checked{% endif %}> School</label>
+              <label><input type="checkbox" name="timing_breaks" {% if a.timing_breaks %}checked{% endif %}> Breaks</label>
               <label><input type="checkbox" name="timing_all_year" {% if a.timing_all_year %}checked{% endif %}> All yr</label>
             </form>
           </td>
