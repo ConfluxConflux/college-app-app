@@ -652,10 +652,7 @@
             <td class="compare-cell compare-text compare-editable"
                 x-data="{ open: false, v: '{{ e.background|escapejs }}' }"
                 @click="if(!open){ open=true; $nextTick(()=>$refs.t.focus()) }" title="Click to edit">
-              <span x-show="!open">
-                <span x-text="v || '—'"></span>
-                <template x-if="v"><span class="compare-cc" :class="v.length > 250 ? 'has-text-danger' : ''" x-text="v.length + '/250'"></span></template>
-              </span>
+              <span x-show="!open"><span x-text="v || '—'"></span><template x-if="v"><span class="compare-cc" :class="v.length > 250 ? 'has-text-danger' : ''" x-text="v.length + '/250'"></span></template></span>
               <div x-show="open" @click.stop>
                 <textarea x-ref="t" class="textarea is-small" name="value" rows="4" x-model="v" maxlength="250"
                   hx-post="{% url 'activities:uc_cell' e.pk 'background' %}" hx-trigger="blur" hx-swap="none"
@@ -667,10 +664,7 @@
             <td class="compare-cell compare-text compare-editable"
                 x-data="{ open: false, v: '{{ e.description|escapejs }}' }"
                 @click="if(!open){ open=true; $nextTick(()=>$refs.t.focus()) }" title="Click to edit">
-              <span x-show="!open">
-                <span x-text="v || '—'"></span>
-                <template x-if="v"><span class="compare-cc" :class="v.length > 350 ? 'has-text-danger' : ''" x-text="v.length + '/350'"></span></template>
-              </span>
+              <span x-show="!open"><span x-text="v || '—'"></span><template x-if="v"><span class="compare-cc" :class="v.length > 350 ? 'has-text-danger' : ''" x-text="v.length + '/350'"></span></template></span>
               <div x-show="open" @click.stop>
                 <textarea x-ref="t" class="textarea is-small" name="value" rows="4" x-model="v" maxlength="350"
                   hx-post="{% url 'activities:uc_cell' e.pk 'description' %}" hx-trigger="blur" hx-swap="none"
@@ -733,10 +727,7 @@
             <td class="compare-cell compare-editable"
                 x-data="{ open: false, v: '{{ a.position|escapejs }}' }"
                 @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
-              <span x-show="!open">
-                <span x-text="v || '—'"></span>
-                <template x-if="v"><span class="compare-cc" :class="v.length > 50 ? 'has-text-danger' : ''" x-text="v.length + '/50'"></span></template>
-              </span>
+              <span x-show="!open"><span x-text="v || '—'"></span><template x-if="v"><span class="compare-cc" :class="v.length > 50 ? 'has-text-danger' : ''" x-text="v.length + '/50'"></span></template></span>
               <div x-show="open" @click.stop>
                 <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="50"
                   hx-post="{% url 'activities:ca_cell' a.pk 'position' %}" hx-trigger="blur" hx-swap="none"
@@ -766,10 +757,7 @@
             <td class="compare-cell compare-text compare-editable"
                 x-data="{ open: false, v: '{{ a.description|escapejs }}' }"
                 @click="if(!open){ open=true; $nextTick(()=>$refs.t.focus()) }" title="Click to edit">
-              <span x-show="!open">
-                <span x-text="v || '—'"></span>
-                <template x-if="v"><span class="compare-cc" :class="v.length > 150 ? 'has-text-danger' : ''" x-text="v.length + '/150'"></span></template>
-              </span>
+              <span x-show="!open"><span x-text="v || '—'"></span><template x-if="v"><span class="compare-cc" :class="v.length > 150 ? 'has-text-danger' : ''" x-text="v.length + '/150'"></span></template></span>
               <div x-show="open" @click.stop>
                 <textarea x-ref="t" class="textarea is-small" name="value" rows="4" x-model="v" maxlength="150"
                   hx-post="{% url 'activities:ca_cell' a.pk 'description' %}" hx-trigger="blur" hx-swap="none"
@@ -867,10 +855,7 @@
             <td class="compare-cell compare-text compare-editable"
                 x-data="{ open: false, v: '{{ m.description|escapejs }}', wc(s){ return s.trim()==='' ? 0 : s.trim().split(/\s+/).length } }"
                 @click="if(!open){ open=true; $nextTick(()=>$refs.t.focus()) }" title="Click to edit">
-              <span x-show="!open">
-                <span x-text="v || '—'"></span>
-                <template x-if="v"><span class="compare-cc" :class="wc(v) > 40 ? 'has-text-danger' : ''" x-text="wc(v) + 'w/40'"></span></template>
-              </span>
+              <span x-show="!open"><span x-text="v || '—'"></span><template x-if="v"><span class="compare-cc" :class="wc(v) > 40 ? 'has-text-danger' : ''" x-text="wc(v) + 'w/40'"></span></template></span>
               <div x-show="open" @click.stop>
                 <textarea x-ref="t" class="textarea is-small" name="value" rows="4" x-model="v"
                   hx-post="{% url 'activities:mit_cell' m.pk 'description' %}" hx-trigger="blur" hx-swap="none"
@@ -963,10 +948,7 @@
           <td class="compare-cell compare-text compare-editable"
               x-data="{ open: false, v: '{{ e.background|escapejs }}' }"
               @click="if(!open){ open=true; $nextTick(()=>$refs.t.focus()) }" title="Click to edit">
-            <span x-show="!open">
-              <span x-text="v || '—'"></span>
-              <template x-if="v"><span class="compare-cc" :class="v.length > 250 ? 'has-text-danger' : ''" x-text="v.length + '/250'"></span></template>
-            </span>
+            <span x-show="!open"><span x-text="v || '—'"></span><template x-if="v"><span class="compare-cc" :class="v.length > 250 ? 'has-text-danger' : ''" x-text="v.length + '/250'"></span></template></span>
             <div x-show="open" @click.stop>
               <textarea x-ref="t" class="textarea is-small" name="value" rows="4" x-model="v" maxlength="250"
                 hx-post="{% url 'activities:uc_cell' e.pk 'background' %}" hx-trigger="blur" hx-swap="none"
@@ -977,10 +959,7 @@
           <td class="compare-cell compare-text compare-editable"
               x-data="{ open: false, v: '{{ e.description|escapejs }}' }"
               @click="if(!open){ open=true; $nextTick(()=>$refs.t.focus()) }" title="Click to edit">
-            <span x-show="!open">
-              <span x-text="v || '—'"></span>
-              <template x-if="v"><span class="compare-cc" :class="v.length > 350 ? 'has-text-danger' : ''" x-text="v.length + '/350'"></span></template>
-            </span>
+            <span x-show="!open"><span x-text="v || '—'"></span><template x-if="v"><span class="compare-cc" :class="v.length > 350 ? 'has-text-danger' : ''" x-text="v.length + '/350'"></span></template></span>
             <div x-show="open" @click.stop>
               <textarea x-ref="t" class="textarea is-small" name="value" rows="4" x-model="v" maxlength="350"
                 hx-post="{% url 'activities:uc_cell' e.pk 'description' %}" hx-trigger="blur" hx-swap="none"
@@ -1036,10 +1015,7 @@
           <td class="compare-cell compare-editable"
               x-data="{ open: false, v: '{{ a.position|escapejs }}' }"
               @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
-            <span x-show="!open">
-              <span x-text="v || '—'"></span>
-              <template x-if="v"><span class="compare-cc" :class="v.length > 50 ? 'has-text-danger' : ''" x-text="v.length + '/50'"></span></template>
-            </span>
+            <span x-show="!open"><span x-text="v || '—'"></span><template x-if="v"><span class="compare-cc" :class="v.length > 50 ? 'has-text-danger' : ''" x-text="v.length + '/50'"></span></template></span>
             <div x-show="open" @click.stop>
               <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="50"
                 hx-post="{% url 'activities:ca_cell' a.pk 'position' %}" hx-trigger="blur" hx-swap="none"
@@ -1065,10 +1041,7 @@
           <td class="compare-cell compare-text compare-editable"
               x-data="{ open: false, v: '{{ a.description|escapejs }}' }"
               @click="if(!open){ open=true; $nextTick(()=>$refs.t.focus()) }" title="Click to edit">
-            <span x-show="!open">
-              <span x-text="v || '—'"></span>
-              <template x-if="v"><span class="compare-cc" :class="v.length > 150 ? 'has-text-danger' : ''" x-text="v.length + '/150'"></span></template>
-            </span>
+            <span x-show="!open"><span x-text="v || '—'"></span><template x-if="v"><span class="compare-cc" :class="v.length > 150 ? 'has-text-danger' : ''" x-text="v.length + '/150'"></span></template></span>
             <div x-show="open" @click.stop>
               <textarea x-ref="t" class="textarea is-small" name="value" rows="4" x-model="v" maxlength="150"
                 hx-post="{% url 'activities:ca_cell' a.pk 'description' %}" hx-trigger="blur" hx-swap="none"
@@ -1156,10 +1129,7 @@
           <td class="compare-cell compare-text compare-editable"
               x-data="{ open: false, v: '{{ m.description|escapejs }}', wc(s){ return s.trim()==='' ? 0 : s.trim().split(/\s+/).length } }"
               @click="if(!open){ open=true; $nextTick(()=>$refs.t.focus()) }" title="Click to edit">
-            <span x-show="!open">
-              <span x-text="v || '—'"></span>
-              <template x-if="v"><span class="compare-cc" :class="wc(v) > 40 ? 'has-text-danger' : ''" x-text="wc(v) + 'w/40'"></span></template>
-            </span>
+            <span x-show="!open"><span x-text="v || '—'"></span><template x-if="v"><span class="compare-cc" :class="wc(v) > 40 ? 'has-text-danger' : ''" x-text="wc(v) + 'w/40'"></span></template></span>
             <div x-show="open" @click.stop>
               <textarea x-ref="t" class="textarea is-small" name="value" rows="4" x-model="v"
                 hx-post="{% url 'activities:mit_cell' m.pk 'description' %}" hx-trigger="blur" hx-swap="none"
