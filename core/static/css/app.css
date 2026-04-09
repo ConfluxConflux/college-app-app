@@ -752,13 +752,10 @@ body.focus-mode {
 /* Cell styles */
 .compare-cell { font-size: 0.8rem; padding: 0.25rem 0.45rem !important; vertical-align: top !important; }
 .compare-text { white-space: pre-wrap !important; line-height: 1.4; }
-/* Clamp ALL editable view-spans in the compare table.
-   Targets: name, role, type (selects), background, description, period, hrs/wk, wks/yr.
-   Alpine sets display:none inline when editing (inline > CSS), so this only applies in read mode. */
+/* Make view-mode spans block so the .compare-cc counter (display:block) renders correctly.
+   Alpine sets display:none inline when editing, which wins over CSS. */
 td.compare-cell [x-show="!open"] {
   display: block;
-  max-height: 3.5em;
-  overflow: hidden;
 }
 .compare-muted { color: #c0c0c0 !important; text-align: center; }
 .compare-grades { font-size: 0.72rem; color: #555; }
