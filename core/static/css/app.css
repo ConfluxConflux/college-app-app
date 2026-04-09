@@ -763,11 +763,22 @@ body.focus-mode {
   margin-top: 2px;
 }
 .compare-edit {
-  font-size: 0.7rem;
+  font-size: 0.85rem;
   color: #b0b0b0;
   text-decoration: none;
 }
 .compare-edit:hover { color: #333; }
+
+/* Editable cells in compare view */
+.compare-editable { cursor: pointer; }
+.compare-editable:hover { background: rgba(0,0,0,0.04) !important; }
+.compare-editable input,
+.compare-editable textarea,
+.compare-editable .select { width: 100%; }
+.compare-editable input.input,
+.compare-editable textarea.textarea { font-size: 0.8rem; }
+.compare-grades label,
+.compare-timing label { font-size: 0.75rem; cursor: pointer; }
 
 /* ── Hrs/Wk Estimator tab ── */
 .estimator-layout {

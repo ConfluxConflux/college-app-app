@@ -566,7 +566,9 @@
 <!-- Compare view -->
 <div x-show="tab === 'compare'">
   <p class="has-text-grey mb-4 is-size-7" style="max-width:680px">
-    Activities grouped by their Brainstorm hub entry. Each row group shows how the same activity appears across UC, Common App, and MIT. Entries not linked to a hub are shown at the bottom.
+    Activities grouped by their Brainstorm hub entry. Each row group shows how the same activity appears across UC, Common App, and MIT.
+    <strong class="has-text-grey">Click any cell to edit</strong> — changes save automatically and appear in the other tabs.
+    Entries not linked to a hub are shown at the bottom.
   </p>
 
   <div class="table-container">
@@ -593,7 +595,7 @@
           <th>Background <span class="compare-limit">UC 250ch</span></th>
           <th>Description <span class="compare-limit">UC 350 · CA 150 · MIT 40w</span></th>
           <th>Grades</th>
-          <th>Timing</th>
+          <th>Timing / Period</th>
           <th>Hrs/wk</th>
           <th>Wks/yr</th>
           <th></th>
@@ -617,48 +619,301 @@
           {% if hub.uc_entry %}{% with e=hub.uc_entry %}
           <tr class="compare-row compare-row-uc">
             <td><span class="tag is-info is-light compare-platform-tag">UC</span></td>
-            <td class="compare-cell">{{ e.name }}</td>
+            {# UC Name #}
+            <td class="compare-cell compare-editable"
+                x-data="{ open: false, v: '{{ e.name|escapejs }}' }"
+                @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+              <span x-show="!open" x-text="v || '—'"></span>
+              <div x-show="open" @click.stop>
+                <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="100"
+                  hx-post="{% url 'activities:uc_cell' e.pk 'name' %}" hx-trigger="blur" hx-swap="none"
+                  @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+              </div>
+            </td>
+            {# UC has no role/position #}
             <td class="compare-cell compare-muted">—</td>
-            <td class="compare-cell">{{ e.get_category_display }}</td>
-            <td class="compare-cell compare-text">{{ e.background }}{% if e.background %}<span class="compare-cc">{{ e.background|length }}/250</span>{% endif %}</td>
-            <td class="compare-cell compare-text">{{ e.description }}{% if e.description %}<span class="compare-cc">{{ e.description|length }}/350</span>{% endif %}</td>
-            <td class="compare-cell compare-grades">{% if e.grade_9 %}9 {% endif %}{% if e.grade_10 %}10 {% endif %}{% if e.grade_11 %}11 {% endif %}{% if e.grade_12 %}12{% endif %}</td>
+            {# UC Category #}
+            <td class="compare-cell compare-editable"
+                x-data="{ open: false, v: '{{ e.category|escapejs }}', label: '{{ e.get_category_display|escapejs }}' }"
+                @click="if(!open){ open=true; $nextTick(()=>$refs.s.focus()) }" title="Click to edit">
+              <span x-show="!open" x-text="label || '—'"></span>
+              <div x-show="open" @click.stop>
+                <div class="select is-small">
+                  <select x-ref="s" name="value" x-model="v"
+                    @change="label = $event.target.options[$event.target.selectedIndex].text; open=false"
+                    hx-post="{% url 'activities:uc_cell' e.pk 'category' %}" hx-trigger="change" hx-swap="none"
+                    @blur="open=false">
+                    {% for val, lbl in uc_category_choices %}<option value="{{ val }}" {% if e.category == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+                  </select>
+                </div>
+              </div>
+            </td>
+            {# UC Background (250ch) #}
+            <td class="compare-cell compare-text compare-editable"
+                x-data="{ open: false, v: '{{ e.background|escapejs }}' }"
+                @click="if(!open){ open=true; $nextTick(()=>$refs.t.focus()) }" title="Click to edit">
+              <span x-show="!open">
+                <span x-text="v || '—'"></span>
+                <template x-if="v"><span class="compare-cc" :class="v.length > 250 ? 'has-text-danger' : ''" x-text="v.length + '/250'"></span></template>
+              </span>
+              <div x-show="open" @click.stop>
+                <textarea x-ref="t" class="textarea is-small" name="value" rows="4" x-model="v" maxlength="250"
+                  hx-post="{% url 'activities:uc_cell' e.pk 'background' %}" hx-trigger="blur" hx-swap="none"
+                  @blur="open=false" @keydown.escape="open=false"></textarea>
+                <p style="text-align:right"><span :class="v.length > 250 ? 'has-text-danger' : 'has-text-grey-light'" x-text="v.length + ' / 250'"></span></p>
+              </div>
+            </td>
+            {# UC Description (350ch) #}
+            <td class="compare-cell compare-text compare-editable"
+                x-data="{ open: false, v: '{{ e.description|escapejs }}' }"
+                @click="if(!open){ open=true; $nextTick(()=>$refs.t.focus()) }" title="Click to edit">
+              <span x-show="!open">
+                <span x-text="v || '—'"></span>
+                <template x-if="v"><span class="compare-cc" :class="v.length > 350 ? 'has-text-danger' : ''" x-text="v.length + '/350'"></span></template>
+              </span>
+              <div x-show="open" @click.stop>
+                <textarea x-ref="t" class="textarea is-small" name="value" rows="4" x-model="v" maxlength="350"
+                  hx-post="{% url 'activities:uc_cell' e.pk 'description' %}" hx-trigger="blur" hx-swap="none"
+                  @blur="open=false" @keydown.escape="open=false"></textarea>
+                <p style="text-align:right"><span :class="v.length > 350 ? 'has-text-danger' : 'has-text-grey-light'" x-text="v.length + ' / 350'"></span></p>
+              </div>
+            </td>
+            {# UC Grades #}
+            <td class="compare-cell compare-grades">
+              <form hx-post="{% url 'activities:uc_cell' e.pk 'grades' %}" hx-trigger="change" hx-swap="none" style="line-height:1.8">
+                <label><input type="checkbox" name="grade_9" {% if e.grade_9 %}checked{% endif %}> 9</label><br>
+                <label><input type="checkbox" name="grade_10" {% if e.grade_10 %}checked{% endif %}> 10</label><br>
+                <label><input type="checkbox" name="grade_11" {% if e.grade_11 %}checked{% endif %}> 11</label><br>
+                <label><input type="checkbox" name="grade_12" {% if e.grade_12 %}checked{% endif %}> 12</label>
+              </form>
+            </td>
+            {# UC has no timing #}
             <td class="compare-cell compare-muted">—</td>
-            <td class="compare-cell">{{ e.hours_per_week|default:"—" }}</td>
-            <td class="compare-cell">{{ e.weeks_per_year|default:"—" }}</td>
-            <td class="compare-cell"><a href="{% url 'activities:uc_edit' e.pk %}" class="compare-edit">edit</a></td>
+            {# UC Hrs/wk #}
+            <td class="compare-cell compare-editable"
+                x-data="{ open: false, v: '{{ e.hours_per_week|default:'' }}' }"
+                @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+              <span x-show="!open" x-text="v || '—'"></span>
+              <div x-show="open" @click.stop>
+                <input x-ref="i" class="input is-small" type="number" name="value" x-model="v" min="0" max="168" style="width:60px"
+                  hx-post="{% url 'activities:uc_cell' e.pk 'hours_per_week' %}" hx-trigger="blur" hx-swap="none"
+                  @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+              </div>
+            </td>
+            {# UC Wks/yr #}
+            <td class="compare-cell compare-editable"
+                x-data="{ open: false, v: '{{ e.weeks_per_year|default:'' }}' }"
+                @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+              <span x-show="!open" x-text="v || '—'"></span>
+              <div x-show="open" @click.stop>
+                <input x-ref="i" class="input is-small" type="number" name="value" x-model="v" min="0" max="52" style="width:60px"
+                  hx-post="{% url 'activities:uc_cell' e.pk 'weeks_per_year' %}" hx-trigger="blur" hx-swap="none"
+                  @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+              </div>
+            </td>
+            <td class="compare-cell"><a href="{% url 'activities:uc_edit' e.pk %}" class="compare-edit" title="Full edit page">⤢</a></td>
           </tr>
           {% endwith %}{% endif %}
 
           {% if hub.ca_entry %}{% with a=hub.ca_entry %}
           <tr class="compare-row compare-row-ca">
             <td><span class="tag is-success is-light compare-platform-tag">CA</span></td>
-            <td class="compare-cell">{{ a.organization }}</td>
-            <td class="compare-cell">{{ a.position }}{% if a.position %}<span class="compare-cc">{{ a.position|length }}/50</span>{% endif %}</td>
-            <td class="compare-cell">{{ a.get_activity_type_display }}</td>
+            {# CA Organization #}
+            <td class="compare-cell compare-editable"
+                x-data="{ open: false, v: '{{ a.organization|escapejs }}' }"
+                @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+              <span x-show="!open" x-text="v || '—'"></span>
+              <div x-show="open" @click.stop>
+                <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="100"
+                  hx-post="{% url 'activities:ca_cell' a.pk 'organization' %}" hx-trigger="blur" hx-swap="none"
+                  @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+              </div>
+            </td>
+            {# CA Position (50ch) #}
+            <td class="compare-cell compare-editable"
+                x-data="{ open: false, v: '{{ a.position|escapejs }}' }"
+                @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+              <span x-show="!open">
+                <span x-text="v || '—'"></span>
+                <template x-if="v"><span class="compare-cc" :class="v.length > 50 ? 'has-text-danger' : ''" x-text="v.length + '/50'"></span></template>
+              </span>
+              <div x-show="open" @click.stop>
+                <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="50"
+                  hx-post="{% url 'activities:ca_cell' a.pk 'position' %}" hx-trigger="blur" hx-swap="none"
+                  @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+                <p style="text-align:right"><span :class="v.length > 50 ? 'has-text-danger' : 'has-text-grey-light'" x-text="v.length + ' / 50'"></span></p>
+              </div>
+            </td>
+            {# CA Activity Type #}
+            <td class="compare-cell compare-editable"
+                x-data="{ open: false, v: '{{ a.activity_type|escapejs }}', label: '{{ a.get_activity_type_display|escapejs }}' }"
+                @click="if(!open){ open=true; $nextTick(()=>$refs.s.focus()) }" title="Click to edit">
+              <span x-show="!open" x-text="label || '—'"></span>
+              <div x-show="open" @click.stop>
+                <div class="select is-small">
+                  <select x-ref="s" name="value" x-model="v"
+                    @change="label = $event.target.options[$event.target.selectedIndex].text; open=false"
+                    hx-post="{% url 'activities:ca_cell' a.pk 'activity_type' %}" hx-trigger="change" hx-swap="none"
+                    @blur="open=false">
+                    {% for val, lbl in ca_type_choices %}<option value="{{ val }}" {% if a.activity_type == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+                  </select>
+                </div>
+              </div>
+            </td>
+            {# CA has no background #}
             <td class="compare-cell compare-muted">—</td>
-            <td class="compare-cell compare-text">{{ a.description }}{% if a.description %}<span class="compare-cc">{{ a.description|length }}/150</span>{% endif %}</td>
-            <td class="compare-cell compare-grades">{% if a.grade_9 %}9 {% endif %}{% if a.grade_10 %}10 {% endif %}{% if a.grade_11 %}11 {% endif %}{% if a.grade_12 %}12{% endif %}</td>
-            <td class="compare-cell compare-timing">{% if a.timing_school %}School{% endif %}{% if a.timing_breaks %}{% if a.timing_school %} · {% endif %}Breaks{% endif %}{% if a.timing_all_year %}{% if a.timing_school or a.timing_breaks %} · {% endif %}All yr{% endif %}{% if not a.timing_school and not a.timing_breaks and not a.timing_all_year %}—{% endif %}</td>
-            <td class="compare-cell">{{ a.hours_per_week|default:"—" }}</td>
-            <td class="compare-cell">{{ a.weeks_per_year|default:"—" }}</td>
-            <td class="compare-cell"><a href="{% url 'activities:ca_edit' a.pk %}" class="compare-edit">edit</a></td>
+            {# CA Description (150ch) #}
+            <td class="compare-cell compare-text compare-editable"
+                x-data="{ open: false, v: '{{ a.description|escapejs }}' }"
+                @click="if(!open){ open=true; $nextTick(()=>$refs.t.focus()) }" title="Click to edit">
+              <span x-show="!open">
+                <span x-text="v || '—'"></span>
+                <template x-if="v"><span class="compare-cc" :class="v.length > 150 ? 'has-text-danger' : ''" x-text="v.length + '/150'"></span></template>
+              </span>
+              <div x-show="open" @click.stop>
+                <textarea x-ref="t" class="textarea is-small" name="value" rows="4" x-model="v" maxlength="150"
+                  hx-post="{% url 'activities:ca_cell' a.pk 'description' %}" hx-trigger="blur" hx-swap="none"
+                  @blur="open=false" @keydown.escape="open=false"></textarea>
+                <p style="text-align:right"><span :class="v.length > 150 ? 'has-text-danger' : 'has-text-grey-light'" x-text="v.length + ' / 150'"></span></p>
+              </div>
+            </td>
+            {# CA Grades #}
+            <td class="compare-cell compare-grades">
+              <form hx-post="{% url 'activities:ca_cell' a.pk 'grades' %}" hx-trigger="change" hx-swap="none" style="line-height:1.8">
+                <label><input type="checkbox" name="grade_9" {% if a.grade_9 %}checked{% endif %}> 9</label><br>
+                <label><input type="checkbox" name="grade_10" {% if a.grade_10 %}checked{% endif %}> 10</label><br>
+                <label><input type="checkbox" name="grade_11" {% if a.grade_11 %}checked{% endif %}> 11</label><br>
+                <label><input type="checkbox" name="grade_12" {% if a.grade_12 %}checked{% endif %}> 12</label>
+              </form>
+            </td>
+            {# CA Timing #}
+            <td class="compare-cell compare-timing">
+              <form hx-post="{% url 'activities:ca_cell' a.pk 'timing' %}" hx-trigger="change" hx-swap="none" style="line-height:1.8">
+                <label><input type="checkbox" name="timing_school" {% if a.timing_school %}checked{% endif %}> School</label><br>
+                <label><input type="checkbox" name="timing_breaks" {% if a.timing_breaks %}checked{% endif %}> Breaks</label><br>
+                <label><input type="checkbox" name="timing_all_year" {% if a.timing_all_year %}checked{% endif %}> All yr</label>
+              </form>
+            </td>
+            {# CA Hrs/wk #}
+            <td class="compare-cell compare-editable"
+                x-data="{ open: false, v: '{{ a.hours_per_week|default:'' }}' }"
+                @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+              <span x-show="!open" x-text="v || '—'"></span>
+              <div x-show="open" @click.stop>
+                <input x-ref="i" class="input is-small" type="number" name="value" x-model="v" min="0" max="168" style="width:60px"
+                  hx-post="{% url 'activities:ca_cell' a.pk 'hours_per_week' %}" hx-trigger="blur" hx-swap="none"
+                  @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+              </div>
+            </td>
+            {# CA Wks/yr #}
+            <td class="compare-cell compare-editable"
+                x-data="{ open: false, v: '{{ a.weeks_per_year|default:'' }}' }"
+                @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+              <span x-show="!open" x-text="v || '—'"></span>
+              <div x-show="open" @click.stop>
+                <input x-ref="i" class="input is-small" type="number" name="value" x-model="v" min="0" max="52" style="width:60px"
+                  hx-post="{% url 'activities:ca_cell' a.pk 'weeks_per_year' %}" hx-trigger="blur" hx-swap="none"
+                  @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+              </div>
+            </td>
+            <td class="compare-cell"><a href="{% url 'activities:ca_edit' a.pk %}" class="compare-edit" title="Full edit page">⤢</a></td>
           </tr>
           {% endwith %}{% endif %}
 
           {% if hub.mit_entry %}{% with m=hub.mit_entry %}
           <tr class="compare-row compare-row-mit">
             <td><span class="tag is-warning is-light compare-platform-tag">MIT</span></td>
-            <td class="compare-cell">{{ m.org_name }}</td>
-            <td class="compare-cell">{{ m.role_award }}</td>
-            <td class="compare-cell">{{ m.get_category_display }}</td>
+            {# MIT Org Name #}
+            <td class="compare-cell compare-editable"
+                x-data="{ open: false, v: '{{ m.org_name|escapejs }}' }"
+                @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+              <span x-show="!open" x-text="v || '—'"></span>
+              <div x-show="open" @click.stop>
+                <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="200"
+                  hx-post="{% url 'activities:mit_cell' m.pk 'org_name' %}" hx-trigger="blur" hx-swap="none"
+                  @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+              </div>
+            </td>
+            {# MIT Role / Award #}
+            <td class="compare-cell compare-editable"
+                x-data="{ open: false, v: '{{ m.role_award|escapejs }}' }"
+                @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+              <span x-show="!open" x-text="v || '—'"></span>
+              <div x-show="open" @click.stop>
+                <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="200"
+                  hx-post="{% url 'activities:mit_cell' m.pk 'role_award' %}" hx-trigger="blur" hx-swap="none"
+                  @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+              </div>
+            </td>
+            {# MIT Category #}
+            <td class="compare-cell compare-editable"
+                x-data="{ open: false, v: '{{ m.category|escapejs }}', label: '{{ m.get_category_display|escapejs }}' }"
+                @click="if(!open){ open=true; $nextTick(()=>$refs.s.focus()) }" title="Click to edit">
+              <span x-show="!open" x-text="label || '—'"></span>
+              <div x-show="open" @click.stop>
+                <div class="select is-small">
+                  <select x-ref="s" name="value" x-model="v"
+                    @change="label = $event.target.options[$event.target.selectedIndex].text; open=false"
+                    hx-post="{% url 'activities:mit_cell' m.pk 'category' %}" hx-trigger="change" hx-swap="none"
+                    @blur="open=false">
+                    {% for val, lbl in mit_category_choices %}<option value="{{ val }}" {% if m.category == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+                  </select>
+                </div>
+              </div>
+            </td>
+            {# MIT has no background #}
             <td class="compare-cell compare-muted">—</td>
-            <td class="compare-cell compare-text">{{ m.description }}</td>
+            {# MIT Description (40 words) #}
+            <td class="compare-cell compare-text compare-editable"
+                x-data="{ open: false, v: '{{ m.description|escapejs }}', wc(s){ return s.trim()==='' ? 0 : s.trim().split(/\s+/).length } }"
+                @click="if(!open){ open=true; $nextTick(()=>$refs.t.focus()) }" title="Click to edit">
+              <span x-show="!open">
+                <span x-text="v || '—'"></span>
+                <template x-if="v"><span class="compare-cc" :class="wc(v) > 40 ? 'has-text-danger' : ''" x-text="wc(v) + 'w/40'"></span></template>
+              </span>
+              <div x-show="open" @click.stop>
+                <textarea x-ref="t" class="textarea is-small" name="value" rows="4" x-model="v"
+                  hx-post="{% url 'activities:mit_cell' m.pk 'description' %}" hx-trigger="blur" hx-swap="none"
+                  @blur="open=false" @keydown.escape="open=false"></textarea>
+                <p style="text-align:right"><span :class="wc(v) > 40 ? 'has-text-danger' : 'has-text-grey-light'" x-text="wc(v) + ' / 40 words'"></span></p>
+              </div>
+            </td>
+            {# MIT has no grade checkboxes #}
             <td class="compare-cell compare-muted">—</td>
-            <td class="compare-cell compare-timing">{{ m.participation_period|default:"—" }}</td>
-            <td class="compare-cell">{{ m.hours_per_week|default:"—" }}</td>
-            <td class="compare-cell">{{ m.weeks_per_year|default:"—" }}</td>
-            <td class="compare-cell"><a href="{% url 'activities:mit_edit' m.pk %}" class="compare-edit">edit</a></td>
+            {# MIT Participation Period #}
+            <td class="compare-cell compare-timing compare-editable"
+                x-data="{ open: false, v: '{{ m.participation_period|escapejs }}' }"
+                @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+              <span x-show="!open" x-text="v || '—'"></span>
+              <div x-show="open" @click.stop>
+                <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="100"
+                  hx-post="{% url 'activities:mit_cell' m.pk 'participation_period' %}" hx-trigger="blur" hx-swap="none"
+                  @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+              </div>
+            </td>
+            {# MIT Hrs/wk #}
+            <td class="compare-cell compare-editable"
+                x-data="{ open: false, v: '{{ m.hours_per_week|default:'' }}' }"
+                @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+              <span x-show="!open" x-text="v || '—'"></span>
+              <div x-show="open" @click.stop>
+                <input x-ref="i" class="input is-small" type="number" name="value" x-model="v" min="0" max="168" style="width:60px"
+                  hx-post="{% url 'activities:mit_cell' m.pk 'hours_per_week' %}" hx-trigger="blur" hx-swap="none"
+                  @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+              </div>
+            </td>
+            {# MIT Wks/yr #}
+            <td class="compare-cell compare-editable"
+                x-data="{ open: false, v: '{{ m.weeks_per_year|default:'' }}' }"
+                @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+              <span x-show="!open" x-text="v || '—'"></span>
+              <div x-show="open" @click.stop>
+                <input x-ref="i" class="input is-small" type="number" name="value" x-model="v" min="0" max="52" style="width:60px"
+                  hx-post="{% url 'activities:mit_cell' m.pk 'weeks_per_year' %}" hx-trigger="blur" hx-swap="none"
+                  @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+              </div>
+            </td>
+            <td class="compare-cell"><a href="{% url 'activities:mit_edit' m.pk %}" class="compare-edit" title="Full edit page">⤢</a></td>
           </tr>
           {% endwith %}{% endif %}
 
@@ -679,46 +934,271 @@
         {% for e in orphaned_uc %}
         <tr class="compare-row compare-row-uc compare-row-orphan">
           <td><span class="tag is-info is-light compare-platform-tag">UC</span></td>
-          <td class="compare-cell">{{ e.name }}</td>
+          <td class="compare-cell compare-editable"
+              x-data="{ open: false, v: '{{ e.name|escapejs }}' }"
+              @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+            <span x-show="!open" x-text="v || '—'"></span>
+            <div x-show="open" @click.stop>
+              <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="100"
+                hx-post="{% url 'activities:uc_cell' e.pk 'name' %}" hx-trigger="blur" hx-swap="none"
+                @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+            </div>
+          </td>
           <td class="compare-cell compare-muted">—</td>
-          <td class="compare-cell">{{ e.get_category_display }}</td>
-          <td class="compare-cell compare-text">{{ e.background }}</td>
-          <td class="compare-cell compare-text">{{ e.description }}</td>
-          <td class="compare-cell compare-grades">{% if e.grade_9 %}9 {% endif %}{% if e.grade_10 %}10 {% endif %}{% if e.grade_11 %}11 {% endif %}{% if e.grade_12 %}12{% endif %}</td>
+          <td class="compare-cell compare-editable"
+              x-data="{ open: false, v: '{{ e.category|escapejs }}', label: '{{ e.get_category_display|escapejs }}' }"
+              @click="if(!open){ open=true; $nextTick(()=>$refs.s.focus()) }" title="Click to edit">
+            <span x-show="!open" x-text="label || '—'"></span>
+            <div x-show="open" @click.stop>
+              <div class="select is-small">
+                <select x-ref="s" name="value" x-model="v"
+                  @change="label = $event.target.options[$event.target.selectedIndex].text; open=false"
+                  hx-post="{% url 'activities:uc_cell' e.pk 'category' %}" hx-trigger="change" hx-swap="none"
+                  @blur="open=false">
+                  {% for val, lbl in uc_category_choices %}<option value="{{ val }}" {% if e.category == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+                </select>
+              </div>
+            </div>
+          </td>
+          <td class="compare-cell compare-text compare-editable"
+              x-data="{ open: false, v: '{{ e.background|escapejs }}' }"
+              @click="if(!open){ open=true; $nextTick(()=>$refs.t.focus()) }" title="Click to edit">
+            <span x-show="!open">
+              <span x-text="v || '—'"></span>
+              <template x-if="v"><span class="compare-cc" :class="v.length > 250 ? 'has-text-danger' : ''" x-text="v.length + '/250'"></span></template>
+            </span>
+            <div x-show="open" @click.stop>
+              <textarea x-ref="t" class="textarea is-small" name="value" rows="4" x-model="v" maxlength="250"
+                hx-post="{% url 'activities:uc_cell' e.pk 'background' %}" hx-trigger="blur" hx-swap="none"
+                @blur="open=false" @keydown.escape="open=false"></textarea>
+              <p style="text-align:right"><span :class="v.length > 250 ? 'has-text-danger' : 'has-text-grey-light'" x-text="v.length + ' / 250'"></span></p>
+            </div>
+          </td>
+          <td class="compare-cell compare-text compare-editable"
+              x-data="{ open: false, v: '{{ e.description|escapejs }}' }"
+              @click="if(!open){ open=true; $nextTick(()=>$refs.t.focus()) }" title="Click to edit">
+            <span x-show="!open">
+              <span x-text="v || '—'"></span>
+              <template x-if="v"><span class="compare-cc" :class="v.length > 350 ? 'has-text-danger' : ''" x-text="v.length + '/350'"></span></template>
+            </span>
+            <div x-show="open" @click.stop>
+              <textarea x-ref="t" class="textarea is-small" name="value" rows="4" x-model="v" maxlength="350"
+                hx-post="{% url 'activities:uc_cell' e.pk 'description' %}" hx-trigger="blur" hx-swap="none"
+                @blur="open=false" @keydown.escape="open=false"></textarea>
+              <p style="text-align:right"><span :class="v.length > 350 ? 'has-text-danger' : 'has-text-grey-light'" x-text="v.length + ' / 350'"></span></p>
+            </div>
+          </td>
+          <td class="compare-cell compare-grades">
+            <form hx-post="{% url 'activities:uc_cell' e.pk 'grades' %}" hx-trigger="change" hx-swap="none" style="line-height:1.8">
+              <label><input type="checkbox" name="grade_9" {% if e.grade_9 %}checked{% endif %}> 9</label><br>
+              <label><input type="checkbox" name="grade_10" {% if e.grade_10 %}checked{% endif %}> 10</label><br>
+              <label><input type="checkbox" name="grade_11" {% if e.grade_11 %}checked{% endif %}> 11</label><br>
+              <label><input type="checkbox" name="grade_12" {% if e.grade_12 %}checked{% endif %}> 12</label>
+            </form>
+          </td>
           <td class="compare-cell compare-muted">—</td>
-          <td class="compare-cell">{{ e.hours_per_week|default:"—" }}</td>
-          <td class="compare-cell">{{ e.weeks_per_year|default:"—" }}</td>
-          <td class="compare-cell"><a href="{% url 'activities:uc_edit' e.pk %}" class="compare-edit">edit</a></td>
+          <td class="compare-cell compare-editable"
+              x-data="{ open: false, v: '{{ e.hours_per_week|default:'' }}' }"
+              @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+            <span x-show="!open" x-text="v || '—'"></span>
+            <div x-show="open" @click.stop>
+              <input x-ref="i" class="input is-small" type="number" name="value" x-model="v" min="0" max="168" style="width:60px"
+                hx-post="{% url 'activities:uc_cell' e.pk 'hours_per_week' %}" hx-trigger="blur" hx-swap="none"
+                @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+            </div>
+          </td>
+          <td class="compare-cell compare-editable"
+              x-data="{ open: false, v: '{{ e.weeks_per_year|default:'' }}' }"
+              @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+            <span x-show="!open" x-text="v || '—'"></span>
+            <div x-show="open" @click.stop>
+              <input x-ref="i" class="input is-small" type="number" name="value" x-model="v" min="0" max="52" style="width:60px"
+                hx-post="{% url 'activities:uc_cell' e.pk 'weeks_per_year' %}" hx-trigger="blur" hx-swap="none"
+                @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+            </div>
+          </td>
+          <td class="compare-cell"><a href="{% url 'activities:uc_edit' e.pk %}" class="compare-edit" title="Full edit page">⤢</a></td>
         </tr>
         {% endfor %}
         {% for a in orphaned_ca %}
         <tr class="compare-row compare-row-ca compare-row-orphan">
           <td><span class="tag is-success is-light compare-platform-tag">CA</span></td>
-          <td class="compare-cell">{{ a.organization }}</td>
-          <td class="compare-cell">{{ a.position }}</td>
-          <td class="compare-cell">{{ a.get_activity_type_display }}</td>
+          <td class="compare-cell compare-editable"
+              x-data="{ open: false, v: '{{ a.organization|escapejs }}' }"
+              @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+            <span x-show="!open" x-text="v || '—'"></span>
+            <div x-show="open" @click.stop>
+              <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="100"
+                hx-post="{% url 'activities:ca_cell' a.pk 'organization' %}" hx-trigger="blur" hx-swap="none"
+                @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+            </div>
+          </td>
+          <td class="compare-cell compare-editable"
+              x-data="{ open: false, v: '{{ a.position|escapejs }}' }"
+              @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+            <span x-show="!open">
+              <span x-text="v || '—'"></span>
+              <template x-if="v"><span class="compare-cc" :class="v.length > 50 ? 'has-text-danger' : ''" x-text="v.length + '/50'"></span></template>
+            </span>
+            <div x-show="open" @click.stop>
+              <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="50"
+                hx-post="{% url 'activities:ca_cell' a.pk 'position' %}" hx-trigger="blur" hx-swap="none"
+                @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+            </div>
+          </td>
+          <td class="compare-cell compare-editable"
+              x-data="{ open: false, v: '{{ a.activity_type|escapejs }}', label: '{{ a.get_activity_type_display|escapejs }}' }"
+              @click="if(!open){ open=true; $nextTick(()=>$refs.s.focus()) }" title="Click to edit">
+            <span x-show="!open" x-text="label || '—'"></span>
+            <div x-show="open" @click.stop>
+              <div class="select is-small">
+                <select x-ref="s" name="value" x-model="v"
+                  @change="label = $event.target.options[$event.target.selectedIndex].text; open=false"
+                  hx-post="{% url 'activities:ca_cell' a.pk 'activity_type' %}" hx-trigger="change" hx-swap="none"
+                  @blur="open=false">
+                  {% for val, lbl in ca_type_choices %}<option value="{{ val }}" {% if a.activity_type == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+                </select>
+              </div>
+            </div>
+          </td>
           <td class="compare-cell compare-muted">—</td>
-          <td class="compare-cell compare-text">{{ a.description }}</td>
-          <td class="compare-cell compare-grades">{% if a.grade_9 %}9 {% endif %}{% if a.grade_10 %}10 {% endif %}{% if a.grade_11 %}11 {% endif %}{% if a.grade_12 %}12{% endif %}</td>
-          <td class="compare-cell compare-timing">{% if a.timing_school %}School{% endif %}{% if a.timing_breaks %}{% if a.timing_school %} · {% endif %}Breaks{% endif %}{% if a.timing_all_year %}{% if a.timing_school or a.timing_breaks %} · {% endif %}All yr{% endif %}{% if not a.timing_school and not a.timing_breaks and not a.timing_all_year %}—{% endif %}</td>
-          <td class="compare-cell">{{ a.hours_per_week|default:"—" }}</td>
-          <td class="compare-cell">{{ a.weeks_per_year|default:"—" }}</td>
-          <td class="compare-cell"><a href="{% url 'activities:ca_edit' a.pk %}" class="compare-edit">edit</a></td>
+          <td class="compare-cell compare-text compare-editable"
+              x-data="{ open: false, v: '{{ a.description|escapejs }}' }"
+              @click="if(!open){ open=true; $nextTick(()=>$refs.t.focus()) }" title="Click to edit">
+            <span x-show="!open">
+              <span x-text="v || '—'"></span>
+              <template x-if="v"><span class="compare-cc" :class="v.length > 150 ? 'has-text-danger' : ''" x-text="v.length + '/150'"></span></template>
+            </span>
+            <div x-show="open" @click.stop>
+              <textarea x-ref="t" class="textarea is-small" name="value" rows="4" x-model="v" maxlength="150"
+                hx-post="{% url 'activities:ca_cell' a.pk 'description' %}" hx-trigger="blur" hx-swap="none"
+                @blur="open=false" @keydown.escape="open=false"></textarea>
+              <p style="text-align:right"><span :class="v.length > 150 ? 'has-text-danger' : 'has-text-grey-light'" x-text="v.length + ' / 150'"></span></p>
+            </div>
+          </td>
+          <td class="compare-cell compare-grades">
+            <form hx-post="{% url 'activities:ca_cell' a.pk 'grades' %}" hx-trigger="change" hx-swap="none" style="line-height:1.8">
+              <label><input type="checkbox" name="grade_9" {% if a.grade_9 %}checked{% endif %}> 9</label><br>
+              <label><input type="checkbox" name="grade_10" {% if a.grade_10 %}checked{% endif %}> 10</label><br>
+              <label><input type="checkbox" name="grade_11" {% if a.grade_11 %}checked{% endif %}> 11</label><br>
+              <label><input type="checkbox" name="grade_12" {% if a.grade_12 %}checked{% endif %}> 12</label>
+            </form>
+          </td>
+          <td class="compare-cell compare-timing">
+            <form hx-post="{% url 'activities:ca_cell' a.pk 'timing' %}" hx-trigger="change" hx-swap="none" style="line-height:1.8">
+              <label><input type="checkbox" name="timing_school" {% if a.timing_school %}checked{% endif %}> School</label><br>
+              <label><input type="checkbox" name="timing_breaks" {% if a.timing_breaks %}checked{% endif %}> Breaks</label><br>
+              <label><input type="checkbox" name="timing_all_year" {% if a.timing_all_year %}checked{% endif %}> All yr</label>
+            </form>
+          </td>
+          <td class="compare-cell compare-editable"
+              x-data="{ open: false, v: '{{ a.hours_per_week|default:'' }}' }"
+              @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+            <span x-show="!open" x-text="v || '—'"></span>
+            <div x-show="open" @click.stop>
+              <input x-ref="i" class="input is-small" type="number" name="value" x-model="v" min="0" max="168" style="width:60px"
+                hx-post="{% url 'activities:ca_cell' a.pk 'hours_per_week' %}" hx-trigger="blur" hx-swap="none"
+                @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+            </div>
+          </td>
+          <td class="compare-cell compare-editable"
+              x-data="{ open: false, v: '{{ a.weeks_per_year|default:'' }}' }"
+              @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+            <span x-show="!open" x-text="v || '—'"></span>
+            <div x-show="open" @click.stop>
+              <input x-ref="i" class="input is-small" type="number" name="value" x-model="v" min="0" max="52" style="width:60px"
+                hx-post="{% url 'activities:ca_cell' a.pk 'weeks_per_year' %}" hx-trigger="blur" hx-swap="none"
+                @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+            </div>
+          </td>
+          <td class="compare-cell"><a href="{% url 'activities:ca_edit' a.pk %}" class="compare-edit" title="Full edit page">⤢</a></td>
         </tr>
         {% endfor %}
         {% for m in orphaned_mit %}
         <tr class="compare-row compare-row-mit compare-row-orphan">
           <td><span class="tag is-warning is-light compare-platform-tag">MIT</span></td>
-          <td class="compare-cell">{{ m.org_name }}</td>
-          <td class="compare-cell">{{ m.role_award }}</td>
-          <td class="compare-cell">{{ m.get_category_display }}</td>
+          <td class="compare-cell compare-editable"
+              x-data="{ open: false, v: '{{ m.org_name|escapejs }}' }"
+              @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+            <span x-show="!open" x-text="v || '—'"></span>
+            <div x-show="open" @click.stop>
+              <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="200"
+                hx-post="{% url 'activities:mit_cell' m.pk 'org_name' %}" hx-trigger="blur" hx-swap="none"
+                @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+            </div>
+          </td>
+          <td class="compare-cell compare-editable"
+              x-data="{ open: false, v: '{{ m.role_award|escapejs }}' }"
+              @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+            <span x-show="!open" x-text="v || '—'"></span>
+            <div x-show="open" @click.stop>
+              <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="200"
+                hx-post="{% url 'activities:mit_cell' m.pk 'role_award' %}" hx-trigger="blur" hx-swap="none"
+                @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+            </div>
+          </td>
+          <td class="compare-cell compare-editable"
+              x-data="{ open: false, v: '{{ m.category|escapejs }}', label: '{{ m.get_category_display|escapejs }}' }"
+              @click="if(!open){ open=true; $nextTick(()=>$refs.s.focus()) }" title="Click to edit">
+            <span x-show="!open" x-text="label || '—'"></span>
+            <div x-show="open" @click.stop>
+              <div class="select is-small">
+                <select x-ref="s" name="value" x-model="v"
+                  @change="label = $event.target.options[$event.target.selectedIndex].text; open=false"
+                  hx-post="{% url 'activities:mit_cell' m.pk 'category' %}" hx-trigger="change" hx-swap="none"
+                  @blur="open=false">
+                  {% for val, lbl in mit_category_choices %}<option value="{{ val }}" {% if m.category == val %}selected{% endif %}>{{ lbl }}</option>{% endfor %}
+                </select>
+              </div>
+            </div>
+          </td>
           <td class="compare-cell compare-muted">—</td>
-          <td class="compare-cell compare-text">{{ m.description }}</td>
+          <td class="compare-cell compare-text compare-editable"
+              x-data="{ open: false, v: '{{ m.description|escapejs }}', wc(s){ return s.trim()==='' ? 0 : s.trim().split(/\s+/).length } }"
+              @click="if(!open){ open=true; $nextTick(()=>$refs.t.focus()) }" title="Click to edit">
+            <span x-show="!open">
+              <span x-text="v || '—'"></span>
+              <template x-if="v"><span class="compare-cc" :class="wc(v) > 40 ? 'has-text-danger' : ''" x-text="wc(v) + 'w/40'"></span></template>
+            </span>
+            <div x-show="open" @click.stop>
+              <textarea x-ref="t" class="textarea is-small" name="value" rows="4" x-model="v"
+                hx-post="{% url 'activities:mit_cell' m.pk 'description' %}" hx-trigger="blur" hx-swap="none"
+                @blur="open=false" @keydown.escape="open=false"></textarea>
+              <p style="text-align:right"><span :class="wc(v) > 40 ? 'has-text-danger' : 'has-text-grey-light'" x-text="wc(v) + ' / 40 words'"></span></p>
+            </div>
+          </td>
           <td class="compare-cell compare-muted">—</td>
-          <td class="compare-cell compare-timing">{{ m.participation_period|default:"—" }}</td>
-          <td class="compare-cell">{{ m.hours_per_week|default:"—" }}</td>
-          <td class="compare-cell">{{ m.weeks_per_year|default:"—" }}</td>
-          <td class="compare-cell"><a href="{% url 'activities:mit_edit' m.pk %}" class="compare-edit">edit</a></td>
+          <td class="compare-cell compare-timing compare-editable"
+              x-data="{ open: false, v: '{{ m.participation_period|escapejs }}' }"
+              @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+            <span x-show="!open" x-text="v || '—'"></span>
+            <div x-show="open" @click.stop>
+              <input x-ref="i" class="input is-small" type="text" name="value" x-model="v" maxlength="100"
+                hx-post="{% url 'activities:mit_cell' m.pk 'participation_period' %}" hx-trigger="blur" hx-swap="none"
+                @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+            </div>
+          </td>
+          <td class="compare-cell compare-editable"
+              x-data="{ open: false, v: '{{ m.hours_per_week|default:'' }}' }"
+              @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+            <span x-show="!open" x-text="v || '—'"></span>
+            <div x-show="open" @click.stop>
+              <input x-ref="i" class="input is-small" type="number" name="value" x-model="v" min="0" max="168" style="width:60px"
+                hx-post="{% url 'activities:mit_cell' m.pk 'hours_per_week' %}" hx-trigger="blur" hx-swap="none"
+                @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+            </div>
+          </td>
+          <td class="compare-cell compare-editable"
+              x-data="{ open: false, v: '{{ m.weeks_per_year|default:'' }}' }"
+              @click="if(!open){ open=true; $nextTick(()=>$refs.i.focus()) }" title="Click to edit">
+            <span x-show="!open" x-text="v || '—'"></span>
+            <div x-show="open" @click.stop>
+              <input x-ref="i" class="input is-small" type="number" name="value" x-model="v" min="0" max="52" style="width:60px"
+                hx-post="{% url 'activities:mit_cell' m.pk 'weeks_per_year' %}" hx-trigger="blur" hx-swap="none"
+                @blur="open=false" @keydown.enter="$refs.i.blur()" @keydown.escape="open=false">
+            </div>
+          </td>
+          <td class="compare-cell"><a href="{% url 'activities:mit_edit' m.pk %}" class="compare-edit" title="Full edit page">⤢</a></td>
         </tr>
         {% endfor %}
         {% endif %}
