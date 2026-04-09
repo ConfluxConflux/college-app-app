@@ -5,6 +5,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}HIPPOCAMPUS{% endblock %}</title>
+  <meta property="og:title" content="{% block og_title %}Hippocampus{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Your personal college application tracker.{% endblock %}">
+  <meta property="og:url" content="https://hippocampus.college">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="{% static 'img/hippocampus_firstdraft.png' %}">
   <link rel="icon" type="image/png" href="{% static 'img/hippocampus_firstdraft.png' %}">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
