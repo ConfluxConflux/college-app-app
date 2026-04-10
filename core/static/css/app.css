@@ -1,8 +1,48 @@
 /* Hippocampus - Custom Styles */
 
-/* Opt out of browser auto dark mode — preserves intentional pastel status colors */
+/* Force light mode unconditionally.
+   Bulma 1.0 sets dark values on :root by default and only applies light values
+   inside @media (prefers-color-scheme: light). Since app.css loads after Bulma,
+   declaring these seed variables here (same :root specificity, later cascade)
+   overrides Bulma's dark defaults for all OS color scheme preferences. */
 :root {
   color-scheme: light;
+
+  /* Scheme brightness seed — controls which direction all derived colors go */
+  --bulma-scheme-brightness: light;
+  --bulma-scheme-h: 221;
+  --bulma-scheme-s: 14%;
+
+  /* Background lightness scale (light = high L values) */
+  --bulma-scheme-main-l: 100%;
+  --bulma-scheme-main-bis-l: 98%;
+  --bulma-scheme-main-ter-l: 96%;
+  --bulma-background-l: 96%;
+
+  /* Border lightness scale */
+  --bulma-border-weak-l: 93%;
+  --bulma-border-l: 86%;
+
+  /* Text lightness scale (light = low L values = dark text) */
+  --bulma-text-weak-l: 48%;
+  --bulma-text-l: 29%;
+  --bulma-text-strong-l: 21%;
+  --bulma-text-title-l: 14%;
+
+  /* Invert scale (used for dark-on-light contrasts) */
+  --bulma-scheme-invert-ter-l: 14%;
+  --bulma-scheme-invert-bis-l: 7%;
+  --bulma-scheme-invert-l: 4%;
+
+  /* Light/dark palette adjustments */
+  --bulma-light-l: 90%;
+  --bulma-light-invert-l: 20%;
+  --bulma-dark-l: 20%;
+  --bulma-dark-invert-l: 90%;
+  --bulma-soft-l: 90%;
+  --bulma-bold-l: 20%;
+  --bulma-soft-invert-l: 20%;
+  --bulma-bold-invert-l: 90%;
 }
 
 /* Color palette */
