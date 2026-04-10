@@ -14,6 +14,7 @@ urlpatterns = [
     path('core-activities/<int:pk>/ca-cell/<str:field>/', views.core_activity_ca_cell, name='core_activity_ca_cell'),
     path('core-activities/<int:pk>/honor-cell/<str:field>/', views.core_activity_honor_cell, name='core_activity_honor_cell'),
     path('core-activities/<int:pk>/mit-cell/<str:field>/', views.core_activity_mit_cell, name='core_activity_mit_cell'),
+    path('are-you-sure', views.are_you_sure, name='are_you_sure'),
     path('switch-applicant/<int:pk>/', views.switch_applicant, name='switch_applicant'),
     path('feedback/', views.feedback, name='feedback'),
 ]

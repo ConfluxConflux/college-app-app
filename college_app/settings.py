@@ -135,6 +135,8 @@ SOCIALACCOUNT_AUTO_SIGNUP = True   # Skip email confirmation form for social log
 ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*']
 
+SOCIALACCOUNT_ADAPTER = 'core.adapter.SocialAccountAdapter'
+
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'APP': {

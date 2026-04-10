@@ -32,6 +32,20 @@ def landing(request):
     return render(request, 'core/landing.html')
 
 
+def are_you_sure(request):
+    if request.method == 'POST':
+        if 'confirm' in request.POST:
+            from allauth.socialaccount.internal.flows.signup import get_pending_signup, process_signup
+            sociallogin = get_pending_signup(request)
+            if sociallogin is None:
+                return redirect('core:landing')
+            return process_signup(request, sociallogin)
+        else:
+            request.session.pop('socialaccount_sociallogin', None)
+            return redirect('https://hippocampus.college')
+    return render(request, 'core/are_you_sure.html')
+
+
 def switch_applicant(request, pk):
     """Dev shortcut: log in as the user linked to the given Applicant pk."""
     applicant = get_object_or_404(Applicant, pk=pk)

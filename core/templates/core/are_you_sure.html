@@ -1,0 +1,111 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HIPPOCAMPUS</title>
+  <link rel="icon" type="image/png" href="{% static 'img/hippocampus_firstdraft.png' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Open+Sans:wght@400;600;700&display=swap">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --teal: #2a9d8f;
+      --teal-dark: #228879;
+      --bg-light: #e4f4f2;
+    }
+
+    body {
+      font-family: 'Libre Baskerville', Georgia, serif;
+      background: radial-gradient(ellipse at 35% 25%, #bde4df 0%, var(--bg-light) 65%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .card {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      max-width: 640px;
+      width: 100%;
+    }
+
+    .headline {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      line-height: 1.25;
+    }
+
+    .subline {
+      font-size: 1rem;
+      font-style: italic;
+      color: #888;
+      margin-top: 0.5rem;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
+
+    .btn {
+      font-family: 'Libre Baskerville', Georgia, serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      padding: 0.65rem 2rem;
+      border-radius: 9999px;
+      border: 3px solid transparent;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+      display: inline-block;
+    }
+
+    .btn-confirm {
+      background: var(--teal);
+      border-color: var(--teal);
+      color: #fff;
+    }
+    .btn-confirm:hover {
+      background: var(--teal-dark);
+      border-color: var(--teal-dark);
+    }
+
+    .btn-cancel {
+      background: #fff;
+      border-color: #ccc;
+      color: #555;
+    }
+    .btn-cancel:hover {
+      background: #f5f5f5;
+      border-color: #bbb;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div>
+      <div class="headline">Creating a new HIPPOCAMPUS account for you&nbsp;&#8230;</div>
+      <div class="subline">very exciting &#8212;Jacob</div>
+    </div>
+    <form method="post" class="buttons">
+      {% csrf_token %}
+      <button type="submit" name="confirm" class="btn btn-confirm">Confirm</button>
+      <button type="submit" name="cancel" class="btn btn-cancel">Cancel</button>
+    </form>
+  </div>
+</body>
+</html>
