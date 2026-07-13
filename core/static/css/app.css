@@ -1419,6 +1419,12 @@ body.focus-mode .pomo-chip-show { top: 14px; }
 }
 .pomo-goal-edit { display: flex; gap: 0.5rem; align-items: center; }
 .pomo-goal-edit .input { flex: 1; }
+.pomo-believe {
+  font-family: 'Libre Baskerville', Georgia, serif;
+  color: #2a9d8f;
+  font-weight: 700;
+  margin-top: 1rem;
+}
 
 /* Penalty textarea with a live mismatch-highlight backdrop (paste is blocked) */
 .pomo-penalty-wrap { position: relative; }

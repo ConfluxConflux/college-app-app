@@ -138,7 +138,7 @@
 
       <template x-if="branch === 'guilty'">
         <div>
-          <p class="pomo-bubble">Normally I'd be angry that you weren't focused during a hippomodoro … but let's be real. Applying to college can be hard and stressful. But I believe in you. Do any of these sound like they would be helpful?</p>
+          <p class="pomo-bubble">Normally I'd be angry that you weren't focused during a hippomodoro ... but I know that applying to college can be hard and stressful. Here are some ideas that might help:</p>
 
           <template x-if="editingGoal">
             <div class="pomo-goal-edit">
@@ -157,7 +157,9 @@
 
           <p class="pomo-care-msg" x-show="careMsg" x-text="careMsg"></p>
 
-          <button type="button" class="button is-primary mt-3" @click="resolveCheckin()">I think I'll just continue on</button>
+          <p class="pomo-believe">I believe in you!</p>
+
+          <button type="button" class="button is-primary mt-3" @click="resolveCheckin()">Continue on</button>
         </div>
       </template>
     </div>
