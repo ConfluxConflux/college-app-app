@@ -23,7 +23,7 @@
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
 </head>
-<body>
+<body x-data="{ acctModal: false }">
   <nav class="navbar is-dark" role="navigation" aria-label="main navigation">
     <div class="navbar-brand">
       <a class="navbar-item has-text-weight-bold" href="{% url 'core:landing' %}">
@@ -79,12 +79,12 @@
       </div>
       {% else %}
       <div class="navbar-start">
-        <a class="navbar-item" href="{% url 'core:landing' %}">Dashboard</a>
-        <a class="navbar-item" href="{% url 'core:landing' %}">Colleges</a>
-        <a class="navbar-item" href="{% url 'core:landing' %}">Applications</a>
-        <a class="navbar-item" href="{% url 'core:landing' %}">Activities</a>
-        <a class="navbar-item" href="{% url 'core:landing' %}">Essays</a>
-        <a class="navbar-item" href="{% url 'core:landing' %}">Widgets</a>
+        <a class="navbar-item" href="#" @click.prevent="acctModal = true">Dashboard</a>
+        <a class="navbar-item" href="#" @click.prevent="acctModal = true">Colleges</a>
+        <a class="navbar-item" href="#" @click.prevent="acctModal = true">Applications</a>
+        <a class="navbar-item" href="#" @click.prevent="acctModal = true">Activities</a>
+        <a class="navbar-item" href="#" @click.prevent="acctModal = true">Essays</a>
+        <a class="navbar-item" href="{% url 'widgets:home' %}">Widgets</a>
       </div>
       <div class="navbar-end">
         <a class="navbar-item" href="/accounts/google/login/">Sign in</a>
@@ -92,6 +92,24 @@
       {% endif %}
     </div>
   </nav>
+
+  {% if not request.user.is_authenticated %}
+  <div class="modal" :class="{ 'is-active': acctModal }">
+    <div class="modal-background" @click="acctModal = false"></div>
+    <div class="modal-content">
+      <div class="box has-text-centered" style="max-width: 420px; margin: 0 auto;">
+        <p class="is-size-4 has-text-weight-bold mb-4">You need an account for this!</p>
+        <a class="button is-primary is-medium is-fullwidth" href="/accounts/google/login/">Sign up/in with Google</a>
+        <p class="has-text-grey is-size-7 mt-5 mb-2">or view as a test user:</p>
+        <div class="buttons is-centered">
+          <a class="button is-light" href="{% url 'core:switch_applicant' 1 %}">Jacob</a>
+          <a class="button is-light" href="{% url 'core:switch_applicant' 2 %}">Hedgie</a>
+        </div>
+      </div>
+    </div>
+    <button class="modal-close is-large" aria-label="close" @click="acctModal = false"></button>
+  </div>
+  {% endif %}
 
   <section class="section">
     <div class="container is-fluid">
