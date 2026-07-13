@@ -23,7 +23,7 @@ class LoginRequiredMiddleware:
         '/admin/',      # Django admin has its own auth
         '/',            # landing page (exact match handled below)
     )
-    EXEMPT_EXACT = {'/'}
+    EXEMPT_EXACT = {'/', '/homepage-1', '/homepage-2'}
 
     def __init__(self, get_response):
         self.get_response = get_response

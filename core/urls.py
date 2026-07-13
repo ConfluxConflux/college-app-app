@@ -5,6 +5,8 @@ app_name = 'core'
 
 urlpatterns = [
     path('', views.landing, name='landing'),
+    path('homepage-1', views.landing, {'pin_version': 1}, name='landing_v1'),
+    path('homepage-2', views.landing, {'pin_version': 2}, name='landing_v2'),
     path('dashboard/', views.home, name='home'),
     path('profile/', views.profile, name='profile'),
     path('core-activities/add/', views.core_activity_add, name='core_activity_add'),

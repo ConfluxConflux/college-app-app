@@ -26,10 +26,12 @@ def _core_row_ctx(activity, editing=None):
     }
 
 
-def landing(request):
-    if request.user.is_authenticated:
+def landing(request, pin_version=None):
+    # pin_version (1 or 2) permalinks to a single homepage version for
+    # debugging: no cycling, no auth redirect.
+    if pin_version is None and request.user.is_authenticated:
         return redirect('core:home')
-    return render(request, 'core/landing.html')
+    return render(request, 'core/landing.html', {'pin_version': pin_version})
 
 
 def are_you_sure(request):

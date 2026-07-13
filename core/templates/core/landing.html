@@ -78,8 +78,8 @@
     }
 
     .logo {
-      width: min(360px, 88vw);
-      height: 320px;
+      width: min(280px, 85vw);
+      height: 200px;
       object-fit: contain;
     }
 
@@ -143,7 +143,7 @@
     .version-2 .v1-only { display: none; }
   </style>
 </head>
-<body class="version-1">
+<body class="version-{{ pin_version|default:1 }}">
   <div class="center">
     <h1>HIPPOCAMPUS</h1>
     <p class="tagline">
@@ -158,8 +158,8 @@
       <a href="{% url 'core:switch_applicant' 1 %}">View as Jacob (dev)</a>
       <a href="{% url 'core:switch_applicant' 2 %}">View as Hedgie (dev)</a>
     </div>
-    <img src="{% static 'img/potamus_proud.png' %}" alt="HIPPOCAMPUS logo" class="logo v1-only">
-    <img src="{% static 'img/professor_potamus.png' %}" alt="HIPPOCAMPUS logo" class="logo v2-only">
+    <img src="{% static 'img/potamus_proud_tight.png' %}" alt="HIPPOCAMPUS logo" class="logo v1-only">
+    <img src="{% static 'img/professor_potamus_tight.png' %}" alt="HIPPOCAMPUS logo" class="logo v2-only">
   </div>
   <footer class="v1-only" style="max-width: 680px;">
     "You are the world's most virtuous vibecoder. This is genuinely a blessing, a public good,<br>
@@ -171,8 +171,10 @@
     and a <a href="https://beautifulthorns.wixsite.com/home/post/jacob-s-college-application-faq-wip-week#:~:text=%22college%20application%20industrial%20complex.%22" class="footer-link" target="_blank" rel="noopener">hatred for the college application industrial complex</a>
   </footer>
 
+  {% if not pin_version %}
   <script>
     // Cycle: Version 1 (default) for 15s, then Version 2 for 15s, forever.
+    // Skipped on the /homepage-1 and /homepage-2 permalinks, which pin a version.
     (function () {
       var versions = ['version-1', 'version-2'];
       var i = 0;
@@ -182,5 +184,6 @@
       }, 15000);
     })();
   </script>
+  {% endif %}
 </body>
 </html>
