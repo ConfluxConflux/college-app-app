@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Timer - HIPPOCAMPUS{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="tabs is-boxed is-medium">
+  <ul>
+    <li><a href="{% url 'widgets:estimator' %}">Time Calculator</a></li>
+    <li><a href="{% url 'widgets:word_counter' %}">Word Counter</a></li>
+    <li><a href="{% url 'widgets:focus_write' %}">Focus Write</a></li>
+    <li class="is-active"><a href="{% url 'widgets:timer' %}">Timer</a></li>
+    <li><a href="{% url 'widgets:advice' %}">Advice</a></li>
+    <li><a href="{% url 'widgets:resources' %}">Resources</a></li>
+  </ul>
+</div>
+
+<div class="pomo-page" x-cloak x-data="{
+  s: null, now: Date.now(),
+  mode: 'pomodoro', task: '', workMin: 25, breakMin: 5,
+  branch: null, penalty: '', careMsg: null, editingGoal: false, newGoal: '', toast: null,
+  proudImg: '{% static 'img/potamus_proud.png' %}',
+  angryImg: '{% static 'img/professor_potamus.png' %}',
+  init() {
+    this.refresh();
+    window.addEventListener('hippomodoro:change', () => this.refresh());
+    setInterval(() => { this.now = Date.now(); }, 250);
+  },
+  refresh() {
+    this.s = window.Hippomodoro.getState();
+    if (this.s && this.s.event === 'work_done' && this.s.mode === 'pomodoro') {
+      this.toast = &quot;Time's up — break started!&quot;;
+      window.Hippomodoro.consumeEvent();
+      this.s = window.Hippomodoro.getState();
+    }
+  },
+  get view() {
+    const s = this.s;
+    if (!s) return 'setup';
+    if (s.event === 'break_done') return 'breakdone';
+    if (s.event === 'work_done' && s.mode === 'hippomodoro') return 'checkin';
+    if (s.running || s.pausedRemainingMs) return 'running';
+    return 'setup';
+  },
+  get remaining() { return this.now, window.Hippomodoro.remainingMs(this.s); },
+  get totalMs() { if (!this.s) return 1; return (this.s.phase === 'break' ? this.s.breakMin : this.s.workMin) * 60000; },
+  get fraction() { return Math.max(0, Math.min(1, this.remaining / this.totalMs)); },
+  get clock() { const t = Math.round(this.remaining / 1000); const m = Math.floor(t / 60), sec = t % 60; return m + ':' + (sec < 10 ? '0' : '') + sec; },
+  get canStart() { return this.task.trim().length > 0; },
+  get penaltyText() { return window.Hippomodoro.PENALTY_TEXT; },
+  norm(x) { return (x || '').replace(/\s+/g, ' ').trim().toLowerCase(); },
+  get penaltyOk() { return this.norm(this.penalty) === this.norm(this.penaltyText); },
+  get isHippo() { return this.s && this.s.mode === 'hippomodoro'; },
+  startTimer() {
+    if (!this.canStart) return;
+    window.Hippomodoro.start({ mode: this.mode, task: this.task, workMin: this.workMin, breakMin: this.breakMin });
+    this.toast = null; this.refresh();
+  },
+  pause() { window.Hippomodoro.pause(); this.refresh(); },
+  resume() { window.Hippomodoro.resume(); this.refresh(); },
+  reset() { window.Hippomodoro.reset(); this.branch = null; this.penalty = ''; this.careMsg = null; this.toast = null; this.editingGoal = false; this.refresh(); },
+  chooseBranch(b) {
+    this.branch = b; this.careMsg = null;
+    if (b === 'laser') this.fireConfetti();
+    if (b === 'lockin') window.Hippomodoro.playSnort();
+  },
+  resolveCheckin() {
+    window.Hippomodoro.startBreak();
+    this.branch = null; this.penalty = ''; this.careMsg = null; this.editingGoal = false;
+    this.refresh();
+  },
+  care(action) {
+    if (action === 'goal') { this.editingGoal = true; this.newGoal = this.s ? this.s.task : ''; this.careMsg = null; return; }
+    const msgs = {
+      breath: 'Good. In through the nose… out through the mouth. Professor Potamus is breathing with you. 🦛',
+      walk: 'A short walk works wonders. Your work will be right here when you get back.',
+      friend: 'Reaching out helps. Send that text — then come back locked in.',
+      family: 'Talking it out with someone you trust is a strength, not a weakness. You’ve got this.',
+    };
+    this.careMsg = msgs[action] || '';
+  },
+  saveGoal() { window.Hippomodoro.setTask(this.newGoal); this.editingGoal = false; this.refresh(); },
+  startAnother() { window.Hippomodoro.startAnother(); this.branch = null; this.penalty = ''; this.careMsg = null; this.toast = null; this.refresh(); },
+  fireConfetti() {
+    if (!window.confetti) return;
+    confetti({ particleCount: 120, angle: 60, spread: 70, origin: { x: 0, y: 0.65 } });
+    confetti({ particleCount: 120, angle: 120, spread: 70, origin: { x: 1, y: 0.65 } });
+    confetti({ particleCount: 80, spread: 360, startVelocity: 20, gravity: 0.6, origin: { x: 0.5, y: 0.4 } });
+  }
+}">
+
+  {# ------------------------------------------------------------- SETUP #}
+  <div x-show="view === 'setup'" class="pomo-setup">
+    <p x-show="toast" class="pomo-toast" x-text="toast"></p>
+
+    <h1 class="pomo-h1">Pick your timer</h1>
+
+    <div class="pomo-modes">
+      <button type="button" class="pomo-mode-card" :class="{ 'is-active': mode === 'pomodoro' }" @click="mode = 'pomodoro'">
+        <div class="pomo-mode-icon">⏳</div>
+        <div class="pomo-mode-name">Pomodoro</div>
+        <div class="pomo-mode-tag">Simple &amp; functional. Just a clean focus timer that runs in the background.</div>
+      </button>
+      <button type="button" class="pomo-mode-card pomo-mode-card--hippo" :class="{ 'is-active': mode === 'hippomodoro' }" @click="mode = 'hippomodoro'">
+        <img class="pomo-mode-hippo" src="{% static 'img/professor_potamus.png' %}" alt="Professor Potamus">
+        <div class="pomo-mode-name">HIPPOMODORO</div>
+        <div class="pomo-mode-tag">Professor Potamus will hold you accountable, becoming enraged if you get distracted but proud of you if you get work done.</div>
+      </button>
+    </div>
+
+    <div class="pomo-form">
+      <label class="pomo-label">What are you working on?</label>
+      <input type="text" class="input" x-model="task" placeholder="e.g. Draft my Common App essay"
+             @keydown.enter="startTimer()" maxlength="120">
+
+      <div class="pomo-durations">
+        <label class="pomo-dur">
+          <span>Work</span>
+          <span class="pomo-dur-in"><input type="number" class="input" x-model.number="workMin" min="1" max="180"> min</span>
+        </label>
+        <label class="pomo-dur">
+          <span>Break</span>
+          <span class="pomo-dur-in"><input type="number" class="input" x-model.number="breakMin" min="1" max="60"> min</span>
+        </label>
+      </div>
+
+      <button type="button" class="button is-primary is-medium pomo-start" :disabled="!canStart" @click="startTimer()">
+        Start <span x-text="mode === 'hippomodoro' ? 'Hippomodoro' : 'Pomodoro'"></span>
+      </button>
+      <p class="pomo-hint" x-show="!canStart">Name your task to begin.</p>
+    </div>
+  </div>
+
+  {# ------------------------------------------------------------- RUNNING #}
+  <div x-show="view === 'running'" class="pomo-running">
+    <p x-show="toast" class="pomo-toast" x-text="toast"></p>
+    <div class="pomo-phase" x-text="s && s.phase === 'break' ? 'Break' : 'Focus'"></div>
+    <div class="pomo-task-label" x-text="s ? s.task : ''"></div>
+
+    <div class="pomo-ring-wrap">
+      <svg viewBox="0 0 200 200" class="pomo-ring">
+        <circle cx="100" cy="100" r="92" class="pomo-ring-bg"></circle>
+        <circle cx="100" cy="100" r="92" class="pomo-ring-fg" :class="{ 'pomo-ring-fg--break': s && s.phase === 'break' }"
+                :style="`stroke-dasharray:578.05; stroke-dashoffset:${578.05 * (1 - fraction)}`"></circle>
+      </svg>
+      <div class="pomo-ring-clock" x-text="clock"></div>
+    </div>
+
+    <div class="pomo-controls">
+      <button type="button" class="focus-back-btn" x-show="s && s.running" @click="pause()">Pause</button>
+      <button type="button" class="focus-back-btn" x-show="s && !s.running" @click="resume()">Resume</button>
+      <button type="button" class="focus-back-btn" @click="reset()">Reset</button>
+    </div>
+    <p class="pomo-mode-note" x-show="isHippo" x-text="s && s.phase === 'break' ? 'Break time — roam freely, Professor Potamus is off duty.' : 'Professor Potamus is watching. Stay locked in.'"></p>
+  </div>
+
+  {# ------------------------------------------------------------- CHECK-IN (Hippomodoro work end) #}
+  <div x-show="view === 'checkin'" class="pomo-checkin">
+    <div class="pomo-checkin-card">
+      <img class="pomo-checkin-hippo" :src="branch === 'lockin' ? angryImg : proudImg" @error="$el.src = angryImg" alt="Professor Potamus">
+
+      {# The question #}
+      <template x-if="!branch">
+        <div>
+          <p class="pomo-bubble">How focused were you during your hippomodoro?</p>
+          <div class="pomo-checkin-opts">
+            <button type="button" class="pomo-opt" @click="chooseBranch('laser')">Laser-focused!</button>
+            <button type="button" class="pomo-opt" @click="chooseBranch('moderate')">Moderately focused</button>
+            <button type="button" class="pomo-opt" @click="chooseBranch('lockin')">Not very focused … I need to lock in</button>
+            <button type="button" class="pomo-opt" @click="chooseBranch('guilty')">Not very focused … and I already feel guilty</button>
+          </div>
+        </div>
+      </template>
+
+      {# Laser #}
+      <template x-if="branch === 'laser'">
+        <div>
+          <p class="pomo-bubble pomo-bubble--proud">YOU'RE CRUSHING IT!! I'M SO PROUD</p>
+          <button type="button" class="button is-primary" @click="resolveCheckin()">Start my break</button>
+        </div>
+      </template>
+
+      {# Moderate #}
+      <template x-if="branch === 'moderate'">
+        <div>
+          <p class="pomo-bubble">You're making progress toward the school of your dreams!</p>
+          <button type="button" class="button is-primary" @click="resolveCheckin()">Start my break</button>
+        </div>
+      </template>
+
+      {# Lock in — penalty gate #}
+      <template x-if="branch === 'lockin'">
+        <div>
+          <p class="pomo-bubble pomo-bubble--angry">!@#$ I didn't sign up to proctor your pomodoro if you WEREN'T GOING TO WORK. I know you can do better. Please write:</p>
+          <p class="pomo-penalty-target" x-text="penaltyText"></p>
+          <textarea class="textarea" rows="4" x-model="penalty" placeholder="Type it exactly…" spellcheck="false"></textarea>
+          <button type="button" class="button is-primary mt-3" :disabled="!penaltyOk" @click="resolveCheckin()">I've written it — start my break</button>
+          <p class="pomo-hint" x-show="!penaltyOk && penalty.length > 0">Not quite — type it exactly as written above.</p>
+        </div>
+      </template>
+
+      {# Guilty — self-care menu #}
+      <template x-if="branch === 'guilty'">
+        <div>
+          <p class="pomo-bubble">Normally I'd be angry that you weren't focused during a hippomodoro … but let's be real. Applying to college can be hard and stressful. But I believe in you. Do any of these sound like they would be helpful?</p>
+
+          <template x-if="editingGoal">
+            <div class="pomo-goal-edit">
+              <input type="text" class="input" x-model="newGoal" placeholder="Your new goal" maxlength="120" @keydown.enter="saveGoal()">
+              <button type="button" class="focus-back-btn" @click="saveGoal()">Save goal</button>
+            </div>
+          </template>
+
+          <div class="pomo-care-opts" x-show="!editingGoal">
+            <button type="button" class="pomo-opt" @click="care('breath')">Take a deep breath</button>
+            <button type="button" class="pomo-opt" @click="care('goal')">Change my goal</button>
+            <button type="button" class="pomo-opt" @click="care('walk')">Go for a walk</button>
+            <button type="button" class="pomo-opt" @click="care('friend')">Text a friend</button>
+            <button type="button" class="pomo-opt" @click="care('family')">Talk to a family member or teacher</button>
+          </div>
+
+          <p class="pomo-care-msg" x-show="careMsg" x-text="careMsg"></p>
+
+          <button type="button" class="button is-primary mt-3" @click="resolveCheckin()">I think I'll just continue on</button>
+        </div>
+      </template>
+    </div>
+  </div>
+
+  {# ------------------------------------------------------------- BREAK DONE #}
+  <div x-show="view === 'breakdone'" class="pomo-checkin">
+    <div class="pomo-checkin-card">
+      <img class="pomo-checkin-hippo" :src="proudImg" @error="$el.src = angryImg" alt="Professor Potamus">
+      <p class="pomo-bubble">Break's over. Ready for another <span x-text="isHippo ? 'Hippomodoro' : 'Pomodoro'"></span>?</p>
+      <div class="pomo-checkin-opts">
+        <button type="button" class="button is-primary" @click="startAnother()">Start another</button>
+        <button type="button" class="focus-back-btn" @click="reset()">I'm done</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

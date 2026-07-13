@@ -1,0 +1,410 @@
+/* HIPPOMODORO — global background timer engine.
+ *
+ * Runs on every page (loaded from both base.html and focus_base.html). Because the
+ * app does hard page navigations (no SPA), all timer state lives in localStorage keyed
+ * by an ABSOLUTE end timestamp, so the countdown stays correct across reloads/navigation.
+ *
+ * Responsibilities:
+ *   - own the localStorage state + expose window.Hippomodoro for the Timer page
+ *   - tick once/second, render the top-right chip, handle phase expiry (force-return to timer)
+ *   - enforce Hippomodoro deterrents (snort, tab title/favicon flip, enraged-Potamus interstitial,
+ *     beforeunload close-dialog) and the neutral plain-Pomodoro Focus-Write guard
+ */
+(function () {
+  'use strict';
+
+  var KEY = 'hippomodoro';
+  var cfg = document.getElementById('hippo-engine');
+  var TIMER_URL  = (cfg && cfg.getAttribute('data-timer-url'))  || '/widgets/timer/';
+  var SNORT_URL  = (cfg && cfg.getAttribute('data-snort-url'))  || '';
+  var ANGRY_IMG  = (cfg && cfg.getAttribute('data-angry-img'))  || '';
+
+  var PENALTY_TEXT = "Dear Professor Potamus, I failed in my duty. I promise to spend my break " +
+    "resetting myself. When I come back for my next pomodoro, I will put my distracted era behind " +
+    "me and enter my locked-in era.";
+
+  var TIMER_PATH = new URL(TIMER_URL, window.location.href).pathname;
+
+  // ---------------------------------------------------------------- state I/O
+  function load() {
+    try { return JSON.parse(localStorage.getItem(KEY)); } catch (e) { return null; }
+  }
+  function save(s) {
+    if (s) { localStorage.setItem(KEY, JSON.stringify(s)); }
+    else   { localStorage.removeItem(KEY); }
+    notify(s);
+  }
+  function notify(s) {
+    try {
+      window.dispatchEvent(new CustomEvent('hippomodoro:change', { detail: s || load() }));
+    } catch (e) {}
+    render();
+  }
+
+  function isActive(s) { return !!(s && (s.running || s.pausedRemainingMs || s.event)); }
+
+  function remainingMs(s) {
+    if (!s) return 0;
+    if (s.running && s.endAt) return Math.max(0, s.endAt - Date.now());
+    if (s.pausedRemainingMs) return s.pausedRemainingMs;
+    return 0;
+  }
+
+  // ---------------------------------------------------------------- controls (API)
+  function start(opts) {
+    opts = opts || {};
+    var work = Math.max(0.02, parseFloat(opts.workMin) || 25);
+    var brk  = Math.max(0.02, parseFloat(opts.breakMin) || 5);
+    var s = {
+      mode: opts.mode === 'hippomodoro' ? 'hippomodoro' : 'pomodoro',
+      task: (opts.task || '').trim(),
+      phase: 'work',
+      workMin: work,
+      breakMin: brk,
+      endAt: Date.now() + work * 60000,
+      running: true,
+      pausedRemainingMs: null,
+      hidden: false,
+      event: null,
+      pendingBreak: false
+    };
+    unlockAudio();
+    save(s);
+    return s;
+  }
+  function pause() {
+    var s = load();
+    if (!s || !s.running) return;
+    s.pausedRemainingMs = remainingMs(s);
+    s.running = false;
+    s.endAt = null;
+    save(s);
+  }
+  function resume() {
+    var s = load();
+    if (!s || s.running || !s.pausedRemainingMs) return;
+    s.endAt = Date.now() + s.pausedRemainingMs;
+    s.pausedRemainingMs = null;
+    s.running = true;
+    save(s);
+  }
+  function reset() { restoreChrome(); save(null); }
+
+  // Hippomodoro: after the focus check-in resolves, begin the break.
+  function startBreak() {
+    var s = load();
+    if (!s) return;
+    s.phase = 'break';
+    s.endAt = Date.now() + s.breakMin * 60000;
+    s.running = true;
+    s.pausedRemainingMs = null;
+    s.event = null;
+    s.pendingBreak = false;
+    save(s);
+  }
+  // After a break_done, start a fresh work session with the same settings.
+  function startAnother() {
+    var s = load();
+    if (!s) return;
+    return start({ mode: s.mode, task: s.task, workMin: s.workMin, breakMin: s.breakMin });
+  }
+  function setTask(task) {
+    var s = load();
+    if (!s) return;
+    s.task = (task || '').trim();
+    save(s);
+  }
+  function consumeEvent() {
+    var s = load();
+    if (!s || !s.event) return;
+    s.event = null;
+    save(s);
+  }
+  function setHidden(hidden) {
+    var s = load();
+    if (!s) return;
+    s.hidden = !!hidden;
+    save(s);
+  }
+
+  // ---------------------------------------------------------------- tick / expiry
+  function tick() {
+    var s = load();
+    if (!s) { render(); return; }
+    if (s.running && s.endAt && Date.now() >= s.endAt) { handleExpiry(s); return; }
+    render();
+  }
+
+  function handleExpiry(s) {
+    if (s.phase === 'work') {
+      s.event = 'work_done';
+      if (s.mode === 'hippomodoro') {
+        // Hold — the break starts only after the focus check-in is resolved.
+        s.running = false;
+        s.endAt = null;
+        s.pendingBreak = true;
+      } else {
+        // Plain Pomodoro: break starts immediately.
+        s.phase = 'break';
+        s.endAt = Date.now() + s.breakMin * 60000;
+        s.running = true;
+      }
+    } else {
+      s.event = 'break_done';
+      s.running = false;
+      s.endAt = null;
+      s.phase = 'work';
+      s.pendingBreak = false;
+    }
+    restoreChrome();
+    save(s);
+    playDing();
+    redirectToTimer();
+  }
+
+  function redirectToTimer() {
+    if (window.location.pathname === TIMER_PATH) { notify(); return; }
+    suppressUnload = true;
+    window.location.href = TIMER_URL;
+  }
+
+  // ---------------------------------------------------------------- navigation guards
+  function zoneOf(path) {
+    if (path === '/widgets/focus-write/') return 'focus_write';
+    if (path === '/widgets/word-counter/') return 'word_counter';
+    if (path.indexOf('/activities/') === 0) return 'activities';
+    if (path.indexOf('/essays/') === 0) return 'essays';
+    return null;
+  }
+  function isLeavingZone(curPath, destPath) {
+    var cz = zoneOf(curPath), dz = zoneOf(destPath);
+    if (!cz) return false;
+    if (cz === dz) return false;
+    if (cz === 'essays' && dz === 'focus_write') return false; // only exempt hop
+    return true;
+  }
+  // Would navigating to destPath pop a guard right now?
+  function shouldIntercept(destPath, s) {
+    if (!s || !s.running || s.phase === 'break') return false;
+    if (destPath === TIMER_PATH) return false;
+    if (s.mode === 'hippomodoro') return isLeavingZone(window.location.pathname, destPath);
+    return zoneOf(window.location.pathname) === 'focus_write' && zoneOf(destPath) !== 'focus_write';
+  }
+
+  var pendingNav = null;
+
+  // Entry point also used by focus_write.html's back button (JS-driven navigation).
+  function attemptNavigate(url) {
+    var destPath = new URL(url, window.location.href).pathname;
+    var s = load();
+    if (!shouldIntercept(destPath, s)) { doNavigate(url); return; }
+    pendingNav = url;
+    if (s.mode === 'hippomodoro') { playSnort(); showLock(false); }
+    else { showConfirm(); }
+  }
+
+  function doNavigate(url) {
+    suppressUnload = true;
+    window.location.href = url;
+  }
+
+  // Intercept in-app link clicks (unmodified left-clicks on same-origin <a>).
+  document.addEventListener('click', function (e) {
+    if (e.defaultPrevented || e.button !== 0) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    var a = e.target.closest ? e.target.closest('a') : null;
+    if (!a || a.closest('[data-hippo-ui]')) return;
+    if (a.target === '_blank' || a.hasAttribute('download')) return;
+    var href = a.getAttribute('href');
+    if (!href || href.charAt(0) === '#' || href.indexOf('javascript:') === 0) return;
+    var url;
+    try { url = new URL(href, window.location.href); } catch (err) { return; }
+    if (url.origin !== window.location.origin) return; // external → beforeunload handles it
+    var s = load();
+    if (shouldIntercept(url.pathname, s)) {
+      e.preventDefault();
+      attemptNavigate(url.href);
+    } else {
+      // A navigation we allow — mark it so the beforeunload guard stays quiet.
+      suppressUnload = true;
+      setTimeout(function () { suppressUnload = false; }, 2000);
+    }
+  }, true);
+
+  // ---------------------------------------------------------------- tab-away deterrents
+  var pendingAmbush = false;
+  document.addEventListener('visibilitychange', function () {
+    var s = load();
+    var armed = s && s.running && s.phase === 'work' && s.mode === 'hippomodoro';
+    if (document.hidden) {
+      if (!armed) return;
+      playSnort();
+      setChrome();
+      pendingAmbush = true;
+    } else {
+      restoreChrome();
+      if (pendingAmbush && armed) { pendingAmbush = false; showLock(true); }
+      else { pendingAmbush = false; }
+    }
+  });
+
+  var origTitle = null, origFavicon = null, faviconEl = null;
+  function setChrome() {
+    if (origTitle === null) origTitle = document.title;
+    document.title = '🦛 GET BACK TO WORK';
+    if (ANGRY_IMG) {
+      faviconEl = document.querySelector('link[rel~="icon"]');
+      if (faviconEl && origFavicon === null) origFavicon = faviconEl.getAttribute('href');
+      if (faviconEl) faviconEl.setAttribute('href', ANGRY_IMG);
+    }
+  }
+  function restoreChrome() {
+    if (origTitle !== null) { document.title = origTitle; origTitle = null; }
+    if (faviconEl && origFavicon !== null) { faviconEl.setAttribute('href', origFavicon); origFavicon = null; }
+  }
+
+  // ---------------------------------------------------------------- hard-exit dialog
+  var suppressUnload = false;
+  window.addEventListener('beforeunload', function (e) {
+    if (suppressUnload) return;
+    var s = load();
+    if (s && s.running && s.phase === 'work' && s.mode === 'hippomodoro') {
+      e.preventDefault();
+      e.returnValue = '';
+      return '';
+    }
+  });
+
+  // ---------------------------------------------------------------- audio
+  var audioCtx = null, snort = null;
+  function unlockAudio() {
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    } catch (e) {}
+  }
+  function playSnort() {
+    if (!SNORT_URL) return;
+    try {
+      if (!snort) snort = new Audio(SNORT_URL);
+      snort.currentTime = 0;
+      var p = snort.play();
+      if (p && p.catch) p.catch(function () {});
+    } catch (e) {}
+  }
+  function beep(freq, dur, delay) {
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      var t = audioCtx.currentTime + (delay || 0);
+      var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = 'sine'; o.frequency.value = freq;
+      o.connect(g); g.connect(audioCtx.destination);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.25, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.start(t); o.stop(t + dur);
+    } catch (e) {}
+  }
+  function playDing() { beep(660, 0.16, 0); beep(880, 0.22, 0.16); }
+
+  // ---------------------------------------------------------------- interstitials
+  function showLock(isAmbush) {
+    var el = document.getElementById('hippo-lock');
+    if (!el) return;
+    var leaveBtn = document.getElementById('hippo-lock-leave');
+    // On a return-ambush there's nowhere to "leave" to — only offer the stay button.
+    if (leaveBtn) leaveBtn.style.display = isAmbush ? 'none' : '';
+    el.style.display = 'flex';
+  }
+  function hideLock() {
+    var el = document.getElementById('hippo-lock');
+    if (el) el.style.display = 'none';
+  }
+  function showConfirm() {
+    var el = document.getElementById('hippo-confirm');
+    if (el) el.style.display = 'flex';
+  }
+  function hideConfirm() {
+    var el = document.getElementById('hippo-confirm');
+    if (el) el.style.display = 'none';
+  }
+  function wireButtons() {
+    var lockStay = document.getElementById('hippo-lock-stay');
+    var lockLeave = document.getElementById('hippo-lock-leave');
+    var confStay = document.getElementById('hippo-confirm-stay');
+    var confLeave = document.getElementById('hippo-confirm-leave');
+    if (lockStay) lockStay.addEventListener('click', function () { pendingNav = null; hideLock(); });
+    if (lockLeave) lockLeave.addEventListener('click', function () {
+      hideLock();
+      if (pendingNav) { var u = pendingNav; pendingNav = null; doNavigate(u); }
+    });
+    if (confStay) confStay.addEventListener('click', function () { pendingNav = null; hideConfirm(); });
+    if (confLeave) confLeave.addEventListener('click', function () {
+      hideConfirm();
+      if (pendingNav) { var u = pendingNav; pendingNav = null; doNavigate(u); }
+    });
+  }
+
+  // ---------------------------------------------------------------- chip render
+  function fmt(ms) {
+    var total = Math.round(ms / 1000);
+    var m = Math.floor(total / 60), s = total % 60;
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  }
+  function render() {
+    var chip = document.getElementById('hippo-chip');
+    var showBtn = document.getElementById('hippo-chip-show');
+    if (!chip) return;
+    var s = load();
+    if (!isActive(s)) {
+      chip.style.display = 'none';
+      if (showBtn) showBtn.style.display = 'none';
+      return;
+    }
+    if (s.hidden) {
+      chip.style.display = 'none';
+      if (showBtn) showBtn.style.display = 'inline-flex';
+    } else {
+      chip.style.display = 'inline-flex';
+      if (showBtn) showBtn.style.display = 'none';
+    }
+    var task = document.getElementById('hippo-chip-task');
+    var icon = document.getElementById('hippo-chip-icon');
+    var clock = document.getElementById('hippo-chip-clock');
+    if (task) task.textContent = s.task || '(no task)';
+    if (icon) icon.textContent = s.mode === 'hippomodoro' ? '🦛' : '⏳';
+    if (clock) clock.textContent = s.event ? "time's up" : fmt(remainingMs(s));
+    chip.classList.toggle('pomo-chip--break', s.phase === 'break');
+    chip.classList.toggle('pomo-chip--hippo', s.mode === 'hippomodoro');
+  }
+
+  function wireChip() {
+    var toggle = document.getElementById('hippo-chip-toggle');
+    var showBtn = document.getElementById('hippo-chip-show');
+    var main = document.getElementById('hippo-chip-main');
+    if (toggle) toggle.addEventListener('click', function (e) { e.preventDefault(); setHidden(true); });
+    if (showBtn) showBtn.addEventListener('click', function (e) { e.preventDefault(); setHidden(false); });
+    // Going to the timer via the chip is always allowed — don't let beforeunload nag.
+    if (main) main.addEventListener('click', function () { suppressUnload = true; });
+  }
+
+  // ---------------------------------------------------------------- boot
+  window.Hippomodoro = {
+    start: start, pause: pause, resume: resume, reset: reset,
+    startBreak: startBreak, startAnother: startAnother,
+    setTask: setTask, consumeEvent: consumeEvent, setHidden: setHidden,
+    getState: load, remainingMs: remainingMs, attemptNavigate: attemptNavigate,
+    unlockAudio: unlockAudio, playSnort: playSnort, PENALTY_TEXT: PENALTY_TEXT
+  };
+
+  function boot() {
+    wireButtons();
+    wireChip();
+    render();
+    setInterval(tick, 1000);
+    window.addEventListener('storage', function (e) { if (e.key === KEY) notify(); });
+    window.addEventListener('pageshow', function () { render(); });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();

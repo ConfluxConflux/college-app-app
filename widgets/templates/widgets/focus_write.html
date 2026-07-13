@@ -20,7 +20,9 @@
          }
        },
        goBack() {
-         window.location.href = '{% url 'widgets:home' %}';
+         var url = '{% url 'widgets:home' %}';
+         if (window.Hippomodoro) { window.Hippomodoro.attemptNavigate(url); }
+         else { window.location.href = url; }
        },
        copyText() {
          navigator.clipboard.writeText(this.text).then(() => { this.copied = true; });

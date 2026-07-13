@@ -1,0 +1,37 @@
+{% load static %}
+{# Persistent Hippomodoro UI — chip + interstitials. Populated/toggled by pomodoro.js. #}
+
+{# Top-right countdown chip: "task <icon> MM:SS" (time anchored on the right) #}
+<div id="hippo-chip" class="pomo-chip" style="display:none" data-hippo-ui>
+  <a id="hippo-chip-main" class="pomo-chip-main" href="{% url 'widgets:timer' %}" title="Go to timer">
+    <span id="hippo-chip-task" class="pomo-chip-task"></span>
+    <span id="hippo-chip-icon" class="pomo-chip-icon">⏳</span>
+    <span id="hippo-chip-clock" class="pomo-chip-clock">0:00</span>
+  </a>
+  <button id="hippo-chip-toggle" type="button" class="pomo-chip-toggle focus-back-btn">Hide</button>
+</div>
+<button id="hippo-chip-show" type="button" class="pomo-chip-show focus-back-btn" style="display:none" data-hippo-ui>Show timer</button>
+
+{# Enraged Professor Potamus interstitial (Hippomodoro: leaving a productive zone / return ambush) #}
+<div id="hippo-lock" class="pomo-lock" style="display:none" data-hippo-ui>
+  <div class="pomo-lock-card">
+    <img class="pomo-lock-img" src="{% static 'img/professor_potamus.png' %}" alt="Professor Potamus, enraged">
+    <p class="pomo-lock-title">YOUR HIPPOMODORO IS HAPPENING!</p>
+    <p class="pomo-lock-sub">you better keep working.</p>
+    <div class="pomo-lock-actions">
+      <button id="hippo-lock-stay" type="button" class="pomo-btn pomo-btn-green">OK FINE I WILL</button>
+      <button id="hippo-lock-leave" type="button" class="pomo-btn pomo-btn-red">I will shamefully stop working even though my pomodoro timer is running</button>
+    </div>
+  </div>
+</div>
+
+{# Neutral leave-Focus-Write confirm (plain Pomodoro — no hippo, no loaded language) #}
+<div id="hippo-confirm" class="pomo-lock pomo-lock--neutral" style="display:none" data-hippo-ui>
+  <div class="pomo-lock-card">
+    <p class="pomo-lock-title pomo-lock-title--neutral">Do you really want to leave Focus Write while you're in the middle of a pomodoro?</p>
+    <div class="pomo-lock-actions">
+      <button id="hippo-confirm-stay" type="button" class="pomo-btn pomo-btn-green">Stay</button>
+      <button id="hippo-confirm-leave" type="button" class="pomo-btn pomo-btn-grey">Leave</button>
+    </div>
+  </div>
+</div>

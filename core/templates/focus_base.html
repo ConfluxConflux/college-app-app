@@ -23,6 +23,14 @@
   {% block content %}{% endblock %}
 
   {% block extra_js %}{% endblock %}
+
+  {% include "_pomodoro.html" %}
+  <script id="hippo-engine"
+          src="{% static 'js/pomodoro.js' %}"
+          data-timer-url="{% url 'widgets:timer' %}"
+          data-snort-url="{% static 'audio/hippo_snort.mp3' %}"
+          data-angry-img="{% static 'img/professor_potamus.png' %}"></script>
+
   <script>
     document.body.addEventListener('htmx:configRequest', function(evt) {
       evt.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
