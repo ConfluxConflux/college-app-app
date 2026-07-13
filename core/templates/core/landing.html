@@ -123,16 +123,22 @@
       color: #999;
       text-decoration: underline;
     }
+
+    /* Version toggling: only the hippo and the bottom text differ between
+       versions. Everything else is shared and written once. */
+    .version-1 .v2-only { display: none; }
+    .version-2 .v1-only { display: none; }
   </style>
 </head>
-<body>
+<body class="version-1">
   <div class="center">
     <h1>HIPPOCAMPUS</h1>
     <p class="tagline">
       a <span class="key">H</span>opefully <span class="key">I</span>ntuitive <span class="key">P</span>latform for <span class="key">P</span>roperly <span class="key">O</span>rganizing<br>
       <span class="key">C</span>ollege <span class="key">A</span>pplication <span class="key">M</span>aterials to <span class="key">P</span>revent <span class="key">U</span>nnecessary <span class="key">S</span>uffering
     </p>
-    <img src="{% static 'img/professor_potamus.png' %}" alt="HIPPOCAMPUS logo" class="logo">
+    <img src="{% static 'img/potamus_proud.png' %}" alt="HIPPOCAMPUS logo" class="logo v1-only">
+    <img src="{% static 'img/professor_potamus.png' %}" alt="HIPPOCAMPUS logo" class="logo v2-only">
     <div class="buttons">
       <a href="/accounts/google/login/" class="btn btn-primary">Sign up / log in with Google</a>
     </div>
@@ -142,6 +148,24 @@
       <a href="{% url 'core:switch_applicant' 2 %}">View as Hedgie (dev)</a>
     </div>
   </div>
-  <footer>Made by Jacob Cohen with Claude Code and a hatred for the college application industrial complex</footer>
+  <footer class="v1-only">
+    "You are the world's most virtuous vibecoder."<br>
+    "This is genuinely a blessing, a public good, a gift from divinity, yada yada."<br>
+    "This Focus Write widget is saving my life."<br>
+    &mdash; Lili, Bronx Science '27
+  </footer>
+  <footer class="v2-only">Made by Jacob Cohen with Claude Code and a hatred for the college application industrial complex</footer>
+
+  <script>
+    // Cycle: Version 1 (default) for 15s, then Version 2 for 15s, forever.
+    (function () {
+      var versions = ['version-1', 'version-2'];
+      var i = 0;
+      setInterval(function () {
+        i = (i + 1) % versions.length;
+        document.body.className = versions[i];
+      }, 15000);
+    })();
+  </script>
 </body>
 </html>
