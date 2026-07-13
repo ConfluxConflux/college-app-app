@@ -397,7 +397,7 @@
     var task = document.getElementById('hippo-chip-task');
     var icon = document.getElementById('hippo-chip-icon');
     var clock = document.getElementById('hippo-chip-clock');
-    if (task) task.textContent = s.task || '(no task)';
+    if (task) task.textContent = s.phase === 'break' ? 'Break' : (s.task || '(no task)');
     if (icon) icon.textContent = s.mode === 'hippomodoro' ? '🦛' : '⏳';
     if (clock) clock.textContent = s.event ? "time's up" : fmt(remainingMs(s));
     chip.classList.toggle('pomo-chip--break', s.phase === 'break');
