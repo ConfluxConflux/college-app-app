@@ -67,7 +67,18 @@ ALIASES = {
 OVERRIDES = {
     'Amherst': 'Amherst College',                       # else -> UMass-Amherst (higher popularity)
     'University of Miami, Florida': 'University of Miami',  # 'Florida' token pulls it to U of Florida
-    'Oxford University': None,                            # UK — nearest US token match is Miami-Oxford
+    # No US IPEDS match — international or absent from the dataset. Force no-match
+    # so they don't get bogus coordinates from a low-confidence token overlap.
+    'Oxford University': None,        # UK
+    'Cambridge University': None,     # UK
+    'University of Warwick': None,    # UK
+    'Durham University': None,        # UK
+    'University of Toronto': None,    # Canada
+    'University of Waterloo': None,   # Canada
+    'McGill': None,                   # Canada
+    'TU Delft': None,                 # Netherlands
+    'Deep Springs': None,            # not in IPEDS
+    'Grand Canyon University': None,  # not in IPEDS
 }
 
 TOKEN_EXPAND = {'univ': 'university', 'u': 'university', 'inst': 'institute', 'st': 'saint'}
