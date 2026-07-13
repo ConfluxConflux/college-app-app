@@ -16,7 +16,7 @@
 </div>
 
 {% if map_points or other_points %}
-  {% if legend %}
+  {% if legend or other_points %}
   <div class="mb-3" style="display:flex; flex-wrap:wrap; gap:0.25rem 1rem; align-items:center;">
     {% for item in legend %}
     <span style="display:inline-flex; align-items:center; gap:0.4rem; font-size:0.85rem;">
@@ -24,6 +24,12 @@
       {{ item.label }}
     </span>
     {% endfor %}
+    {% if other_points %}
+    <span style="display:inline-flex; align-items:center; gap:0.4rem; font-size:0.85rem; color:#777;">
+      <span style="width:10px; height:10px; border-radius:50%; background:#9aa0a6; border:2px solid #fff; box-shadow:0 0 0 1px #bbb;"></span>
+      Not applying
+    </span>
+    {% endif %}
   </div>
   {% endif %}
 
@@ -57,23 +63,31 @@
   var appsUrl = "{{ applications_url }}";
 
   var map = L.map('college-map', { scrollWheelZoom: false });
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 18,
-    attribution: '&copy; OpenStreetMap contributors'
+  // Muted, low-emphasis basemap (CartoDB Positron) so the college dots lead.
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19,
+    subdomains: 'abcd',
+    attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
   }).addTo(map);
 
-  // Gray context dots for every other college in the DB (drawn underneath).
+  // Your not-applying colleges: gray context dots (drawn underneath).
+  // Still clickable — opens in applications even though you're not applying.
   others.forEach(function (p) {
     var loc = [p.city, p.state].filter(Boolean).join(', ');
+    var href = appsUrl + '?college=' + p.pk;
     L.circleMarker([p.lat, p.lon], {
-      radius: 4,
+      radius: 5,
       fillColor: '#9aa0a6',
       color: '#ffffff',
       weight: 1,
       opacity: 1,
-      fillOpacity: 0.7
+      fillOpacity: 0.75
     }).addTo(map).bindPopup(
-      '<strong>' + p.name + '</strong>' + (loc ? '<br><span style="color:#666;">' + loc + '</span>' : '')
+      '<a href="' + href + '" style="display:block; color:inherit; text-decoration:none; min-width:140px;">' +
+        '<strong>' + p.name + '</strong>' +
+        (loc ? '<br><span style="color:#666;">' + loc + '</span>' : '') +
+        '<div style="margin-top:6px; font-size:0.72rem; color:#2a9d8f;">Open in applications &rarr;</div>' +
+      '</a>'
     );
   });
 

@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST, require_http_methods
 
 from .forms import CollegeForm
-from .models import College, UserCollege
+from .models import UserCollege
 from activities.models import UCEntry, CommonAppActivity, CommonAppHonor, MITEntry
 from core.models import Applicant
 from supplements.models import SupplementEssay, UCPersonalInsightQuestion, CommonAppEssay, UC_PIQ_PROMPTS, COMMON_APP_PROMPTS
@@ -100,50 +100,39 @@ def college_map(request):
     applicant = request.user.applicant
     status_labels = dict(UserCollege.APPLY_STATUS_CHOICES)
 
-    colleges = (UserCollege.objects
-                .filter(applicant=applicant)
-                .exclude(apply_status__in=['', 'not_applying'])
-                .select_related('college'))
+    all_colleges = (UserCollege.objects
+                    .filter(applicant=applicant)
+                    .select_related('college'))
 
-    points = []
-    missing = []  # on the list but no coordinates (e.g. international)
-    on_list_college_ids = set()
-    for uc in colleges:
-        if uc.college_id:
-            on_list_college_ids.add(uc.college_id)
+    points = []   # actively applying/considering/etc — colored by status
+    other = []    # your not-applying colleges — gray, still openable in applications
+    missing = []  # active but no coordinates (e.g. international)
+    for uc in all_colleges:
+        active = uc.apply_status not in ('', 'not_applying')
         if uc.latitude is None or uc.longitude is None:
-            missing.append(uc.name)
+            if active:
+                missing.append(uc.name)
             continue
-        points.append({
-            'pk': uc.pk,
-            'name': uc.name,
-            'city': uc.city,
-            'state': uc.state,
-            'status': status_labels.get(uc.apply_status, uc.apply_status),
-            'color': STATUS_DOT_COLOR.get(uc.apply_status, '#666666'),
-            'lat': uc.latitude,
-            'lon': uc.longitude,
-        })
-
-    # Every other college in the DB that has coordinates — shown as gray
-    # context dots (deduped by name so the per-user duplicates don't stack).
-    other = []
-    seen_names = set()
-    other_qs = (College.objects
-                .filter(latitude__isnull=False, longitude__isnull=False)
-                .exclude(pk__in=on_list_college_ids)
-                .values('name', 'city', 'state', 'latitude', 'longitude'))
-    for col in other_qs:
-        if col['name'] in seen_names:
-            continue
-        seen_names.add(col['name'])
-        other.append({
-            'name': col['name'],
-            'city': col['city'],
-            'state': col['state'],
-            'lat': col['latitude'],
-            'lon': col['longitude'],
-        })
+        if active:
+            points.append({
+                'pk': uc.pk,
+                'name': uc.name,
+                'city': uc.city,
+                'state': uc.state,
+                'status': status_labels.get(uc.apply_status, uc.apply_status),
+                'color': STATUS_DOT_COLOR.get(uc.apply_status, '#666666'),
+                'lat': uc.latitude,
+                'lon': uc.longitude,
+            })
+        else:
+            other.append({
+                'pk': uc.pk,
+                'name': uc.name,
+                'city': uc.city,
+                'state': uc.state,
+                'lat': uc.latitude,
+                'lon': uc.longitude,
+            })
 
     # Legend: only statuses actually present, in relevance order.
     present = {p['status'] for p in points}
