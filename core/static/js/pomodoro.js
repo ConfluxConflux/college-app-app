@@ -15,7 +15,7 @@
 
   var KEY = 'hippomodoro';
   var cfg = document.getElementById('hippo-engine');
-  var TIMER_URL  = (cfg && cfg.getAttribute('data-timer-url'))  || '/widgets/timer/';
+  var TIMER_URL  = (cfg && cfg.getAttribute('data-timer-url'))  || '/widgets/pomodoros/';
   var SNORT_URL  = (cfg && cfg.getAttribute('data-snort-url'))  || '';
   var ANGRY_IMG  = (cfg && cfg.getAttribute('data-angry-img'))  || '';
 
