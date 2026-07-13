@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}College Map - HIPPOCAMPUS{% endblock %}
+
+{% block content %}
+
+<h1 class="title">College List</h1>
+
+<!-- Tabs (match the list toolbar) -->
+<div class="college-toolbar mb-3">
+  <div class="buttons has-addons mb-0">
+    <a class="button" href="{% url 'colleges:list' %}">Your List</a>
+    <a class="button" href="{% url 'colleges:list_all' %}">All Colleges</a>
+    <a class="button is-dark is-selected" href="{% url 'colleges:map' %}">Map</a>
+  </div>
+</div>
+
+{% if map_points %}
+  {% if legend %}
+  <div class="mb-3" style="display:flex; flex-wrap:wrap; gap:0.25rem 1rem; align-items:center;">
+    {% for item in legend %}
+    <span style="display:inline-flex; align-items:center; gap:0.4rem; font-size:0.85rem;">
+      <span style="width:12px; height:12px; border-radius:50%; background:{{ item.color }}; border:2px solid #fff; box-shadow:0 0 0 1px #bbb;"></span>
+      {{ item.label }}
+    </span>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div id="college-map" style="height:70vh; min-height:420px; border-radius:10px; z-index:1;"></div>
+
+  {% if missing %}
+  <p class="mt-3 has-text-grey is-size-7">
+    Not shown (no coordinates yet): {{ missing|join:", " }}
+  </p>
+  {% endif %}
+{% else %}
+  <div class="notification is-light">
+    No colleges on your list have coordinates yet. Add colleges and set an application status to see them here.
+  </div>
+{% endif %}
+
+{{ map_points|json_script:"map-data" }}
+{% endblock %}
+
+{% block extra_js %}
+{% if map_points %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+(function () {
+  var points = JSON.parse(document.getElementById('map-data').textContent);
+  var appsUrl = "{{ applications_url }}";
+
+  var map = L.map('college-map', { scrollWheelZoom: false });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 18,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  var latlngs = [];
+  points.forEach(function (p) {
+    var marker = L.circleMarker([p.lat, p.lon], {
+      radius: 8,
+      fillColor: p.color,
+      color: '#ffffff',
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 0.95
+    }).addTo(map);
+
+    var loc = [p.city, p.state].filter(Boolean).join(', ');
+    var href = appsUrl + '?college=' + p.pk;
+    var html =
+      '<a href="' + href + '" style="display:block; color:inherit; text-decoration:none; min-width:140px;">' +
+        '<strong>' + p.name + '</strong><br>' +
+        (loc ? '<span style="color:#666;">' + loc + '</span><br>' : '') +
+        '<span style="display:inline-flex; align-items:center; gap:6px; margin-top:4px;">' +
+          '<span style="width:10px; height:10px; border-radius:50%; background:' + p.color + '; display:inline-block;"></span>' +
+          p.status +
+        '</span>' +
+        '<div style="margin-top:6px; font-size:0.72rem; color:#2a9d8f;">Open in applications &rarr;</div>' +
+      '</a>';
+    marker.bindPopup(html);
+    latlngs.push([p.lat, p.lon]);
+  });
+
+  if (latlngs.length === 1) {
+    map.setView(latlngs[0], 6);
+  } else {
+    map.fitBounds(L.latLngBounds(latlngs), { padding: [40, 40] });
+  }
+})();
+</script>
+{% endif %}
+{% endblock %}

@@ -4,6 +4,7 @@ from collections import defaultdict
 from django.db.models import Case, When, Value, IntegerField, Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.views.decorators.http import require_POST, require_http_methods
 
 from .forms import CollegeForm
@@ -75,6 +76,66 @@ _RELEVANCE_ORDER = Case(
 
 APP_PROGRESS_STATUS_ORDER = _RELEVANCE_ORDER
 STATUS_ORDER = _RELEVANCE_ORDER
+
+
+# Solid dot colors per status for the map (the darker pill text colors).
+STATUS_DOT_COLOR = {
+    'considering': '#4a3a9c',
+    'applying':    '#1a4a9c',
+    'likely':      '#1a5a9c',
+    'unlikely':    '#8c2020',
+    'applied':     '#1e5c20',
+    'accepted':    '#246024',
+    'deferred':    '#7a6000',
+    'waitlisted':  '#7a4a00',
+    'rejected':    '#8c1a1a',
+    'enrolled':    '#1a5c70',
+    'withdrawn':   '#5a4038',
+}
+
+
+def college_map(request):
+    """Map tab: plots the applicant's list colleges (those with coordinates),
+    color-coded by application status."""
+    applicant = request.user.applicant
+    status_labels = dict(UserCollege.APPLY_STATUS_CHOICES)
+
+    colleges = (UserCollege.objects
+                .filter(applicant=applicant)
+                .exclude(apply_status__in=['', 'not_applying'])
+                .select_related('college'))
+
+    points = []
+    missing = []  # on the list but no coordinates (e.g. international)
+    for uc in colleges:
+        if uc.latitude is None or uc.longitude is None:
+            missing.append(uc.name)
+            continue
+        points.append({
+            'pk': uc.pk,
+            'name': uc.name,
+            'city': uc.city,
+            'state': uc.state,
+            'status': status_labels.get(uc.apply_status, uc.apply_status),
+            'color': STATUS_DOT_COLOR.get(uc.apply_status, '#666666'),
+            'lat': uc.latitude,
+            'lon': uc.longitude,
+        })
+
+    # Legend: only statuses actually present, in relevance order.
+    present = {p['status'] for p in points}
+    legend = []
+    for value, label in UserCollege.APPLY_STATUS_CHOICES:
+        if label in present and value in STATUS_DOT_COLOR:
+            legend.append({'label': label, 'color': STATUS_DOT_COLOR[value]})
+
+    return render(request, 'colleges/college_map.html', {
+        'current_view': 'map',
+        'map_points': points,
+        'missing': missing,
+        'legend': legend,
+        'applications_url': reverse('applications:home'),
+    })
 
 
 def college_list(request, tab='applications'):
