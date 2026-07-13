@@ -1194,6 +1194,17 @@ td.compare-cell [x-show="!open"] {
 body.focus-mode .pomo-chip,
 body.focus-mode .pomo-chip-show { top: 14px; }
 
+/* Chip docked inside the focus toolbar — flows beside the buttons, no overlap */
+.pomo-chip.pomo-chip--inline {
+  position: static;
+  box-shadow: none;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 0.2rem 0.3rem 0.2rem 0.65rem;
+  flex-shrink: 0;
+}
+.pomo-chip-show.pomo-chip--inline { position: static; background: transparent; }
+.pomo-chip--inline .pomo-chip-task { max-width: 160px; }
+
 /* --- Interstitial overlays (enraged Potamus + neutral confirm) --- */
 .pomo-lock {
   position: fixed;
@@ -1247,6 +1258,8 @@ body.focus-mode .pomo-chip-show { top: 14px; }
 .pomo-btn-red:hover { color: #922b21; }
 .pomo-btn-grey { background: #f3f4f6; color: #374151; }
 .pomo-btn-grey:hover { background: #e5e7eb; }
+.pomo-btn-blue { background: #eaf1fb; color: #2a6fb0; border: 1.5px solid #cfe0f5; font-size: 0.85rem; }
+.pomo-btn-blue:hover { background: #dbe8f8; }
 .pomo-lock--neutral .pomo-lock-actions { flex-direction: row; justify-content: center; }
 .pomo-lock--neutral .pomo-btn-green,
 .pomo-lock--neutral .pomo-btn-grey { font-size: 0.95rem; padding: 0.55rem 1.4rem; }

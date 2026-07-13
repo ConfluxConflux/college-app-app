@@ -185,7 +185,7 @@
   }
   // Would navigating to destPath pop a guard right now?
   function shouldIntercept(destPath, s) {
-    if (!s || !s.running || s.phase === 'break') return false;
+    if (!s || !s.running || s.phase === 'break' || s.leaveOk) return false;
     if (destPath === TIMER_PATH) return false;
     if (s.mode === 'hippomodoro') return isLeavingZone(window.location.pathname, destPath);
     return zoneOf(window.location.pathname) === 'focus_write' && zoneOf(destPath) !== 'focus_write';
@@ -199,7 +199,7 @@
     var s = load();
     if (!shouldIntercept(destPath, s)) { doNavigate(url); return; }
     pendingNav = url;
-    if (s.mode === 'hippomodoro') { playSnort(); showLock(false); }
+    if (s.mode === 'hippomodoro') { playSnort(); showLock(); }
     else { showConfirm(); }
   }
 
@@ -235,15 +235,16 @@
   var pendingAmbush = false;
   document.addEventListener('visibilitychange', function () {
     var s = load();
-    var armed = s && s.running && s.phase === 'work' && s.mode === 'hippomodoro';
+    var armed = s && s.running && s.phase === 'work' && s.mode === 'hippomodoro' && !s.leaveOk;
     if (document.hidden) {
       if (!armed) return;
-      playSnort();
+      startSnortLoop();
       setChrome();
       pendingAmbush = true;
     } else {
+      stopSnortLoop();
       restoreChrome();
-      if (pendingAmbush && armed) { pendingAmbush = false; showLock(true); }
+      if (pendingAmbush && armed) { pendingAmbush = false; showLock(); }
       else { pendingAmbush = false; }
     }
   });
@@ -268,7 +269,7 @@
   window.addEventListener('beforeunload', function (e) {
     if (suppressUnload) return;
     var s = load();
-    if (s && s.running && s.phase === 'work' && s.mode === 'hippomodoro') {
+    if (s && s.running && s.phase === 'work' && s.mode === 'hippomodoro' && !s.leaveOk) {
       e.preventDefault();
       e.returnValue = '';
       return '';
@@ -283,15 +284,31 @@
       if (audioCtx.state === 'suspended') audioCtx.resume();
     } catch (e) {}
   }
-  function playSnort() {
+  function playSnort(vol) {
     if (!SNORT_URL) return;
     try {
       if (!snort) snort = new Audio(SNORT_URL);
+      snort.volume = (typeof vol === 'number') ? Math.max(0, Math.min(1, vol)) : 1;
       snort.currentTime = 0;
       var p = snort.play();
       if (p && p.catch) p.catch(function () {});
     } catch (e) {}
   }
+
+  // Escalating snort loop while the user is off the tab (~15s, growing louder, until return).
+  var snortTimer = null, snortStart = 0;
+  var SNORT_MS = 15000;
+  function startSnortLoop() {
+    stopSnortLoop();
+    snortStart = Date.now();
+    (function once() {
+      var elapsed = Date.now() - snortStart;
+      if (elapsed > SNORT_MS) { stopSnortLoop(); return; }
+      playSnort(0.25 + (elapsed / SNORT_MS) * 0.75); // ramp 0.25 → 1.0
+      snortTimer = setTimeout(once, 1100);
+    })();
+  }
+  function stopSnortLoop() { if (snortTimer) { clearTimeout(snortTimer); snortTimer = null; } }
   function beep(freq, dur, delay) {
     try {
       audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
@@ -308,13 +325,16 @@
   function playDing() { beep(660, 0.16, 0); beep(880, 0.22, 0.16); }
 
   // ---------------------------------------------------------------- interstitials
-  function showLock(isAmbush) {
+  function showLock() {
     var el = document.getElementById('hippo-lock');
-    if (!el) return;
-    var leaveBtn = document.getElementById('hippo-lock-leave');
-    // On a return-ambush there's nowhere to "leave" to — only offer the stay button.
-    if (leaveBtn) leaveBtn.style.display = isAmbush ? 'none' : '';
-    el.style.display = 'flex';
+    if (el) el.style.display = 'flex';
+  }
+  // "Leaving the tab is part of my task" — quiet all Hippomodoro deterrents for this work session.
+  function allowLeaving() {
+    var s = load();
+    if (s) { s.leaveOk = true; save(s); }
+    stopSnortLoop();
+    restoreChrome();
   }
   function hideLock() {
     var el = document.getElementById('hippo-lock');
@@ -330,10 +350,16 @@
   }
   function wireButtons() {
     var lockStay = document.getElementById('hippo-lock-stay');
+    var lockAllow = document.getElementById('hippo-lock-allow');
     var lockLeave = document.getElementById('hippo-lock-leave');
     var confStay = document.getElementById('hippo-confirm-stay');
     var confLeave = document.getElementById('hippo-confirm-leave');
     if (lockStay) lockStay.addEventListener('click', function () { pendingNav = null; hideLock(); });
+    if (lockAllow) lockAllow.addEventListener('click', function () {
+      allowLeaving();
+      hideLock();
+      if (pendingNav) { var u = pendingNav; pendingNav = null; doNavigate(u); }
+    });
     if (lockLeave) lockLeave.addEventListener('click', function () {
       hideLock();
       if (pendingNav) { var u = pendingNav; pendingNav = null; doNavigate(u); }
@@ -397,9 +423,24 @@
     unlockAudio: unlockAudio, playSnort: playSnort, PENALTY_TEXT: PENALTY_TEXT
   };
 
+  // On focus pages (no navbar), dock the chip inside the focus toolbar so it flows
+  // beside the existing buttons instead of floating over them.
+  function dockChipInFocusBar() {
+    if (!document.body.classList.contains('focus-mode')) return;
+    var bar = document.querySelector('.focus-topbar');
+    var group = bar ? bar.querySelector(':scope > div') : null;
+    var chip = document.getElementById('hippo-chip');
+    var showBtn = document.getElementById('hippo-chip-show');
+    if (!group || !chip) return;
+    chip.classList.add('pomo-chip--inline');
+    group.appendChild(chip);
+    if (showBtn) { showBtn.classList.add('pomo-chip--inline'); group.appendChild(showBtn); }
+  }
+
   function boot() {
     wireButtons();
     wireChip();
+    dockChipInFocusBar();
     render();
     setInterval(tick, 1000);
     window.addEventListener('storage', function (e) { if (e.key === KEY) notify(); });
