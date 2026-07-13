@@ -15,7 +15,7 @@
   </div>
 </div>
 
-{% if map_points %}
+{% if map_points or other_points %}
   {% if legend %}
   <div class="mb-3" style="display:flex; flex-wrap:wrap; gap:0.25rem 1rem; align-items:center;">
     {% for item in legend %}
@@ -36,15 +36,16 @@
   {% endif %}
 {% else %}
   <div class="notification is-light">
-    No colleges on your list have coordinates yet. Add colleges and set an application status to see them here.
+    No colleges with coordinates yet. Add colleges and set an application status to see them here.
   </div>
 {% endif %}
 
 {{ map_points|json_script:"map-data" }}
+{{ other_points|json_script:"other-data" }}
 {% endblock %}
 
 {% block extra_js %}
-{% if map_points %}
+{% if map_points or other_points %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
       integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -52,6 +53,7 @@
 <script>
 (function () {
   var points = JSON.parse(document.getElementById('map-data').textContent);
+  var others = JSON.parse(document.getElementById('other-data').textContent);
   var appsUrl = "{{ applications_url }}";
 
   var map = L.map('college-map', { scrollWheelZoom: false });
@@ -59,6 +61,21 @@
     maxZoom: 18,
     attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
+
+  // Gray context dots for every other college in the DB (drawn underneath).
+  others.forEach(function (p) {
+    var loc = [p.city, p.state].filter(Boolean).join(', ');
+    L.circleMarker([p.lat, p.lon], {
+      radius: 4,
+      fillColor: '#9aa0a6',
+      color: '#ffffff',
+      weight: 1,
+      opacity: 1,
+      fillOpacity: 0.7
+    }).addTo(map).bindPopup(
+      '<strong>' + p.name + '</strong>' + (loc ? '<br><span style="color:#666;">' + loc + '</span>' : '')
+    );
+  });
 
   var latlngs = [];
   points.forEach(function (p) {
@@ -87,10 +104,14 @@
     latlngs.push([p.lat, p.lon]);
   });
 
-  if (latlngs.length === 1) {
-    map.setView(latlngs[0], 6);
+  // Frame to your list if you have one, otherwise to all the gray dots.
+  var frame = latlngs.length ? latlngs : others.map(function (p) { return [p.lat, p.lon]; });
+  if (frame.length === 1) {
+    map.setView(frame[0], 6);
+  } else if (frame.length) {
+    map.fitBounds(L.latLngBounds(frame), { padding: [40, 40] });
   } else {
-    map.fitBounds(L.latLngBounds(latlngs), { padding: [40, 40] });
+    map.setView([39.5, -98.35], 4);  // continental US fallback
   }
 })();
 </script>

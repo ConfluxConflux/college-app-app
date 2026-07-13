@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST, require_http_methods
 
 from .forms import CollegeForm
-from .models import UserCollege
+from .models import College, UserCollege
 from activities.models import UCEntry, CommonAppActivity, CommonAppHonor, MITEntry
 from core.models import Applicant
 from supplements.models import SupplementEssay, UCPersonalInsightQuestion, CommonAppEssay, UC_PIQ_PROMPTS, COMMON_APP_PROMPTS
@@ -107,7 +107,10 @@ def college_map(request):
 
     points = []
     missing = []  # on the list but no coordinates (e.g. international)
+    on_list_college_ids = set()
     for uc in colleges:
+        if uc.college_id:
+            on_list_college_ids.add(uc.college_id)
         if uc.latitude is None or uc.longitude is None:
             missing.append(uc.name)
             continue
@@ -122,6 +125,26 @@ def college_map(request):
             'lon': uc.longitude,
         })
 
+    # Every other college in the DB that has coordinates — shown as gray
+    # context dots (deduped by name so the per-user duplicates don't stack).
+    other = []
+    seen_names = set()
+    other_qs = (College.objects
+                .filter(latitude__isnull=False, longitude__isnull=False)
+                .exclude(pk__in=on_list_college_ids)
+                .values('name', 'city', 'state', 'latitude', 'longitude'))
+    for col in other_qs:
+        if col['name'] in seen_names:
+            continue
+        seen_names.add(col['name'])
+        other.append({
+            'name': col['name'],
+            'city': col['city'],
+            'state': col['state'],
+            'lat': col['latitude'],
+            'lon': col['longitude'],
+        })
+
     # Legend: only statuses actually present, in relevance order.
     present = {p['status'] for p in points}
     legend = []
@@ -132,6 +155,7 @@ def college_map(request):
     return render(request, 'colleges/college_map.html', {
         'current_view': 'map',
         'map_points': points,
+        'other_points': other,
         'missing': missing,
         'legend': legend,
         'applications_url': reverse('applications:home'),
