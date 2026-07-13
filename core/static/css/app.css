@@ -1195,11 +1195,14 @@ body.focus-mode .pomo-chip,
 body.focus-mode .pomo-chip-show { top: 14px; }
 
 /* Chip docked inside the focus toolbar — flows beside the buttons, no overlap */
+/* Docked in the focus toolbar: transparent + no vertical padding so the bar height
+   (and therefore the margin above the editor) does not change when the pill appears. */
 .pomo-chip.pomo-chip--inline {
   position: static;
   box-shadow: none;
-  background: rgba(255, 255, 255, 0.6);
-  padding: 0.2rem 0.3rem 0.2rem 0.65rem;
+  background: transparent;
+  padding: 0;
+  gap: 0.5rem;
   flex-shrink: 0;
 }
 .pomo-chip-show.pomo-chip--inline { position: static; background: transparent; }
@@ -1265,7 +1268,7 @@ body.focus-mode .pomo-chip-show { top: 14px; }
 .pomo-lock--neutral .pomo-btn-grey { font-size: 0.95rem; padding: 0.55rem 1.4rem; }
 
 /* --- Timer page --- */
-.pomo-page { max-width: 620px; margin: 0 auto; }
+.pomo-page { max-width: 780px; margin: 0 auto; }
 .pomo-h1 {
   font-family: 'Libre Baskerville', Georgia, serif;
   font-size: 1.6rem;
@@ -1299,8 +1302,16 @@ body.focus-mode .pomo-chip-show { top: 14px; }
 }
 .pomo-mode-card:hover { border-color: #2a9d8f; }
 .pomo-mode-card.is-active { border-color: #2a9d8f; box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.15); }
-.pomo-mode-icon { font-size: 2.4rem; line-height: 1; }
-.pomo-mode-hippo { width: 74px; height: 74px; object-fit: contain; }
+/* Equal-height icon slot so the hourglass and Potamus align — names start at the same y */
+.pomo-mode-icon {
+  font-size: 3.6rem;
+  line-height: 1;
+  height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pomo-mode-hippo { height: 92px; width: auto; max-width: 110px; object-fit: contain; }
 .pomo-mode-name {
   font-family: 'Libre Baskerville', Georgia, serif;
   font-weight: 700;
@@ -1408,6 +1419,72 @@ body.focus-mode .pomo-chip-show { top: 14px; }
 }
 .pomo-goal-edit { display: flex; gap: 0.5rem; align-items: center; }
 .pomo-goal-edit .input { flex: 1; }
+
+/* Penalty textarea with a live mismatch-highlight backdrop (paste is blocked) */
+.pomo-penalty-wrap { position: relative; }
+.pomo-penalty-backdrop,
+.pomo-penalty-input {
+  font-family: 'Open Sans', sans-serif;
+  font-size: 1rem;
+  line-height: 1.5;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #dbdbdb;
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: left;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+.pomo-penalty-backdrop {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  margin: 0;
+  color: #333;
+  background: #fff;
+  border-color: transparent;
+  pointer-events: none;
+  overflow: hidden;
+}
+.pomo-penalty-backdrop mark {
+  background: #fbdcdc;
+  color: #c0392b;
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px #f3b4b4;
+}
+.pomo-penalty-input {
+  position: relative;
+  display: block;
+  margin: 0;
+  resize: vertical;
+  min-height: 7rem;
+  background: transparent;
+  color: transparent;
+  caret-color: #333;
+}
+.pomo-penalty-input::placeholder { color: #b5b5b5; }
+
+/* "You have to type it!" paste-blocked popup */
+.pomo-paste-warn {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+}
+.pomo-paste-warn-box {
+  background: #fff;
+  border-radius: 14px;
+  padding: 1.4rem 2rem;
+  font-family: 'Libre Baskerville', Georgia, serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #c0392b;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
 
 @media (max-width: 560px) {
   .pomo-modes { flex-direction: column; }

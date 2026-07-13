@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Timer - HIPPOCAMPUS{% endblock %}
+{% block title %}Pomodoros - HIPPOCAMPUS{% endblock %}
 
 {% block extra_head %}
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
@@ -13,85 +13,18 @@
     <li><a href="{% url 'widgets:estimator' %}">Time Calculator</a></li>
     <li><a href="{% url 'widgets:word_counter' %}">Word Counter</a></li>
     <li><a href="{% url 'widgets:focus_write' %}">Focus Write</a></li>
-    <li class="is-active"><a href="{% url 'widgets:timer' %}">Timer</a></li>
+    <li class="is-active"><a href="{% url 'widgets:timer' %}">Pomodoros</a></li>
     <li><a href="{% url 'widgets:advice' %}">Advice</a></li>
     <li><a href="{% url 'widgets:resources' %}">Resources</a></li>
   </ul>
 </div>
 
-<div class="pomo-page" x-cloak x-data="{
-  s: null, now: Date.now(),
-  mode: 'pomodoro', task: '', workMin: 25, breakMin: 5,
-  branch: null, penalty: '', careMsg: null, editingGoal: false, newGoal: '', toast: null,
-  proudImg: '{% static 'img/potamus_proud.png' %}',
-  angryImg: '{% static 'img/professor_potamus.png' %}',
-  init() {
-    this.refresh();
-    window.addEventListener('hippomodoro:change', () => this.refresh());
-    setInterval(() => { this.now = Date.now(); }, 250);
-  },
-  refresh() {
-    this.s = window.Hippomodoro.getState();
-    if (this.s && this.s.event === 'work_done' && this.s.mode === 'pomodoro') {
-      this.toast = &quot;Time's up — break started!&quot;;
-      window.Hippomodoro.consumeEvent();
-      this.s = window.Hippomodoro.getState();
-    }
-  },
-  get view() {
-    const s = this.s;
-    if (!s) return 'setup';
-    if (s.event === 'break_done') return 'breakdone';
-    if (s.event === 'work_done' && s.mode === 'hippomodoro') return 'checkin';
-    if (s.running || s.pausedRemainingMs) return 'running';
-    return 'setup';
-  },
-  get remaining() { return this.now, window.Hippomodoro.remainingMs(this.s); },
-  get totalMs() { if (!this.s) return 1; return (this.s.phase === 'break' ? this.s.breakMin : this.s.workMin) * 60000; },
-  get fraction() { return Math.max(0, Math.min(1, this.remaining / this.totalMs)); },
-  get clock() { const t = Math.round(this.remaining / 1000); const m = Math.floor(t / 60), sec = t % 60; return m + ':' + (sec < 10 ? '0' : '') + sec; },
-  get canStart() { return this.task.trim().length > 0; },
-  get penaltyText() { return window.Hippomodoro.PENALTY_TEXT; },
-  norm(x) { return (x || '').replace(/\s+/g, ' ').trim().toLowerCase(); },
-  get penaltyOk() { return this.norm(this.penalty) === this.norm(this.penaltyText); },
-  get isHippo() { return this.s && this.s.mode === 'hippomodoro'; },
-  startTimer() {
-    if (!this.canStart) return;
-    window.Hippomodoro.start({ mode: this.mode, task: this.task, workMin: this.workMin, breakMin: this.breakMin });
-    this.toast = null; this.refresh();
-  },
-  pause() { window.Hippomodoro.pause(); this.refresh(); },
-  resume() { window.Hippomodoro.resume(); this.refresh(); },
-  reset() { window.Hippomodoro.reset(); this.branch = null; this.penalty = ''; this.careMsg = null; this.toast = null; this.editingGoal = false; this.refresh(); },
-  chooseBranch(b) {
-    this.branch = b; this.careMsg = null;
-    if (b === 'laser') this.fireConfetti();
-    if (b === 'lockin') window.Hippomodoro.playSnort();
-  },
-  resolveCheckin() {
-    window.Hippomodoro.startBreak();
-    this.branch = null; this.penalty = ''; this.careMsg = null; this.editingGoal = false;
-    this.refresh();
-  },
-  care(action) {
-    if (action === 'goal') { this.editingGoal = true; this.newGoal = this.s ? this.s.task : ''; this.careMsg = null; return; }
-    const msgs = {
-      breath: 'Good. In through the nose… out through the mouth. Professor Potamus is breathing with you. 🦛',
-      walk: 'A short walk works wonders. Your work will be right here when you get back.',
-      friend: 'Reaching out helps. Send that text — then come back locked in.',
-      family: 'Talking it out with someone you trust is a strength, not a weakness. You’ve got this.',
-    };
-    this.careMsg = msgs[action] || '';
-  },
-  saveGoal() { window.Hippomodoro.setTask(this.newGoal); this.editingGoal = false; this.refresh(); },
-  startAnother() { window.Hippomodoro.startAnother(); this.branch = null; this.penalty = ''; this.careMsg = null; this.toast = null; this.refresh(); },
-  fireConfetti() {
-    if (!window.confetti) return;
-    confetti({ particleCount: 120, angle: 60, spread: 70, origin: { x: 0, y: 0.65 } });
-    confetti({ particleCount: 120, angle: 120, spread: 70, origin: { x: 1, y: 0.65 } });
-    confetti({ particleCount: 80, spread: 360, startVelocity: 20, gravity: 0.6, origin: { x: 0.5, y: 0.4 } });
-  }
-}">
+<div class="pomo-page" x-cloak x-data="pomoTimer">
+
+  {# Paste-blocked warning #}
+  <div x-show="pasteWarn" x-cloak class="pomo-paste-warn" @click="pasteWarn = false">
+    <div class="pomo-paste-warn-box">You have to type it!</div>
+  </div>
 
   {# ------------------------------------------------------------- SETUP #}
   <div x-show="view === 'setup'" class="pomo-setup">
@@ -128,9 +61,7 @@
         </label>
       </div>
 
-      <button type="button" class="button is-primary is-medium pomo-start" :disabled="!canStart" @click="startTimer()">
-        Start <span x-text="mode === 'hippomodoro' ? 'Hippomodoro' : 'Pomodoro'"></span>
-      </button>
+      <button type="button" class="button is-primary is-medium pomo-start" :disabled="!canStart" @click="startTimer()">Start</button>
       <p class="pomo-hint" x-show="!canStart">Name your task to begin.</p>
     </div>
   </div>
@@ -139,7 +70,7 @@
   <div x-show="view === 'running'" class="pomo-running">
     <p x-show="toast" class="pomo-toast" x-text="toast"></p>
     <div class="pomo-phase" x-text="s && s.phase === 'break' ? 'Break' : 'Focus'"></div>
-    <div class="pomo-task-label" x-text="s ? s.task : ''"></div>
+    <div class="pomo-task-label" x-text="s ? (s.phase === 'break' ? 'Break' : s.task) : ''"></div>
 
     <div class="pomo-ring-wrap">
       <svg viewBox="0 0 200 200" class="pomo-ring">
@@ -163,7 +94,6 @@
     <div class="pomo-checkin-card">
       <img class="pomo-checkin-hippo" :src="branch === 'lockin' ? angryImg : proudImg" @error="$el.src = angryImg" alt="Professor Potamus">
 
-      {# The question #}
       <template x-if="!branch">
         <div>
           <p class="pomo-bubble">How focused were you during your hippomodoro?</p>
@@ -176,7 +106,6 @@
         </div>
       </template>
 
-      {# Laser #}
       <template x-if="branch === 'laser'">
         <div>
           <p class="pomo-bubble pomo-bubble--proud">YOU'RE CRUSHING IT!! I'M SO PROUD</p>
@@ -184,7 +113,6 @@
         </div>
       </template>
 
-      {# Moderate #}
       <template x-if="branch === 'moderate'">
         <div>
           <p class="pomo-bubble">You're making progress toward the school of your dreams!</p>
@@ -192,18 +120,22 @@
         </div>
       </template>
 
-      {# Lock in — penalty gate #}
       <template x-if="branch === 'lockin'">
         <div>
           <p class="pomo-bubble pomo-bubble--angry">!@#$ I didn't sign up to proctor your pomodoro if you WEREN'T GOING TO WORK. I know you can do better. Please write:</p>
           <p class="pomo-penalty-target" x-text="penaltyText"></p>
-          <textarea class="textarea" rows="4" x-model="penalty" placeholder="Type it exactly…" spellcheck="false"></textarea>
+          <div class="pomo-penalty-wrap">
+            <div class="pomo-penalty-backdrop" x-ref="bd" x-html="diffHtml()" aria-hidden="true"></div>
+            <textarea class="pomo-penalty-input" rows="4" x-model="penalty"
+                      @paste.prevent="blockPaste()" @drop.prevent="blockPaste()" @dragover.prevent
+                      @scroll="$refs.bd.scrollTop = $event.target.scrollTop"
+                      placeholder="Type it exactly…" spellcheck="false"></textarea>
+          </div>
           <button type="button" class="button is-primary mt-3" :disabled="!penaltyOk" @click="resolveCheckin()">I've written it — start my break</button>
-          <p class="pomo-hint" x-show="!penaltyOk && penalty.length > 0">Not quite — type it exactly as written above.</p>
+          <p class="pomo-hint" x-show="!penaltyOk && penalty.length > 0">Not quite — the highlighted words don't match. Type it exactly.</p>
         </div>
       </template>
 
-      {# Guilty — self-care menu #}
       <template x-if="branch === 'guilty'">
         <div>
           <p class="pomo-bubble">Normally I'd be angry that you weren't focused during a hippomodoro … but let's be real. Applying to college can be hard and stressful. But I believe in you. Do any of these sound like they would be helpful?</p>
@@ -244,4 +176,120 @@
   </div>
 
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('alpine:init', function () {
+    Alpine.data('pomoTimer', function () {
+      return {
+        s: null, now: Date.now(),
+        mode: 'pomodoro', task: '', workMin: 25, breakMin: 5,
+        branch: null, penalty: '', careMsg: null, editingGoal: false, newGoal: '', toast: null, pasteWarn: false,
+        proudImg: "{% static 'img/potamus_proud.png' %}",
+        angryImg: "{% static 'img/professor_potamus.png' %}",
+
+        init() {
+          this.refresh();
+          window.addEventListener('hippomodoro:change', () => this.refresh());
+          setInterval(() => { this.now = Date.now(); }, 250);
+        },
+        refresh() {
+          this.s = window.Hippomodoro.getState();
+          if (this.s && this.s.event === 'work_done' && this.s.mode === 'pomodoro') {
+            this.toast = "Time's up — break started!";
+            window.Hippomodoro.consumeEvent();
+            this.s = window.Hippomodoro.getState();
+          }
+        },
+        get view() {
+          const s = this.s;
+          if (!s) return 'setup';
+          if (s.event === 'break_done') return 'breakdone';
+          if (s.event === 'work_done' && s.mode === 'hippomodoro') return 'checkin';
+          if (s.running || s.pausedRemainingMs) return 'running';
+          return 'setup';
+        },
+        get remaining() { this.now; return window.Hippomodoro.remainingMs(this.s); },
+        get totalMs() { if (!this.s) return 1; return (this.s.phase === 'break' ? this.s.breakMin : this.s.workMin) * 60000; },
+        get fraction() { return Math.max(0, Math.min(1, this.remaining / this.totalMs)); },
+        get clock() { const t = Math.round(this.remaining / 1000); const m = Math.floor(t / 60), sec = t % 60; return m + ':' + (sec < 10 ? '0' : '') + sec; },
+        get canStart() { return this.task.trim().length > 0; },
+        get penaltyText() { return window.Hippomodoro.PENALTY_TEXT; },
+        norm(x) { return (x || '').replace(/\s+/g, ' ').trim().toLowerCase(); },
+        get penaltyOk() { return this.norm(this.penalty) === this.norm(this.penaltyText); },
+        get isHippo() { return this.s && this.s.mode === 'hippomodoro'; },
+
+        startTimer() {
+          if (!this.canStart) return;
+          window.Hippomodoro.start({ mode: this.mode, task: this.task, workMin: this.workMin, breakMin: this.breakMin });
+          this.toast = null; this.refresh();
+        },
+        pause() { window.Hippomodoro.pause(); this.refresh(); },
+        resume() { window.Hippomodoro.resume(); this.refresh(); },
+        reset() { window.Hippomodoro.reset(); this.branch = null; this.penalty = ''; this.careMsg = null; this.toast = null; this.editingGoal = false; this.refresh(); },
+        chooseBranch(b) {
+          this.branch = b; this.careMsg = null;
+          if (b === 'laser') this.fireConfetti();
+          if (b === 'lockin') window.Hippomodoro.playSnort();
+        },
+        resolveCheckin() {
+          window.Hippomodoro.startBreak();
+          this.branch = null; this.penalty = ''; this.careMsg = null; this.editingGoal = false;
+          this.refresh();
+        },
+        care(action) {
+          if (action === 'goal') { this.editingGoal = true; this.newGoal = this.s ? this.s.task : ''; this.careMsg = null; return; }
+          const msgs = {
+            breath: 'Good. In through the nose… out through the mouth. Professor Potamus is breathing with you. 🦛',
+            walk: 'A short walk works wonders. Your work will be right here when you get back.',
+            friend: 'Reaching out helps. Send that text — then come back locked in.',
+            family: 'Talking it out with someone you trust is a strength, not a weakness. You’ve got this.'
+          };
+          this.careMsg = msgs[action] || '';
+        },
+        saveGoal() { window.Hippomodoro.setTask(this.newGoal); this.editingGoal = false; this.refresh(); },
+        blockPaste() { this.pasteWarn = true; if (window.Hippomodoro) window.Hippomodoro.playSnort(); },
+        startAnother() { window.Hippomodoro.startAnother(); this.branch = null; this.penalty = ''; this.careMsg = null; this.toast = null; this.refresh(); },
+        fireConfetti() {
+          if (!window.confetti) return;
+          confetti({ particleCount: 120, angle: 60, spread: 70, origin: { x: 0, y: 0.65 } });
+          confetti({ particleCount: 120, angle: 120, spread: 70, origin: { x: 1, y: 0.65 } });
+          confetti({ particleCount: 80, spread: 360, startVelocity: 20, gravity: 0.6, origin: { x: 0.5, y: 0.4 } });
+        },
+
+        // Live word-diff: render the typed text with mismatched words highlighted so
+        // the user can see exactly where they went wrong.
+        diffHtml() {
+          const typed = this.penalty;
+          if (!typed) return '';
+          const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          const parts = typed.split(/(\s+)/);
+          const isWord = (t) => t.length > 0 && !/^\s+$/.test(t);
+          const typedWords = [], targetWords = this.penaltyText.split(/\s+/).filter(Boolean);
+          parts.forEach((t) => { if (isWord(t)) typedWords.push(t); });
+          const lc = (w) => w.toLowerCase();
+          const n = typedWords.length, m = targetWords.length;
+          const dp = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
+          for (let i = n - 1; i >= 0; i--)
+            for (let j = m - 1; j >= 0; j--)
+              dp[i][j] = lc(typedWords[i]) === lc(targetWords[j]) ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+          const matched = new Array(n).fill(false);
+          let i = 0, j = 0;
+          while (i < n && j < m) {
+            if (lc(typedWords[i]) === lc(targetWords[j])) { matched[i] = true; i++; j++; }
+            else if (dp[i + 1][j] >= dp[i][j + 1]) i++;
+            else j++;
+          }
+          let wi = 0, html = '';
+          parts.forEach((t) => {
+            if (isWord(t)) { html += matched[wi] ? esc(t) : '<mark>' + esc(t) + '</mark>'; wi++; }
+            else html += esc(t);
+          });
+          return html;
+        }
+      };
+    });
+  });
+</script>
 {% endblock %}
