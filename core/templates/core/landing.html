@@ -30,10 +30,11 @@
     footer {
       margin-top: auto;
       padding: 0.75rem 2rem;
-      font-size: 0.9rem;
+      font-size: 1.1rem;
       font-style: italic;
       color: #888;
       text-align: center;
+      max-width: 680px;
     }
 
     .center {
@@ -156,7 +157,7 @@
     <img src="{% static 'img/potamus_proud.png' %}" alt="HIPPOCAMPUS logo" class="logo v1-only">
     <img src="{% static 'img/professor_potamus.png' %}" alt="HIPPOCAMPUS logo" class="logo v2-only">
   </div>
-  <footer class="v1-only" style="max-width: 680px;">
+  <footer class="v1-only">
     "You are the world's most virtuous vibecoder. This is genuinely a blessing, a public good,<br>
     a gift from divinity, yada yada. <a href="{% url 'widgets:focus_write' %}" class="quote-link">This Focus Write widget</a> is saving my life."<br>
     &mdash; Lili, Bronx Science '27
