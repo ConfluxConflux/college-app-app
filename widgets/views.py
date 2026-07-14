@@ -15,6 +15,25 @@ def _current_applicant(request):
         return None
 
 
+# Which Applicant field backs each scratchpad slot.
+SCRATCHPAD_FIELDS = {'focus': 'focus_draft', 'words': 'word_counter_draft'}
+
+
+@require_POST
+def scratchpad_save(request, slot):
+    """Persist a scratchpad (Focus Write / Word Counter) to the account. Logged-out
+    visitors get a no-op — the page keeps their text in localStorage instead."""
+    field = SCRATCHPAD_FIELDS.get(slot)
+    if field is None:
+        return HttpResponse(status=404)
+    applicant = _current_applicant(request)
+    if applicant is None:
+        return HttpResponse(status=204)
+    setattr(applicant, field, request.POST.get('text', ''))
+    applicant.save(update_fields=[field])
+    return HttpResponse(status=204)
+
+
 def estimator(request):
     return render(request, 'widgets/estimator.html')
 
@@ -27,24 +46,16 @@ def focus_write(request):
     })
 
 
-@require_POST
-def focus_write_save(request):
-    """Persist the shared Focus Write scratchpad. Logged-out visitors get a no-op
-    (the page keeps their text in localStorage instead)."""
-    applicant = _current_applicant(request)
-    if applicant is None:
-        return HttpResponse(status=204)
-    applicant.focus_draft = request.POST.get('text', '')
-    applicant.save(update_fields=['focus_draft'])
-    return HttpResponse(status=204)
-
-
 def timer(request):
     return render(request, 'widgets/timer.html')
 
 
 def word_counter(request):
-    return render(request, 'widgets/word_counter.html')
+    applicant = _current_applicant(request)
+    return render(request, 'widgets/word_counter.html', {
+        'draft': applicant.word_counter_draft if applicant else '',
+        'can_save': applicant is not None,
+    })
 
 
 def resources(request):

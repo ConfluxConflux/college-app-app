@@ -30,7 +30,7 @@
        pushToAccount() {
          if (!window.htmx) { return; }
          this.saving = true;
-         window.htmx.ajax('POST', '{% url 'widgets:focus_write_save' %}',
+         window.htmx.ajax('POST', '{% url 'widgets:scratchpad_save' 'focus' %}',
                           { values: { text: this.text }, target: document.body, swap: 'none' })
            .then(() => { this.saving = false; this.saved = true; })
            .catch(() => { this.saving = false; });

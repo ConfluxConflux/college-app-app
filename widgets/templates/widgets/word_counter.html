@@ -27,10 +27,70 @@
 </div>
 
 <div x-data="{
-  text: '',
+  canSave: {{ can_save|yesno:'true,false' }},
+  text: {% if can_save %}'{{ draft|escapejs }}'{% else %}localStorage.getItem('wordCounterText') || ''{% endif %},
+  saving: false,
+  saved: true,
+  saveTimer: null,
+  history: [],
+  hptr: 0,
+  pushTimer: null,
   get wc() { return this.text.trim() ? this.text.trim().split(/\s+/).length : 0; },
   get cc() { return this.text.length; },
-}">
+  // Logged in → autosave to the account (debounced). Logged out → localStorage.
+  persist() {
+    if (this.canSave) {
+      this.saved = false;
+      clearTimeout(this.saveTimer);
+      this.saveTimer = setTimeout(() => this.pushToAccount(), 900);
+    } else {
+      localStorage.setItem('wordCounterText', this.text);
+    }
+  },
+  pushToAccount() {
+    if (!window.htmx) { return; }
+    this.saving = true;
+    window.htmx.ajax('POST', '{% url 'widgets:scratchpad_save' 'words' %}',
+                     { values: { text: this.text }, target: document.body, swap: 'none' })
+      .then(() => { this.saving = false; this.saved = true; })
+      .catch(() => { this.saving = false; });
+  },
+  // Coalesce a typing burst into one history entry once typing pauses.
+  onEdit() {
+    clearTimeout(this.pushTimer);
+    this.pushTimer = setTimeout(() => this.commit(), 400);
+  },
+  commit() {
+    if (this.text === this.history[this.hptr]) return;
+    this.history = this.history.slice(0, this.hptr + 1);
+    this.history.push(this.text);
+    this.hptr = this.history.length - 1;
+  },
+  undo() {
+    clearTimeout(this.pushTimer);
+    this.commit();
+    if (this.hptr > 0) { this.hptr--; this.text = this.history[this.hptr]; this.afterHistoryNav(); }
+  },
+  redo() {
+    clearTimeout(this.pushTimer);
+    if (this.hptr < this.history.length - 1) { this.hptr++; this.text = this.history[this.hptr]; this.afterHistoryNav(); }
+  },
+  afterHistoryNav() {
+    this.$nextTick(() => {
+      var ta = this.$refs.ta;
+      if (!ta) return;
+      ta.focus();
+      ta.selectionStart = ta.selectionEnd = ta.value.length;
+    });
+  },
+  handleKey(e) {
+    if (!(e.metaKey || e.ctrlKey)) return;
+    var k = e.key.toLowerCase();
+    if (k === 'z' && e.shiftKey) { e.preventDefault(); this.redo(); }
+    else if (k === 'z') { e.preventDefault(); this.undo(); }
+    else if (k === 'y') { e.preventDefault(); this.redo(); }
+  },
+}" x-init="history = [text]; hptr = 0; $watch('text', () => persist());">
 
   <!-- Count banner -->
   <div style="background:#e8f4f2; border-radius:6px 6px 0 0; padding:0.65rem 1rem; display:flex; align-items:baseline; gap:0.35rem; font-family:'Libre Baskerville', Georgia, serif;">
@@ -39,6 +99,13 @@
     <span style="font-size:2rem; color:#aaa; margin-right:0.75rem;">·</span>
     <span style="font-size:2.4rem; font-weight:700; line-height:1;" x-text="cc"></span>
     <span style="font-size:2.4rem; color:#555; margin-left:0.3rem; font-style:italic;" x-text="cc === 1 ? 'character' : 'characters'"></span>
+    <span x-show="canSave" x-cloak
+          style="margin-left:auto; align-self:center; font-family:'Open Sans',sans-serif; font-size:0.85rem; font-style:normal;"
+          :style="saving ? 'color:#b0946a' : (saved ? 'color:#3a9d7e' : 'color:#c07a7a')">
+      <span x-show="saving">Saving…</span>
+      <span x-show="!saving && saved">Saved</span>
+      <span x-show="!saving && !saved">Unsaved</span>
+    </span>
   </div>
 
   <!-- Textarea -->
@@ -47,6 +114,9 @@
     rows="14"
     placeholder="Paste or type your text here…"
     x-model="text"
+    x-ref="ta"
+    @input="onEdit()"
+    @keydown="handleKey($event)"
     spellcheck="false"
     style="font-size:0.95rem; resize:vertical; border-radius:0 0 6px 6px; border-top:none; background-color:#fff; color:#363636;"
   ></textarea>
