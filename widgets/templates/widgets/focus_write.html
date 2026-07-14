@@ -10,8 +10,48 @@
        fs: false,
        showBackPrompt: false,
        copied: false,
+       history: [localStorage.getItem('focusWriteText') || ''],
+       hptr: 0,
+       pushTimer: null,
        get wc() { return this.text.trim() ? this.text.trim().split(/\s+/).length : 0; },
        get cc() { return this.text.length; },
+       // Coalesce a typing burst into one history entry once typing pauses.
+       onEdit() {
+         clearTimeout(this.pushTimer);
+         this.pushTimer = setTimeout(() => this.commit(), 400);
+       },
+       commit() {
+         if (this.text === this.history[this.hptr]) return;
+         this.history = this.history.slice(0, this.hptr + 1);
+         this.history.push(this.text);
+         this.hptr = this.history.length - 1;
+       },
+       undo() {
+         clearTimeout(this.pushTimer);
+         this.commit();
+         if (this.hptr > 0) { this.hptr--; this.text = this.history[this.hptr]; this.afterHistoryNav(); }
+       },
+       redo() {
+         clearTimeout(this.pushTimer);
+         if (this.hptr < this.history.length - 1) { this.hptr++; this.text = this.history[this.hptr]; this.afterHistoryNav(); }
+       },
+       afterHistoryNav() {
+         this.$nextTick(() => {
+           var ta = this.$refs.ta;
+           if (!ta) return;
+           ta.style.height = 'auto';
+           ta.style.height = Math.max(ta.scrollHeight, 320) + 'px';
+           ta.focus();
+           ta.selectionStart = ta.selectionEnd = ta.value.length;
+         });
+       },
+       handleKey(e) {
+         if (!(e.metaKey || e.ctrlKey)) return;
+         var k = e.key.toLowerCase();
+         if (k === 'z' && e.shiftKey) { e.preventDefault(); this.redo(); }
+         else if (k === 'z') { e.preventDefault(); this.undo(); }
+         else if (k === 'y') { e.preventDefault(); this.redo(); }
+       },
        toggleFs() {
          if (!document.fullscreenElement) {
            document.documentElement.requestFullscreen();
@@ -66,8 +106,10 @@
       class="focus-textarea"
       placeholder="Start writing…"
       x-model="text"
+      x-ref="ta"
       x-init="$nextTick(() => { $el.style.height = 'auto'; $el.style.height = Math.max($el.scrollHeight, 320) + 'px'; })"
-      @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'"
+      @input="$el.style.height = 'auto'; $el.style.height = $el.scrollHeight + 'px'; onEdit()"
+      @keydown="handleKey($event)"
       spellcheck="true"
       autocomplete="off"
     ></textarea>
