@@ -93,14 +93,14 @@
 }" x-init="history = [text]; hptr = 0; $watch('text', () => persist());">
 
   <!-- Count banner -->
-  <div style="background:#e8f4f2; border-radius:6px 6px 0 0; padding:0.65rem 1rem; display:flex; align-items:baseline; gap:0.35rem; font-family:'Libre Baskerville', Georgia, serif;">
+  <div style="position:relative; background:#e8f4f2; border-radius:6px 6px 0 0; padding:0.65rem 1rem; display:flex; align-items:baseline; gap:0.35rem; font-family:'Libre Baskerville', Georgia, serif;">
     <span style="font-size:2.4rem; font-weight:700; line-height:1;" x-text="wc"></span>
     <span style="font-size:2.4rem; color:#555; margin-left:0.3rem; margin-right:0.75rem; font-style:italic;" x-text="wc === 1 ? 'word' : 'words'"></span>
     <span style="font-size:2rem; color:#aaa; margin-right:0.75rem;">·</span>
     <span style="font-size:2.4rem; font-weight:700; line-height:1;" x-text="cc"></span>
     <span style="font-size:2.4rem; color:#555; margin-left:0.3rem; font-style:italic;" x-text="cc === 1 ? 'character' : 'characters'"></span>
     <span x-show="canSave" x-cloak
-          style="margin-left:auto; align-self:center; font-family:'Open Sans',sans-serif; font-size:0.85rem; font-style:normal;"
+          style="position:absolute; top:0.5rem; right:0.85rem; font-family:'Open Sans',sans-serif; font-size:0.85rem; font-style:normal;"
           :style="saving ? 'color:#b0946a' : (saved ? 'color:#3a9d7e' : 'color:#c07a7a')">
       <span x-show="saving">Saving…</span>
       <span x-show="!saving && saved">Saved</span>

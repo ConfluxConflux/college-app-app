@@ -7,8 +7,6 @@
      x-data="{
        canSave: {{ can_save|yesno:'true,false' }},
        text: {% if can_save %}'{{ draft|escapejs }}'{% else %}localStorage.getItem('focusWriteText') || ''{% endif %},
-       saving: false,
-       saved: true,
        saveTimer: null,
        showCount: false,
        fs: false,
@@ -17,10 +15,9 @@
        history: [],
        hptr: 0,
        pushTimer: null,
-       // Logged in → autosave to the account (debounced). Logged out → localStorage.
+       // Logged in → autosave to the account (debounced, silent). Logged out → localStorage.
        persist() {
          if (this.canSave) {
-           this.saved = false;
            clearTimeout(this.saveTimer);
            this.saveTimer = setTimeout(() => this.pushToAccount(), 900);
          } else {
@@ -29,11 +26,22 @@
        },
        pushToAccount() {
          if (!window.htmx) { return; }
-         this.saving = true;
          window.htmx.ajax('POST', '{% url 'widgets:scratchpad_save' 'focus' %}',
-                          { values: { text: this.text }, target: document.body, swap: 'none' })
-           .then(() => { this.saving = false; this.saved = true; })
-           .catch(() => { this.saving = false; });
+                          { values: { text: this.text }, target: document.body, swap: 'none' });
+       },
+       // Guarantee the latest text is saved whenever the tab is hidden/closed/redirected —
+       // sendBeacon still delivers during page unload, unlike a normal async request.
+       saveOnLeave() {
+         clearTimeout(this.saveTimer);
+         if (!this.canSave) { localStorage.setItem('focusWriteText', this.text); return; }
+         if (navigator.sendBeacon) {
+           var data = new FormData();
+           data.append('text', this.text);
+           data.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+           navigator.sendBeacon('{% url 'widgets:scratchpad_save' 'focus' %}', data);
+         } else {
+           this.pushToAccount();
+         }
        },
        get wc() { return this.text.trim() ? this.text.trim().split(/\s+/).length : 0; },
        get cc() { return this.text.length; },
@@ -92,10 +100,12 @@
      }"
      x-init="history = [text]; hptr = 0;
              $watch('text', () => persist());
+             document.addEventListener('visibilitychange', () => { if (document.hidden) saveOnLeave(); });
+             window.addEventListener('pagehide', () => saveOnLeave());
              document.addEventListener('fullscreenchange', () => { fs = !!document.fullscreenElement; })">
 
   <!-- Back confirmation prompt -->
-  <div x-show="showBackPrompt" @click.self="showBackPrompt = false" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;">
+  <div x-show="showBackPrompt" x-cloak @click.self="showBackPrompt = false" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;">
     <div style="position:relative;background:#fff;border-radius:12px;padding:2rem 1rem;max-width:302px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.2);font-family:'Libre Baskerville',Georgia,serif;">
       <button @click="showBackPrompt = false" style="position:absolute;top:0.6rem;right:0.75rem;background:none;border:none;font-size:1.2rem;line-height:1;color:#9ca3af;cursor:pointer;font-family:'Libre Baskerville',Georgia,serif;" aria-label="Dismiss">&times;</button>
       <p style="font-size:1.1rem;font-weight:600;margin:0 0 0.5rem;">Copy your writing<br>somewhere safe!</p>
@@ -120,11 +130,6 @@
       </span>
       <button class="focus-back-btn" @click="showCount = !showCount" x-text="showCount ? 'Hide Word Count' : 'Show Word Count'"></button>
       <button class="focus-back-btn" @click="toggleFs()" x-text="fs ? '⤡ Exit Fullscreen' : '⤢ Fullscreen'"></button>
-      <span x-show="canSave" class="focus-saved-label" :class="saving ? 'is-saving' : (saved ? 'is-saved' : 'is-unsaved')">
-        <span x-show="saving">Saving…</span>
-        <span x-show="!saving && saved">Saved</span>
-        <span x-show="!saving && !saved">Unsaved</span>
-      </span>
     </div>
   </div>
 
