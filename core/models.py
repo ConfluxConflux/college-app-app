@@ -11,6 +11,7 @@ class Applicant(models.Model):
     email = models.EmailField(blank=True)
     profile_picture = models.CharField(max_length=300, blank=True)
     brainstorm = models.TextField(blank=True)
+    focus_draft = models.TextField(blank=True)  # shared Focus Write scratchpad
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'

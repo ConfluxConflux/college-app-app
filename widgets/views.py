@@ -1,4 +1,18 @@
+from django.http import HttpResponse
 from django.shortcuts import render
+from django.views.decorators.http import require_POST
+
+from core.models import Applicant
+
+
+def _current_applicant(request):
+    """The logged-in user's Applicant, or None (widgets are usable logged-out)."""
+    if not request.user.is_authenticated:
+        return None
+    try:
+        return request.user.applicant
+    except Applicant.DoesNotExist:
+        return None
 
 
 def estimator(request):
@@ -6,7 +20,23 @@ def estimator(request):
 
 
 def focus_write(request):
-    return render(request, 'widgets/focus_write.html')
+    applicant = _current_applicant(request)
+    return render(request, 'widgets/focus_write.html', {
+        'draft': applicant.focus_draft if applicant else '',
+        'can_save': applicant is not None,
+    })
+
+
+@require_POST
+def focus_write_save(request):
+    """Persist the shared Focus Write scratchpad. Logged-out visitors get a no-op
+    (the page keeps their text in localStorage instead)."""
+    applicant = _current_applicant(request)
+    if applicant is None:
+        return HttpResponse(status=204)
+    applicant.focus_draft = request.POST.get('text', '')
+    applicant.save(update_fields=['focus_draft'])
+    return HttpResponse(status=204)
 
 
 def timer(request):

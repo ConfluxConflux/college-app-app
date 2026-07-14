@@ -5,14 +5,36 @@
 {% block content %}
 <div class="focus-shell"
      x-data="{
-       text: localStorage.getItem('focusWriteText') || '',
+       canSave: {{ can_save|yesno:'true,false' }},
+       text: {% if can_save %}'{{ draft|escapejs }}'{% else %}localStorage.getItem('focusWriteText') || ''{% endif %},
+       saving: false,
+       saved: true,
+       saveTimer: null,
        showCount: false,
        fs: false,
        showBackPrompt: false,
        copied: false,
-       history: [localStorage.getItem('focusWriteText') || ''],
+       history: [],
        hptr: 0,
        pushTimer: null,
+       // Logged in → autosave to the account (debounced). Logged out → localStorage.
+       persist() {
+         if (this.canSave) {
+           this.saved = false;
+           clearTimeout(this.saveTimer);
+           this.saveTimer = setTimeout(() => this.pushToAccount(), 900);
+         } else {
+           localStorage.setItem('focusWriteText', this.text);
+         }
+       },
+       pushToAccount() {
+         if (!window.htmx) { return; }
+         this.saving = true;
+         window.htmx.ajax('POST', '{% url 'widgets:focus_write_save' %}',
+                          { values: { text: this.text }, target: document.body, swap: 'none' })
+           .then(() => { this.saving = false; this.saved = true; })
+           .catch(() => { this.saving = false; });
+       },
        get wc() { return this.text.trim() ? this.text.trim().split(/\s+/).length : 0; },
        get cc() { return this.text.length; },
        // Coalesce a typing burst into one history entry once typing pauses.
@@ -68,7 +90,8 @@
          navigator.clipboard.writeText(this.text).then(() => { this.copied = true; });
        },
      }"
-     x-init="$watch('text', v => localStorage.setItem('focusWriteText', v));
+     x-init="history = [text]; hptr = 0;
+             $watch('text', () => persist());
              document.addEventListener('fullscreenchange', () => { fs = !!document.fullscreenElement; })">
 
   <!-- Back confirmation prompt -->
@@ -89,7 +112,7 @@
 
   <!-- Back bar -->
   <div class="focus-topbar">
-    <button @click="text.length >= 2 ? showBackPrompt = true : goBack()" class="focus-back-btn">← Other Widgets</button>
+    <button @click="(!canSave && text.length >= 2) ? showBackPrompt = true : goBack()" class="focus-back-btn">← Other Widgets</button>
     <span class="focus-college-label">Focus Write</span>
     <div style="display:flex; align-items:center; gap:0.75rem;">
       <span x-show="showCount" class="focus-counter" style="font-size:0.8rem;">
@@ -97,6 +120,11 @@
       </span>
       <button class="focus-back-btn" @click="showCount = !showCount" x-text="showCount ? 'Hide Word Count' : 'Show Word Count'"></button>
       <button class="focus-back-btn" @click="toggleFs()" x-text="fs ? '⤡ Exit Fullscreen' : '⤢ Fullscreen'"></button>
+      <span x-show="canSave" class="focus-saved-label" :class="saving ? 'is-saving' : (saved ? 'is-saved' : 'is-unsaved')">
+        <span x-show="saving">Saving…</span>
+        <span x-show="!saving && saved">Saved</span>
+        <span x-show="!saving && !saved">Unsaved</span>
+      </span>
     </div>
   </div>
 
