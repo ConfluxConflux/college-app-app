@@ -97,13 +97,13 @@
   <div class="modal" :class="{ 'is-active': acctModal }">
     <div class="modal-background" @click="acctModal = false"></div>
     <div class="modal-content">
-      <div class="box has-text-centered" style="max-width: 420px; margin: 0 auto;">
-        <p class="is-size-4 has-text-weight-bold mb-4">You need an account for this!</p>
+      <div class="box has-text-centered" style="max-width: 420px; margin: 0 auto; padding: 2.5rem;">
+        <p class="title is-4 mb-5">You need an account for this</p>
         <a class="button is-primary is-medium is-fullwidth" href="/accounts/google/login/">Sign up/in with Google</a>
-        <p class="has-text-grey is-size-7 mt-5 mb-2">or view as a test user:</p>
+        <p class="has-text-grey is-size-7 mt-5 mb-3" style="text-transform: uppercase; letter-spacing: 0.08em;">or view as a test user</p>
         <div class="buttons is-centered">
-          <a class="button is-light" href="{% url 'core:switch_applicant' 1 %}">Jacob</a>
-          <a class="button is-light" href="{% url 'core:switch_applicant' 2 %}">Hedgie</a>
+          <a class="button is-light is-rounded" href="{% url 'core:switch_applicant' 1 %}">Jacob</a>
+          <a class="button is-light is-rounded" href="{% url 'core:switch_applicant' 2 %}">Hedgie</a>
         </div>
       </div>
     </div>
