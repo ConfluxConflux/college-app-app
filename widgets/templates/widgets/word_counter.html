@@ -55,6 +55,21 @@
       .then(() => { this.saving = false; this.saved = true; })
       .catch(() => { this.saving = false; });
   },
+  // Guarantee the latest text is saved whenever the tab is hidden/closed/redirected —
+  // sendBeacon still delivers during page unload, unlike a normal async request.
+  saveOnLeave() {
+    clearTimeout(this.saveTimer);
+    if (!this.canSave) { localStorage.setItem('wordCounterText', this.text); return; }
+    if (navigator.sendBeacon) {
+      var data = new FormData();
+      data.append('text', this.text);
+      data.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+      navigator.sendBeacon('{% url 'widgets:scratchpad_save' 'words' %}', data);
+      this.saved = true; this.saving = false;
+    } else {
+      this.pushToAccount();
+    }
+  },
   // Coalesce a typing burst into one history entry once typing pauses.
   onEdit() {
     clearTimeout(this.pushTimer);
@@ -90,7 +105,10 @@
     else if (k === 'z') { e.preventDefault(); this.undo(); }
     else if (k === 'y') { e.preventDefault(); this.redo(); }
   },
-}" x-init="history = [text]; hptr = 0; $watch('text', () => persist());">
+}" x-init="history = [text]; hptr = 0;
+           $watch('text', () => persist());
+           document.addEventListener('visibilitychange', () => { if (document.hidden) saveOnLeave(); });
+           window.addEventListener('pagehide', () => saveOnLeave());">
 
   <!-- Count banner -->
   <div style="position:relative; background:#e8f4f2; border-radius:6px 6px 0 0; padding:0.65rem 1rem; display:flex; align-items:baseline; gap:0.35rem; font-family:'Libre Baskerville', Georgia, serif;">
