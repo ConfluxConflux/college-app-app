@@ -27,18 +27,18 @@ from supplements.models import (
 )
 
 
-# Always-visible columns — what a student acts on. Everything else is nerd
-# information until they ask for it.
+# Always visible. Everything else is off until you ask for it — the blank
+# slate is the point, and a wall of columns is what the competitors do.
 DEFAULT_FIELDS = [
     ('name', 'College'),
     ('apply_status', 'Status'),
-    ('application_round', 'Round'),
-    ('deadline', 'Deadline'),
     ('applicant_notes', 'Notes'),
 ]
 
 # Optional columns the user can toggle on
 OPTIONAL_FIELDS = [
+    ('application_round', 'Round'),
+    ('deadline', 'Deadline'),
     ('tier', 'Tier'),
     ('difficulty', 'Difficulty'),
     ('acceptance_rate', 'Acc. Rate'),
@@ -308,6 +308,10 @@ def effective_name():
 # is every college now that IPEDS is imported and redundant overrides pruned.
 SORT_ANNOTATIONS = {
     'name': effective_name,
+    # Status has a meaning-order, not an alphabet-order: Applying comes before
+    # Considering because that is how much it matters, not because A < C.
+    # Without this the header sorted the raw values as strings.
+    'apply_status': lambda: _RELEVANCE_ORDER,
     'acceptance_rate': lambda: effective_pct('acceptance_rate'),
     'app_platform': lambda: effective('app_platform'),
     'terms': lambda: effective('academic_calendar', 'academic_calendar'),
