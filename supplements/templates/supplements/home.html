@@ -5,10 +5,29 @@
 {% block extra_head %}
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script>
-function fireConfetti() {
-  confetti({ particleCount: 120, angle: 60,  spread: 70, origin: { x: 0,   y: 0.65 } });
-  confetti({ particleCount: 120, angle: 120, spread: 70, origin: { x: 1,   y: 0.65 } });
-  confetti({ particleCount: 80,  spread: 360, startVelocity: 20, gravity: 0.6, origin: { x: 0.5, y: 0.45 } });
+function fireConfetti(colors) {
+  const o = colors ? { colors } : {};
+  confetti({ particleCount: 120, angle: 60,  spread: 70, origin: { x: 0,   y: 0.65 }, ...o });
+  confetti({ particleCount: 120, angle: 120, spread: 70, origin: { x: 1,   y: 0.65 }, ...o });
+  confetti({ particleCount: 80,  spread: 360, startVelocity: 20, gravity: 0.6, origin: { x: 0.5, y: 0.45 }, ...o });
+}
+
+/* Progress is worth celebrating, not just finishing — every step forward gets
+   confetti in that stage's colours. Only forward: dropping Drafted back to WIP
+   is a correction, and confetti would be mocking you.
+   Saturated versions of the pill colours; the pill backgrounds themselves are
+   pale enough to vanish against the page. */
+const STAGE_ORDER = ['todo', 'idea', 'wip', 'drafted', 'done'];
+const STAGE_CONFETTI = {
+  todo:    ['#b0b0b0', '#8a8a8a', '#d8d8d8'],
+  idea:    ['#f6a93b', '#e0821a', '#ffd9a0'],
+  wip:     ['#8b74d8', '#6247b8', '#c9bcf0'],
+  drafted: ['#4b8bec', '#2a63c4', '#b9d3f7'],
+  done:    ['#4caf50', '#2e7d32', '#a5dba8'],
+};
+function celebrateStage(from, to) {
+  const a = STAGE_ORDER.indexOf(from), b = STAGE_ORDER.indexOf(to);
+  if (b > a) fireConfetti(STAGE_CONFETTI[to]);
 }
 </script>
 {% endblock %}
@@ -20,14 +39,7 @@ function fireConfetti() {
   <p class="subtitle mb-0" style="color:#888;">Track and write your supplemental essays across all schools.</p>
 </div>
 
-<div class="notification is-warning is-light" style="display:flex;align-items:center;gap:0.65rem;margin-bottom:1.5rem;">
-  <svg width="22" height="22" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
-    <path d="M12 3 L22 20.5 H2 Z" fill="#ffdd57" stroke="#946c00" stroke-width="1.3" stroke-linejoin="round"/>
-    <rect x="11.1" y="9.5" width="1.8" height="6" rx="0.9" fill="#946c00"/>
-    <circle cx="12" cy="17.7" r="1.1" fill="#946c00"/>
-  </svg>
-  <span>It is not currently possible to add supplemental essays as far as I am aware of. Let me know at <a href="mailto:chromaticconflux@gmail.com">chromaticconflux@gmail.com</a> if you think this would be useful and want me to expedite the development of this feature!</span>
-</div>
+{% include "supplements/_essay_add.html" %}
 
 {% comment %}Outer Alpine component — owns view state and college selection{% endcomment %}
 <div x-data="{
@@ -109,8 +121,33 @@ function fireConfetti() {
       </thead>
       <tbody>
         {% for row in matrix_rows %}
-        <tr>
-          <td class="matrix-cat-cell">{{ row.category.name }}</td>
+        <tr {% if row.is_reusable %}class="matrix-row-reusable"{% endif %}>
+          <td class="matrix-cat-cell">
+            {{ row.category.name }}
+            {% comment %}
+              A tag on more than one college means the same question asked
+              twice — the thing worth noticing here. Reuse is only realistic
+              if the lengths are close, so say when they aren't.
+            {% endcomment %}
+            {% if row.is_reusable %}
+            <span class="matrix-reuse-note">
+              {{ row.colleges_asking }} colleges ask this
+              {% if row.limit_range %}
+                {% if row.limits_compatible %}
+                  &middot; {{ row.limit_range.0 }}&ndash;{{ row.limit_range.1 }} words
+                {% else %}
+                  &middot; <span class="matrix-reuse-warn">{{ row.limit_range.0 }} vs {{ row.limit_range.1 }} words</span>
+                {% endif %}
+              {% endif %}
+              {% if row.longest_written %}
+              <br><a href="{% url 'supplements:essay_focus' row.longest_written.pk %}"
+                     title="Your longest answer on this topic — the one to adapt">
+                reuse your {{ row.longest_written.college.name }} answer ({{ row.longest_written.word_count }}w)
+              </a>
+              {% endif %}
+            </span>
+            {% endif %}
+          </td>
           {% for cell in row.cells %}
           <td class="matrix-cell {% if cell.essays %}matrix-cell-filled{% else %}matrix-cell-empty{% endif %}"
               {% if cell.essays %}
@@ -228,6 +265,7 @@ function fireConfetti() {
          x-data="{
            text: '{{ essay.response|escapejs }}',
            s: '{{ essay.status|escapejs }}',
+           prevStage: '{{ essay.status|escapejs }}',
            saved: true,
            saving: false,
            limitType: '{{ essay.limit_type }}',
@@ -268,10 +306,17 @@ function fireConfetti() {
         </div>
         <div class="essay-card-actions">
           {# Status pill select #}
+          {% comment %}
+            @change fires after x-model has already overwritten s, so the
+            previous stage is captured on focus/mousedown — otherwise there is
+            nothing to compare against and every change looks like progress.
+          {% endcomment %}
           <select class="essay-status-pill"
                   :class="s || 'blank'"
                   x-model="s"
-                  @change="if($event.target.value === 'done') fireConfetti()"
+                  @focus="prevStage = s"
+                  @mousedown="prevStage = s"
+                  @change="celebrateStage(prevStage, $event.target.value); prevStage = $event.target.value"
                   hx-post="{% url 'supplements:essay_status' essay.pk %}"
                   hx-trigger="change"
                   hx-swap="none"
@@ -286,11 +331,41 @@ function fireConfetti() {
              title="Open in focus mode">
             ⛶ Focus
           </a>
+
+          <button class="essay-card-del"
+                  type="button"
+                  aria-label="Delete this essay"
+                  title="Delete this essay"
+                  hx-post="{% url 'supplements:essay_delete' essay.pk %}"
+                  hx-confirm="Delete this essay?{% if essay.response %} Your {{ essay.word_count }} words go with it.{% endif %} This can't be undone."
+                  hx-target="closest .essay-card"
+                  hx-swap="outerHTML">&times;</button>
         </div>
       </div>
 
-      {# Prompt #}
-      <p class="essay-prompt-text">{{ essay.prompt }}</p>
+      {% comment %}
+        With more than one prompt the college is offering a choice, so the
+        applicant picks. With one there is nothing to choose and the prompt is
+        just shown.
+      {% endcomment %}
+      {% if essay.has_choice %}
+      <div class="essay-prompt-choice">
+        <span class="essay-prompt-choice-label">This college lets you choose &mdash; which are you answering?</span>
+        {% for opt in essay.prompts.all %}
+        <label class="essay-prompt-option {% if opt.pk == essay.selected_prompt_id %}is-chosen{% endif %}">
+          <input type="radio" name="prompt-{{ essay.pk }}" value="{{ opt.pk }}"
+                 {% if opt.pk == essay.selected_prompt_id %}checked{% endif %}
+                 hx-post="{% url 'supplements:essay_prompt_select' essay.pk %}"
+                 hx-vals='{"prompt": "{{ opt.pk }}"}'
+                 hx-trigger="change"
+                 hx-swap="none">
+          <span>{{ opt.text }}</span>
+        </label>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="essay-prompt-text">{{ essay.prompt_text }}</p>
+      {% endif %}
 
       {# Auto-save textarea form #}
       <form hx-post="{% url 'supplements:essay_save' essay.pk %}"

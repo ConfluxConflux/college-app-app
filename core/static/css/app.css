@@ -1211,6 +1211,105 @@ td.compare-cell [x-show="!open"] {
 }
 .add-college-result--custom:hover { background: #f5f8ff; border-color: var(--bulma-primary, #14b8a6); }
 
+/* By Topic reuse signal — a tag on more than one college is the same question
+   asked twice, which is the whole reason the matrix exists. */
+.matrix-reuse-note {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 400;
+  color: #8a7fb8;
+  line-height: 1.45;
+  margin-top: 0.15rem;
+}
+.matrix-reuse-note a { color: #6247b8; text-decoration: underline; }
+/* Lengths too far apart to be one essay. */
+.matrix-reuse-warn { color: #b06000; }
+.matrix-row-reusable .matrix-cat-cell {
+  border-left: 3px solid #b9a8f0;
+}
+
+/* Choice of prompts on one essay */
+.essay-prompt-choice {
+  border-left: 3px solid #e0d8f5;
+  padding-left: 0.75rem;
+  margin: 0.5rem 0 0.75rem;
+}
+.essay-prompt-choice-label {
+  display: block;
+  font-size: 0.72rem;
+  color: #888;
+  margin-bottom: 0.35rem;
+}
+.essay-prompt-option {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  padding: 0.25rem 0;
+  cursor: pointer;
+  color: #999;
+}
+.essay-prompt-option input { margin-top: 0.35rem; flex-shrink: 0; }
+/* The one being answered reads as the prompt; the rest recede to options. */
+.essay-prompt-option.is-chosen { color: #363636; }
+
+.essay-card-del {
+  border: none;
+  background: none;
+  color: #d5d5d5;
+  cursor: pointer;
+  font-size: 1.15rem;
+  line-height: 1;
+  padding: 0 0.3rem;
+  border-radius: 4px;
+  transition: color 0.1s, background 0.1s;
+}
+.essay-card-del:hover { color: #cc0f35; background: #feecf0; }
+
+/* Add-an-essay form */
+.essay-add {
+  background: rgba(255,255,255,0.6);
+  border: 1px solid #e2e2e2;
+  border-radius: 6px;
+  padding: 0.5rem 0.9rem;
+  margin-bottom: 1.25rem;
+}
+.essay-add > summary {
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #2a9d8f;
+  list-style: none;
+}
+.essay-add > summary::-webkit-details-marker { display: none; }
+.essay-add[open] > summary { margin-bottom: 0.75rem; }
+.essay-add-form { max-width: 720px; padding-bottom: 0.4rem; }
+.essay-add-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.7rem;
+  flex-wrap: wrap;
+}
+.essay-add-label {
+  width: 4.5rem;
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #666;
+}
+.essay-add-del {
+  border: none;
+  background: none;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0 0.3rem;
+  align-self: flex-start;
+}
+.essay-add-del:hover { color: #cc0f35; }
+
 /* Essay tag manager */
 .tag-manager-disclosure > summary {
   cursor: pointer;

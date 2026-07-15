@@ -1,0 +1,95 @@
+{% comment %}
+  Add an essay. Hippocampus doesn't presuppose that any college asks any
+  particular essay, so everything here is the applicant's to state. Only the
+  prompt is required — limits, tag and status can come later.
+
+  Not htmx: creating an essay changes the matrix, the college list and the
+  by-college panel at once, so a plain POST + redirect is honest and avoids
+  three out-of-band swaps.
+{% endcomment %}
+<details class="essay-add" x-data="{ prompts: [''] }">
+  <summary>+ Add an essay</summary>
+
+  <form method="post" action="{% url 'supplements:essay_create' %}" class="essay-add-form">
+    {% csrf_token %}
+
+    <div class="essay-add-row">
+      <label class="essay-add-label" for="essay-add-college">College</label>
+      <div class="select is-small">
+        <select id="essay-add-college" name="college" required>
+          <option value="">Choose a college…</option>
+          {% for c in addable_colleges %}
+          <option value="{{ c.pk }}" {% if selected_college and c.pk == selected_college.pk %}selected{% endif %}>{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% if not addable_colleges %}
+      <span class="has-text-grey is-size-7">
+        Add a college to <a href="{% url 'colleges:list' %}">your list</a> first.
+      </span>
+      {% endif %}
+    </div>
+
+    <div class="essay-add-row is-align-items-flex-start">
+      <label class="essay-add-label" for="essay-add-prompt-0">Prompt</label>
+      <div style="flex:1;">
+        <template x-for="(p, i) in prompts" :key="i">
+          <div style="display:flex; gap:0.4rem; margin-bottom:0.4rem;">
+            <textarea class="textarea is-small" name="prompt" rows="2"
+                      :id="i === 0 ? 'essay-add-prompt-0' : null"
+                      :placeholder="i === 0 ? 'What does the college actually ask?' : 'Another option you could answer instead…'"
+                      :required="i === 0"></textarea>
+            <button type="button" class="essay-add-del" x-show="prompts.length > 1"
+                    @click="prompts.splice(i, 1)" title="Remove this option">&times;</button>
+          </div>
+        </template>
+        <button type="button" class="button is-small is-light" @click="prompts.push('')">
+          + Add a prompt option
+        </button>
+        <p class="has-text-grey is-size-7" style="margin-top:0.3rem;" x-show="prompts.length > 1">
+          You'll pick which one you're answering after it's created.
+        </p>
+      </div>
+    </div>
+
+    <div class="essay-add-row">
+      <label class="essay-add-label" for="essay-add-limit">Limit</label>
+      <input class="input is-small" id="essay-add-limit" type="number" name="limit"
+             min="1" step="1" placeholder="e.g. 250" style="width:7rem;">
+      <div class="select is-small">
+        <select name="limit_type" aria-label="Limit counted in">
+          <option value="word">words</option>
+          <option value="char">characters</option>
+        </select>
+      </div>
+      <span class="has-text-grey is-size-7">Leave blank if there isn't one.</span>
+    </div>
+
+    <div class="essay-add-row">
+      <label class="essay-add-label" for="essay-add-tag">Tag</label>
+      <div class="select is-small">
+        <select id="essay-add-tag" name="category">
+          <option value="">— none —</option>
+          {% for cat in all_categories %}
+          <option value="{{ cat.pk }}">{{ cat.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <label class="essay-add-label" for="essay-add-status">Status</label>
+      <div class="select is-small">
+        <select id="essay-add-status" name="status">
+          {% for val, label in status_choices %}
+          <option value="{{ val }}" {% if val == 'todo' %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="essay-add-row">
+      <span class="essay-add-label"></span>
+      <button type="submit" class="button is-small is-primary" {% if not addable_colleges %}disabled{% endif %}>
+        Add essay
+      </button>
+    </div>
+  </form>
+</details>

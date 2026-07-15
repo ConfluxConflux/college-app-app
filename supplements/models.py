@@ -119,6 +119,12 @@ class SupplementEssay(models.Model):
         on_delete=models.SET_NULL, related_name='essays'
     )
     prompt = models.TextField(blank=True)
+    # Which of the offered prompts this essay answers. Null when the essay has
+    # a single prompt (the common case) or when nothing is chosen yet.
+    selected_prompt = models.ForeignKey(
+        'EssayPrompt', null=True, blank=True,
+        on_delete=models.SET_NULL, related_name='+',
+    )
     word_limit = models.IntegerField(null=True, blank=True)
     char_limit = models.IntegerField(null=True, blank=True)
     response = models.TextField(blank=True)
@@ -143,6 +149,54 @@ class SupplementEssay(models.Model):
     @property
     def char_count(self):
         return len(self.response)
+
+    @property
+    def prompt_text(self):
+        """The prompt to show: the chosen option, else the plain prompt field.
+
+        Essays imported before EssayPrompt existed keep their text in `prompt`,
+        so both are read here rather than migrating one into the other.
+        """
+        if self.selected_prompt_id:
+            return self.selected_prompt.text
+        return self.prompt
+
+    @property
+    def has_choice(self):
+        """True when the college offers a choice of prompts for this essay.
+
+        len() over count() so a prefetched list is reused instead of firing a
+        query per essay on the cards.
+        """
+        return len(self.prompts.all()) > 1
+
+
+class EssayPrompt(models.Model):
+    """One prompt an essay could answer.
+
+    A normal essay has exactly one of these; a "choose one of the following"
+    essay has several and one selected. Modelling both the same way means the
+    fact that a choice existed survives, instead of being flattened into
+    whichever option got pasted in.
+
+    Common App (pick 1 of 7) and the UC PIQs (answer 4 of 8) are the same
+    shape, still hardcoded elsewhere; this doesn't preclude folding them in.
+    """
+    essay = models.ForeignKey(
+        SupplementEssay, on_delete=models.CASCADE, related_name='prompts'
+    )
+    text = models.TextField()
+    # Per-option limits: some colleges give different lengths per option. Blank
+    # means fall back to the essay's own limit.
+    word_limit = models.IntegerField(null=True, blank=True)
+    char_limit = models.IntegerField(null=True, blank=True)
+    sort_order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['sort_order', 'id']
+
+    def __str__(self):
+        return self.text[:60]
 
 
 class UCPersonalInsightQuestion(models.Model):
