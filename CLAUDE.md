@@ -155,12 +155,15 @@ Used in `colleges/_cell_edit.html` and `_cell_edit_select.html`.
 **`applicant` context processor**: injects `applicant` (the `Applicant` instance) into every template. Use `applicant` in templates, `request.user.applicant` in views.
 
 **`LoginRequiredMiddleware`**: all URLs require auth except:
-- `/` (landing), `/accounts/` (allauth), `/admin/`, `/widgets/` (all widgets are public), `/time`, `/words`, `/are-you-sure`
-- `/switch-applicant/` is exempt **only when `DEBUG=True`**.
+- `/` (landing), `/accounts/` (allauth), `/admin/`, `/switch-applicant/`, `/widgets/` (all widgets are public), `/time`, `/words`, `/are-you-sure`
 
 **New user signup**: `SocialAccountAdapter` redirects new social logins to `/are-you-sure` before creating an account.
 
-**Dev shortcut**: `/switch-applicant/<pk>/` logs in as the user linked to that Applicant. It grants a session for any applicant with no credentials, so it is **routed only under `DEBUG`** (`core/urls.py`) and the view re-checks `settings.DEBUG` independently. Never register this route unconditionally.
+**Demo accounts**: `/switch-applicant/<pk>/` logs in as that Applicant with no credentials, and is **public on purpose** — the "View as Jacob / Hedgie" links on the landing page let anyone try the app. Applicants 1 and 2 hold throwaway data that is fine for strangers to read or edit.
+
+`pk` is checked against `DEMO_APPLICANTS` in `core/views.py`. That allowlist is the only thing keeping `/switch-applicant/3/` from handing out a session on Jacob's real Google-linked account. Add a pk only if that applicant's data is meant to be public.
+
+Do **not** gate this route on `DEBUG`: six templates reverse `core:switch_applicant`, so a conditional route raises `NoReverseMatch` and 500s every page in production.
 
 **Ownership**: every per-applicant object must be fetched with `get_object_or_404(Model, pk=pk, applicant=request.user.applicant)`. A bare `pk=pk` lookup is an IDOR — the app is multi-user.
 

@@ -100,13 +100,11 @@
       <div class="box has-text-centered" style="max-width: 420px; margin: 0 auto; padding: 2.5rem;">
         <p class="title is-4 mb-5">You need an account for this</p>
         <a class="button is-primary is-medium is-fullwidth" href="/accounts/google/login/">Sign up/in with Google</a>
-        {% if debug %}
         <p class="has-text-grey is-size-7 mt-5 mb-3" style="text-transform: uppercase; letter-spacing: 0.08em;">or view as a test user</p>
         <div class="buttons is-centered">
           <a class="button is-light is-rounded" href="{% url 'core:switch_applicant' 1 %}">Jacob</a>
           <a class="button is-light is-rounded" href="{% url 'core:switch_applicant' 2 %}">Hedgie</a>
         </div>
-        {% endif %}
       </div>
     </div>
     <button class="modal-close is-large" aria-label="close" @click="acctModal = false"></button>

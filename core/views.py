@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -10,6 +9,11 @@ from colleges.models import UserCollege
 from activities.models import UCEntry, CommonAppActivity, CommonAppHonor, MITEntry
 from supplements.models import SupplementEssay
 from .models import Applicant, CoreActivity
+
+
+# Applicants anyone may log in as from the landing page: 1 = Jacob (demo),
+# 2 = Hedgie Wedgie. Deliberately excludes Jacob's real accounts (3, 4).
+DEMO_APPLICANTS = {1, 2}
 
 
 def _core_row_ctx(activity, editing=None):
@@ -50,13 +54,18 @@ def are_you_sure(request):
 
 
 def switch_applicant(request, pk):
-    """Dev shortcut: log in as the user linked to the given Applicant pk.
+    """Log in as one of the demo applicants. Public, and meant to be.
 
-    Grants a session for an arbitrary applicant without credentials, so it is
-    routed only under DEBUG (see core/urls.py). This check is the second lock:
-    it must stay even if the route is ever registered unconditionally again.
+    The demo accounts hold throwaway data Jacob is happy for anyone to read or
+    edit — that is the point of the "View as Jacob / Hedgie" links on the
+    landing page.
+
+    The pk is checked against DEMO_APPLICANTS because this grants a session
+    with no credentials: without the allowlist, /switch-applicant/3/ would log
+    a stranger into Jacob's real Google-linked account. Add a pk here only if
+    that applicant's data is meant to be public.
     """
-    if not settings.DEBUG:
+    if pk not in DEMO_APPLICANTS:
         raise Http404
     applicant = get_object_or_404(Applicant, pk=pk)
     if applicant.user is None:
