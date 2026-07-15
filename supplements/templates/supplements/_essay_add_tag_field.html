@@ -1,0 +1,16 @@
+{% comment %}
+  The tag <select> inside the add-essay form. Returned on its own by
+  tag_create when called with select=1, so making a tag mid-form swaps just
+  this and leaves the prompt you typed alone.
+{% endcomment %}
+<div id="essay-add-tag-field" x-show="!newTag" style="display:contents">
+  <div class="select is-small">
+    <select id="essay-add-tag" name="category">
+      <option value="">— none —</option>
+      {% for cat in all_categories %}
+      <option value="{{ cat.pk }}" {% if cat.pk == just_created_tag_pk %}selected{% endif %}>{{ cat.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button type="button" class="button is-small is-light" @click="newTag = true">+ New tag</button>
+</div>

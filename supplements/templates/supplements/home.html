@@ -270,11 +270,16 @@ function celebrateStage(from, to) {
            saving: false,
            limitType: '{{ essay.limit_type }}',
            limitVal: {{ essay.limit_val }},
+           limitMin: {{ essay.limit_min|default:0 }},
            get wc() { return this.text.trim() ? this.text.trim().split(/\s+/).length : 0; },
            get cc() { return this.text.length; },
            get count() { return this.limitType === 'char' ? this.cc : this.wc; },
            get overLimit() { return this.limitVal > 0 && this.count > this.limitVal; },
            get nearLimit() { return this.limitVal > 0 && this.count >= Math.floor(this.limitVal * 0.9) && !this.overLimit; },
+           /* A range ("5-500 words") makes too-short a real state, not just
+              too-long. Only once something is written — an empty essay isn't
+              "too short", it's unstarted. */
+           get underMin() { return this.limitMin > 0 && this.count > 0 && this.count < this.limitMin; },
            onInput(val) {
              const wasAtOrOver = this.limitVal > 0 && this.count >= this.limitVal;
              this.text = val;
@@ -385,14 +390,21 @@ function celebrateStage(from, to) {
       {# Counter + saved indicator #}
       <div class="essay-card-footer">
         <span class="essay-word-counter"
-              :class="{'is-over': overLimit, 'is-near': nearLimit}">
+              :class="{'is-over': overLimit, 'is-near': nearLimit, 'is-under': underMin}">
           <span x-text="count">{{ essay.word_count }}</span>
           <span x-show="limitVal > 0">
-            / <span x-text="limitVal"></span>
+            / <span x-show="limitMin > 0"><span x-text="limitMin"></span>&ndash;</span><span x-text="limitVal"></span>
             <span x-show="limitType === 'char'">ch</span>
             <span x-show="limitType !== 'char'">w</span>
           </span>
-          <span x-show="limitVal === 0"> words</span>
+          {# A floor with no ceiling: "at least 250 words". #}
+          <span x-show="limitVal === 0 && limitMin > 0">
+            / <span x-text="limitMin"></span>+
+            <span x-show="limitType === 'char'">ch</span>
+            <span x-show="limitType !== 'char'">w</span>
+          </span>
+          <span x-show="underMin" class="essay-under-note">too short</span>
+          <span x-show="limitVal === 0 && limitMin === 0"> words</span>
         </span>
 
         <span class="essay-saved-indicator"

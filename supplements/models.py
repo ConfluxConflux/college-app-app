@@ -125,6 +125,10 @@ class SupplementEssay(models.Model):
         'EssayPrompt', null=True, blank=True,
         on_delete=models.SET_NULL, related_name='+',
     )
+    # Some prompts give a range ("5-500 words"), most give a ceiling
+    # ("max 500"). The minimum is null in the second case.
+    word_limit_min = models.IntegerField(null=True, blank=True)
+    char_limit_min = models.IntegerField(null=True, blank=True)
     word_limit = models.IntegerField(null=True, blank=True)
     char_limit = models.IntegerField(null=True, blank=True)
     response = models.TextField(blank=True)

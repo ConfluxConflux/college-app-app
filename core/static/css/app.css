@@ -565,6 +565,10 @@ body {
 }
 .essay-word-counter.is-over { color: #f14668; }
 .essay-word-counter.is-near { color: #e0a020; }
+/* Below a stated minimum ("5-500 words"). Softer than over-limit: too long is
+   a problem to fix, too short is just not finished yet. */
+.essay-word-counter.is-under { color: #8a8a8a; }
+.essay-under-note { font-weight: 400; font-style: italic; opacity: 0.85; }
 .essay-saved-indicator {
   font-size: 0.72rem;
   transition: color 0.2s;

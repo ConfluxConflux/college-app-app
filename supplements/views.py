@@ -18,26 +18,44 @@ from .models import (
 
 
 def _augment_essays(essays):
-    """Attach progress_pct, limit_display, count_display, limit_type, limit_val."""
+    """Attach progress_pct, limit_display, count_display, limit_type, limit_val, limit_min.
+
+    A prompt gives either a ceiling ("max 500") or a range ("5-500"), so
+    limit_min is 0 unless there really is a lower bound.
+    """
     for e in essays:
         if e.word_limit and e.word_limit > 0:
             e.progress_pct = min(int(e.word_count / e.word_limit * 100), 100)
-            e.limit_display = f'{e.word_limit}w'
-            e.count_display = f'{e.word_count}/{e.word_limit}'
             e.limit_type = 'word'
             e.limit_val = e.word_limit
+            e.limit_min = e.word_limit_min or 0
+            e.limit_display = (
+                f'{e.limit_min}–{e.word_limit}w' if e.limit_min else f'{e.word_limit}w'
+            )
+            e.count_display = f'{e.word_count}/{e.word_limit}'
         elif e.char_limit and e.char_limit > 0:
             e.progress_pct = min(int(e.char_count / e.char_limit * 100), 100)
-            e.limit_display = f'{e.char_limit}ch'
-            e.count_display = f'{e.char_count}/{e.char_limit}'
             e.limit_type = 'char'
             e.limit_val = e.char_limit
+            e.limit_min = e.char_limit_min or 0
+            e.limit_display = (
+                f'{e.limit_min}–{e.char_limit}ch' if e.limit_min else f'{e.char_limit}ch'
+            )
+            e.count_display = f'{e.char_count}/{e.char_limit}'
         else:
             e.progress_pct = 0
             e.limit_display = ''
             e.count_display = str(e.word_count) if e.response else ''
             e.limit_type = 'word'
             e.limit_val = 0
+            # A floor with no ceiling is legitimate: "at least 250 words".
+            e.limit_min = e.word_limit_min or e.char_limit_min or 0
+            if e.limit_min:
+                e.limit_type = 'char' if e.char_limit_min else 'word'
+                count = e.char_count if e.limit_type == 'char' else e.word_count
+                e.progress_pct = min(int(count / e.limit_min * 100), 100)
+                e.limit_display = f'{e.limit_min}+{"ch" if e.limit_type == "char" else "w"}'
+                e.count_display = f'{count}/{e.limit_min}'
 
 
 def supplements_home(request):
@@ -92,6 +110,8 @@ def supplements_home(request):
         # question asked twice. Kathy's redundancy problem, for essays.
         row_essays = [e for c in cells for e in c['essays']]
         colleges_asking = sum(1 for c in cells if c['essays'])
+        # Compare ceilings: a 250-word answer fits a 250-word box regardless of
+        # whether the other college also sets a floor.
         limits = sorted({e.word_limit for e in row_essays if e.word_limit})
         written = [e for e in row_essays if e.response.strip()]
 
@@ -202,13 +222,27 @@ def essay_create(request):
     if not prompt_texts:
         return HttpResponse('An essay needs at least one prompt', status=400)
 
+    # "max 500" gives a ceiling; "5-500 words" gives both. Either can stand
+    # alone — "at least 250 words" is a real prompt too.
     limit_type = request.POST.get('limit_type', 'word')
-    try:
-        limit = int(request.POST.get('limit') or 0)
-    except ValueError:
-        limit = 0
-    word_limit = limit if (limit > 0 and limit_type == 'word') else None
-    char_limit = limit if (limit > 0 and limit_type == 'char') else None
+    def _int(name):
+        try:
+            v = int(request.POST.get(name) or 0)
+        except ValueError:
+            return None
+        return v if v > 0 else None
+
+    limit_min, limit_max = _int('limit_min'), _int('limit')
+    # A backwards range is a typo, not an intent. Swap rather than reject: the
+    # numbers are right, the boxes were mixed up.
+    if limit_min and limit_max and limit_min > limit_max:
+        limit_min, limit_max = limit_max, limit_min
+
+    is_word = limit_type == 'word'
+    word_limit = limit_max if is_word else None
+    char_limit = limit_max if not is_word else None
+    word_limit_min = limit_min if is_word else None
+    char_limit_min = limit_min if not is_word else None
 
     category = None
     cat_pk = request.POST.get('category') or ''
@@ -229,6 +263,8 @@ def essay_create(request):
             prompt=prompt_texts[0],
             word_limit=word_limit,
             char_limit=char_limit,
+            word_limit_min=word_limit_min,
+            char_limit_min=char_limit_min,
             status=status,
             sort_order=(last.sort_order + 1) if last else 0,
         )
@@ -275,21 +311,39 @@ def essay_prompt_select(request, pk):
 
 @require_POST
 def tag_create(request):
-    """Add a tag of the applicant's own."""
+    """Add a tag of the applicant's own.
+
+    With select=1 this is being called from the add-essay form, so it returns
+    just that form's <select> with the new tag chosen — swapping the whole tag
+    manager in there would blow away the half-filled form.
+    """
     applicant = request.user.applicant
     name = request.POST.get('name', '').strip()
+    inline = request.POST.get('select') == '1'
+
     if not name:
         return HttpResponse('A name is required', status=400)
-    if EssayCategory.objects.filter(applicant=applicant, name__iexact=name).exists():
-        return HttpResponse('You already have a tag with that name', status=400)
-    last = EssayCategory.objects.filter(applicant=applicant).order_by('-sort_order').first()
-    EssayCategory.objects.create(
-        applicant=applicant, name=name,
-        sort_order=(last.sort_order + 1) if last else 0,
-    )
-    return render(request, 'supplements/_tag_manager.html', {
-        'all_categories': EssayCategory.objects.filter(applicant=applicant),
-    })
+
+    existing = EssayCategory.objects.filter(applicant=applicant, name__iexact=name).first()
+    if existing:
+        # From the form, an existing name is not worth an error: they want to
+        # use that tag, and it is right there. Select it.
+        if inline:
+            tag = existing
+        else:
+            return HttpResponse('You already have a tag with that name', status=400)
+    else:
+        last = EssayCategory.objects.filter(applicant=applicant).order_by('-sort_order').first()
+        tag = EssayCategory.objects.create(
+            applicant=applicant, name=name,
+            sort_order=(last.sort_order + 1) if last else 0,
+        )
+
+    ctx = {'all_categories': EssayCategory.objects.filter(applicant=applicant)}
+    if inline:
+        ctx['just_created_tag_pk'] = tag.pk
+        return render(request, 'supplements/_essay_add_tag_field.html', ctx)
+    return render(request, 'supplements/_tag_manager.html', ctx)
 
 
 @require_POST

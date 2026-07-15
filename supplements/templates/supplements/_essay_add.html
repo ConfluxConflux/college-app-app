@@ -52,28 +52,51 @@
       </div>
     </div>
 
+    {% comment %}
+      Most prompts give a ceiling ("max 500"), some give a range ("5-500
+      words"), and a few only a floor. All three work: fill in whichever
+      halves the college actually states.
+    {% endcomment %}
     <div class="essay-add-row">
-      <label class="essay-add-label" for="essay-add-limit">Limit</label>
+      <label class="essay-add-label" for="essay-add-limit-min">Limit</label>
+      <input class="input is-small" id="essay-add-limit-min" type="number" name="limit_min"
+             min="1" step="1" placeholder="min" style="width:5.5rem;"
+             aria-label="Minimum length (leave blank if there is no minimum)">
+      <span class="has-text-grey">&ndash;</span>
       <input class="input is-small" id="essay-add-limit" type="number" name="limit"
-             min="1" step="1" placeholder="e.g. 250" style="width:7rem;">
+             min="1" step="1" placeholder="max" style="width:5.5rem;"
+             aria-label="Maximum length">
       <div class="select is-small">
         <select name="limit_type" aria-label="Limit counted in">
           <option value="word">words</option>
           <option value="char">characters</option>
         </select>
       </div>
-      <span class="has-text-grey is-size-7">Leave blank if there isn't one.</span>
+      <span class="has-text-grey is-size-7">Fill in either, both, or neither.</span>
     </div>
 
-    <div class="essay-add-row">
+    <div class="essay-add-row" x-data="{ newTag: false }">
       <label class="essay-add-label" for="essay-add-tag">Tag</label>
-      <div class="select is-small">
-        <select id="essay-add-tag" name="category">
-          <option value="">— none —</option>
-          {% for cat in all_categories %}
-          <option value="{{ cat.pk }}">{{ cat.name }}</option>
-          {% endfor %}
-        </select>
+
+      {% comment %}
+        Creating a tag posts to tag_create with htmx and swaps only this
+        select back — the half-filled form around it is untouched, so you
+        don't lose the prompt you just typed.
+      {% endcomment %}
+      {% include "supplements/_essay_add_tag_field.html" %}
+
+      <div x-show="newTag" x-cloak style="display:contents">
+        <input class="input is-small" type="text" id="essay-add-newtag" maxlength="200"
+               placeholder="New tag name…" style="width:12rem;"
+               @keydown.enter.prevent="$refs.mk.click()">
+        <button type="button" class="button is-small is-primary" x-ref="mk"
+                hx-post="{% url 'supplements:tag_create' %}"
+                hx-include="#essay-add-newtag"
+                hx-vals='js:{name: document.getElementById("essay-add-newtag").value, select: "1"}'
+                hx-target="#essay-add-tag-field"
+                hx-swap="outerHTML"
+                @htmx:after-request="if($event.detail.successful) newTag = false">Create</button>
+        <button type="button" class="button is-small is-light" @click="newTag = false">Cancel</button>
       </div>
       <label class="essay-add-label" for="essay-add-status">Status</label>
       <div class="select is-small">
