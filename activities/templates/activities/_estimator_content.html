@@ -15,6 +15,36 @@
   get suggestHrs() { return Math.round(this.avgHrs) },
   get suggestWks() { return Math.round(this.avgWks) },
   get pct() { return Math.min(this.totalWeeks / 208 * 100, 100) },
+  /* Sanity checks. These only ever point something out — the numbers still
+     compute and nothing is corrected for you. Most of these are quiet by
+     nature: a wrong year count just silently halves or doubles the answer. */
+  get warnings() {
+    const w = [], f = this.filled;
+    if (!f.length) return w;
+    const num = v => parseFloat(v) || 0;
+    if (f.some(r => num(r.weeks) > 52)) {
+      w.push('A period is longer than 52 weeks — a year only has 52.');
+    }
+    if (f.some(r => num(r.hrs) > 168)) {
+      w.push('A period is over 168 hrs/week — that is every hour in the week.');
+    }
+    if (f.some(r => r.hrs !== '' && num(r.hrs) === 0)) {
+      w.push('A period is set to 0 hrs/week and is pulling the average down. Delete the row if it should not count.');
+    }
+    const tagged = f.filter(r => r.grade !== '').length;
+    if (tagged === 0) {
+      w.push('No grades marked, so every period is being counted as its own year.');
+    } else if (tagged < f.length) {
+      w.push('Some periods have no grade marked, so the year count is a guess.');
+    }
+    const grades = f.filter(r => r.grade !== '').map(r => r.grade);
+    if (new Set(grades).size < grades.length && this.avgWks > 52) {
+      w.push('That averages to more than 52 weeks a year — two periods share a grade, so they collapse into one year.');
+    } else if (this.avgWks > 52) {
+      w.push('That averages to more than 52 weeks a year, which is not possible.');
+    }
+    return w;
+  },
   showDetails: false,
   addRow() { this.rows.push({id: this.nid++, grade: '', weeks: '', hrs: '', notes: ''}) },
   del(id) { if (this.rows.length > 1) this.rows = this.rows.filter(r => r.id !== id) },
@@ -109,6 +139,15 @@
                 </button>
               </div>
             </div>
+
+            <!-- Sanity checks -->
+            <template x-if="warnings.length">
+              <ul class="estimator-warnings">
+                <template x-for="msg in warnings" :key="msg">
+                  <li x-text="msg"></li>
+                </template>
+              </ul>
+            </template>
 
             <!-- Details toggle -->
             <button class="est-details-toggle mt-3" @click="showDetails = !showDetails">

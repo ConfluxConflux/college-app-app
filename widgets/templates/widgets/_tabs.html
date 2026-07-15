@@ -1,0 +1,26 @@
+{% comment %}
+  The widgets tab bar. Include with the current page's key:
+      {% include "widgets/_tabs.html" with active="resources" %}
+{% endcomment %}
+<div class="tabs is-boxed is-medium">
+  <ul>
+    <li {% if active == 'word_counter' %}class="is-active"{% endif %}>
+      <a href="{% url 'widgets:word_counter' %}">Word Counter</a>
+    </li>
+    <li {% if active == 'focus_write' %}class="is-active"{% endif %}>
+      <a href="{% url 'widgets:focus_write' %}">Focus Write</a>
+    </li>
+    <li {% if active == 'timer' %}class="is-active"{% endif %}>
+      <a href="{% url 'widgets:timer' %}">Pomodoros</a>
+    </li>
+    <li {% if active == 'estimator' %}class="is-active"{% endif %}>
+      <a href="{% url 'widgets:estimator' %}">Time Calculator</a>
+    </li>
+    <li {% if active == 'advice' %}class="is-active"{% endif %}>
+      <a href="{% url 'widgets:advice' %}">Advice</a>
+    </li>
+    <li {% if active == 'resources' %}class="is-active"{% endif %}>
+      <a href="{% url 'widgets:resources' %}">Resources</a>
+    </li>
+  </ul>
+</div>

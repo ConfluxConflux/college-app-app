@@ -3,29 +3,7 @@
 {% block title %}Advice - HIPPOCAMPUS{% endblock %}
 
 {% block content %}
-<div class="tabs is-boxed is-medium">
-  <ul>
-    <li>
-      <a href="{% url 'widgets:word_counter' %}">Word Counter</a>
-    </li>
-    <li>
-      <a href="{% url 'widgets:focus_write' %}">Focus Write</a>
-    </li>
-    <li>
-      <a href="{% url 'widgets:timer' %}">Pomodoros</a>
-    </li>
-    <li>
-      <a href="{% url 'widgets:estimator' %}">Time Calculator</a>
-    </li>
-    <li class="is-active">
-      <a href="{% url 'widgets:advice' %}">Advice</a>
-    </li>
-    <li>
-      <a href="{% url 'widgets:resources' %}">Resources</a>
-    </li>
-  </ul>
-</div>
-
+{% include "widgets/_tabs.html" with active="advice" %}
 <div style="max-width:680px;">
   {% for link in links %}
   <a href="{{ link.url }}" target="_blank" rel="noopener"

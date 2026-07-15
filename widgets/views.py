@@ -76,6 +76,11 @@ def resources(request):
             'source': 'applyingto.college',
         },
         {
+            'title': "College Essay Advisors (prompt-by-prompt breakdowns for the Common App and supplements)",
+            'url': 'https://www.collegeessayadvisors.com/',
+            'source': 'collegeessayadvisors.com',
+        },
+        {
             'title': "Admissions Matters (supposedly comprehensive book that I've never read)",
             'url': 'https://www.amazon.com/Admission-Matters-Students-Parents-Getting/dp/1119885736/',
             'source': 'amazon.com',
