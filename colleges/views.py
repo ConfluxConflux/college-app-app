@@ -172,13 +172,37 @@ def college_map(request):
         if label in present and value in STATUS_DOT_COLOR:
             legend.append({'label': label, 'color': STATUS_DOT_COLOR[value]})
 
+    # Every other college in the database, as small background dots — so the
+    # map shows where you could go, not only where you've decided to. Kept
+    # deliberately faint and tiny: your own colleges have to stay readable on
+    # top of ~2,400 of these.
+    on_my_list = {uc.college_id for uc in all_colleges if uc.college_id}
+    rest = [
+        {
+            'n': c.name,
+            'c': ', '.join(x for x in (c.city, c.state) if x),
+            'lat': c.latitude,
+            'lon': c.longitude,
+            # Certified dots are a touch bigger — someone got in there, so it
+            # is worth more than a place that merely exists.
+            'k': 1 if c.proof_acceptances else 0,
+        }
+        for c in College.objects.exclude(pk__in=on_my_list)
+                               .exclude(latitude__isnull=True)
+                               .exclude(longitude__isnull=True)
+                               .only('name', 'city', 'state', 'latitude', 'longitude',
+                                     'proof_acceptances')
+    ]
+
     return render(request, 'colleges/college_map.html', {
         'current_view': 'map',
         'map_points': points,
         'other_points': other,
+        'rest_points': rest,
         'missing': missing,
         'legend': legend,
         'applications_url': reverse('applications:home'),
+        'browse_url': reverse('colleges:list_all'),
     })
 
 

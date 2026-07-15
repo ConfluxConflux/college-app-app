@@ -15,8 +15,12 @@
   </div>
 </div>
 
-{% if map_points or other_points %}
-  {% if legend or other_points %}
+{% comment %}
+  The map draws even with an empty list now: the rest of the database is on it,
+  so there is always something to look at.
+{% endcomment %}
+{% if map_points or other_points or rest_points %}
+  {% if legend or other_points or rest_points %}
   <div class="mb-3" style="display:flex; flex-wrap:wrap; gap:0.25rem 1rem; align-items:center;">
     {% for item in legend %}
     <span style="display:inline-flex; align-items:center; gap:0.4rem; font-size:0.85rem;">
@@ -28,6 +32,16 @@
     <span style="display:inline-flex; align-items:center; gap:0.4rem; font-size:0.85rem; color:#777;">
       <span style="width:10px; height:10px; border-radius:50%; background:#9aa0a6; border:2px solid #fff; box-shadow:0 0 0 1px #bbb;"></span>
       Not applying
+    </span>
+    {% endif %}
+    {% if rest_points %}
+    <span style="display:inline-flex; align-items:center; gap:0.4rem; font-size:0.85rem; color:#999;">
+      <span style="width:7px; height:7px; border-radius:50%; background:#7cc3bb;"></span>
+      Someone got in
+    </span>
+    <span style="display:inline-flex; align-items:center; gap:0.4rem; font-size:0.85rem; color:#999;">
+      <span style="width:4px; height:4px; border-radius:50%; background:#c2c8cc;"></span>
+      Everywhere else
     </span>
     {% endif %}
   </div>
@@ -48,10 +62,11 @@
 
 {{ map_points|json_script:"map-data" }}
 {{ other_points|json_script:"other-data" }}
+{{ rest_points|json_script:"rest-data" }}
 {% endblock %}
 
 {% block extra_js %}
-{% if map_points or other_points %}
+{% if map_points or other_points or rest_points %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
       integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -60,7 +75,9 @@
 (function () {
   var points = JSON.parse(document.getElementById('map-data').textContent);
   var others = JSON.parse(document.getElementById('other-data').textContent);
+  var rest   = JSON.parse(document.getElementById('rest-data').textContent);
   var appsUrl = "{{ applications_url }}";
+  var browseUrl = "{{ browse_url }}";
 
   var map = L.map('college-map', { scrollWheelZoom: false });
   // Muted, low-emphasis basemap (CartoDB Positron) so the college dots lead.
@@ -69,6 +86,27 @@
     subdomains: 'abcd',
     attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
   }).addTo(map);
+
+  // Every other college in the database, drawn first so your own sit on top.
+  // Canvas rather than SVG: ~2,400 individual DOM nodes makes panning crawl.
+  // Popups are built on click, not up front, for the same reason.
+  var bulk = L.canvas({ padding: 0.3 });
+  rest.forEach(function (p) {
+    L.circleMarker([p.lat, p.lon], {
+      renderer: bulk,
+      radius: p.k ? 3 : 1.8,
+      fillColor: p.k ? '#7cc3bb' : '#c2c8cc',
+      color: p.k ? '#7cc3bb' : '#c2c8cc',
+      weight: 0,
+      fillOpacity: p.k ? 0.85 : 0.55
+    }).addTo(map).bindPopup(function () {
+      return '<strong>' + p.n + '</strong>' +
+             (p.c ? '<br><span style="color:#666;">' + p.c + '</span>' : '') +
+             '<div style="margin-top:6px; font-size:0.72rem;">' +
+               '<a href="' + browseUrl + '?q=' + encodeURIComponent(p.n) + '" style="color:#2a9d8f;">' +
+                 'Find in All Colleges &rarr;</a></div>';
+    });
+  });
 
   // Your not-applying colleges: gray context dots (drawn underneath).
   // Still clickable — opens in applications even though you're not applying.
