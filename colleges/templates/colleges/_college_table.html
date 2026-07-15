@@ -2,6 +2,14 @@
   <table class="table is-bordered is-hoverable is-fullwidth is-narrow">
     <thead>
       <tr>
+        <th class="col-drag" style="width:1%;">
+          {% if sort %}
+          <a hx-get="{{ tab_url }}" hx-target="#college-table-wrapper" hx-push-url="true"
+             class="has-text-grey" style="text-decoration:none;" title="Back to your custom order">&#10227;</a>
+          {% else %}
+          <span class="is-sr-only">Drag to reorder</span>
+          {% endif %}
+        </th>
         {% for field_name, field_label in table_fields %}
         <th class="col-{{ field_name }}"
             style="white-space:nowrap;{% if field_name in optional_field_names %} display:none;{% endif %}">
@@ -18,12 +26,12 @@
         <th class="col-actions" style="width:1%;"><span class="is-sr-only">Remove</span></th>
       </tr>
     </thead>
-    <tbody id="college-tbody">
+    <tbody id="college-tbody"{% if reorderable %} data-reorder-url="{% url 'colleges:reorder' %}"{% endif %}>
       {% for college in colleges %}
         {% include "colleges/_college_row.html" %}
       {% empty %}
       <tr>
-        <td colspan="{{ table_fields|length|add:1 }}" class="has-text-centered has-text-grey py-5">
+        <td colspan="{{ table_fields|length|add:2 }}" class="has-text-centered has-text-grey py-5">
           No colleges match your filters.
         </td>
       </tr>

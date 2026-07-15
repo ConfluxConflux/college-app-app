@@ -1,5 +1,6 @@
 {% load college_tags %}
-<tr id="college-row-{{ college.pk }}" class="status-{{ college.apply_status }} has-background-white-ter">
+<tr id="college-row-{{ college.pk }}" class="status-{{ college.apply_status }} has-background-white-ter" data-pk="{{ college.pk }}">
+  <td class="col-drag"></td>
   {% for field_name, field_label in table_fields %}
   <td class="col-{{ field_name }}">
     {% if field_name == field %}

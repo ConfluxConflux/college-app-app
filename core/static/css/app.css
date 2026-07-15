@@ -1143,6 +1143,25 @@ td.compare-cell [x-show="!open"] {
 }
 .add-college-result--custom:hover { background: #f5f8ff; border-color: var(--bulma-primary, #14b8a6); }
 
+/* Drag-to-reorder handle (first cell of every college row).
+   Hidden unless the tbody is reorderable — i.e. no sort, search, or filter is
+   deciding the order instead. */
+.col-drag { width: 1%; padding-right: 0 !important; }
+.drag-handle { display: none; }
+#college-tbody[data-reorder-url] .drag-handle {
+  display: inline-block;
+  cursor: grab;
+  color: #d0d0d0;
+  letter-spacing: -3px;
+  user-select: none;
+  padding: 0 0.15rem;
+}
+#college-tbody[data-reorder-url] tr:hover .drag-handle { color: #999; }
+.drag-handle:active { cursor: grabbing; }
+tr.is-dragging { opacity: 0.4; }
+tr.drop-above td { box-shadow: inset 0 2px 0 var(--bulma-primary, #14b8a6); }
+tr.drop-below td { box-shadow: inset 0 -2px 0 var(--bulma-primary, #14b8a6); }
+
 /* Remove-from-list control (last cell of every college row) */
 .col-actions {
   width: 1%;

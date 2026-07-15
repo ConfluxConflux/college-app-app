@@ -181,8 +181,8 @@ def college_list(request, tab='applications'):
         colleges = colleges.annotate(certified=CERTIFIED_FIRST, eff_name=effective_name()) \
                            .order_by('certified', 'eff_name')
     elif current_view == 'applications':
-        colleges = colleges.annotate(status_order=STATUS_ORDER, eff_name=effective_name()) \
-                           .order_by('status_order', 'eff_name')
+        # Your arrangement is the home state; sorting is a lens over it.
+        colleges = colleges.order_by('order')
 
     # Search (display_name if set, else canonical name)
     search = request.GET.get('q', '')
@@ -210,8 +210,12 @@ def college_list(request, tab='applications'):
     from django.urls import reverse
     tab_url = reverse(tab_url_map.get(current_view, 'colleges:list'))
 
+    # Rows can only be hand-placed when nothing else is deciding the order.
+    reorderable = current_view == 'applications' and not sort and not search and not status_filter
+
     context = {
         'colleges': colleges,
+        'reorderable': reorderable,
         'table_fields': ALL_TABLE_FIELDS,
         'optional_fields': OPTIONAL_FIELDS,
         'optional_field_names': {f[0] for f in OPTIONAL_FIELDS},
@@ -539,6 +543,34 @@ def college_quick_add(request):
     response = render(request, 'colleges/_college_row_with_tracker.html', ctx)
     response['HX-Trigger'] = 'college-added'
     return response
+
+
+@require_POST
+def college_reorder(request):
+    """Persist a drag-reorder of the college list.
+
+    Takes the visible rows' pks in their new order. Your List hides
+    not_applying colleges, so rather than renumbering 0..n-1 — which would
+    drag hidden rows to the front — the visible rows are redistributed across
+    the order slots they already occupy. Hidden rows keep their positions.
+    """
+    applicant = request.user.applicant
+    try:
+        pks = [int(p) for p in request.POST.getlist('pk')]
+    except (TypeError, ValueError):
+        return HttpResponse('Bad pk list', status=400)
+
+    rows = {r.pk: r for r in UserCollege.objects.filter(applicant=applicant, pk__in=pks)}
+    ordered = [rows[p] for p in pks if p in rows]
+    if not ordered:
+        return HttpResponse(status=204)
+
+    slots = sorted(r.order for r in ordered)
+    for slot, row in zip(slots, ordered):
+        if row.order != slot:
+            row.order = slot
+            row.save(update_fields=['order'])
+    return HttpResponse(status=204)
 
 
 @require_POST

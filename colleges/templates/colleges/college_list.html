@@ -168,6 +168,71 @@
       applyVisibility();
     }
   });
+
+  // ---- Drag to reorder -------------------------------------------------
+  // Listeners are delegated from the wrapper so rows swapped in by htmx need
+  // no rebinding. The tbody only carries data-reorder-url when nothing else
+  // (sort, search, filter) is deciding the order.
+  (function() {
+    var wrapper = document.getElementById('college-table-wrapper');
+    var dragged = null;
+
+    function tbody() { return document.querySelector('#college-tbody[data-reorder-url]'); }
+    function clearMarkers() {
+      document.querySelectorAll('.drop-above, .drop-below').forEach(function(el) {
+        el.classList.remove('drop-above', 'drop-below');
+      });
+    }
+
+    wrapper.addEventListener('dragstart', function(e) {
+      var handle = e.target.closest('.drag-handle');
+      if (!handle || !tbody()) return;
+      dragged = handle.closest('tr[data-pk]');
+      if (!dragged) return;
+      dragged.classList.add('is-dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      // Firefox will not start a drag without data set.
+      e.dataTransfer.setData('text/plain', dragged.dataset.pk);
+    });
+
+    wrapper.addEventListener('dragover', function(e) {
+      if (!dragged || !tbody()) return;
+      var row = e.target.closest('tr[data-pk]');
+      if (!row || row === dragged) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      var box = row.getBoundingClientRect();
+      var after = (e.clientY - box.top) > box.height / 2;
+      clearMarkers();
+      row.classList.add(after ? 'drop-below' : 'drop-above');
+    });
+
+    wrapper.addEventListener('drop', function(e) {
+      var body = tbody();
+      if (!dragged || !body) return;
+      var row = e.target.closest('tr[data-pk]');
+      if (!row || row === dragged) return;
+      e.preventDefault();
+      var box = row.getBoundingClientRect();
+      var after = (e.clientY - box.top) > box.height / 2;
+      row.parentNode.insertBefore(dragged, after ? row.nextSibling : row);
+      clearMarkers();
+
+      var pks = Array.prototype.map.call(
+        body.querySelectorAll('tr[data-pk]'), function(tr) { return tr.dataset.pk; }
+      );
+      // htmx.ajax so the CSRF header from htmx:configRequest is applied.
+      htmx.ajax('POST', body.dataset.reorderUrl, {
+        values: { pk: pks }, swap: 'none'
+      });
+    });
+
+    wrapper.addEventListener('dragend', function() {
+      if (dragged) dragged.classList.remove('is-dragging');
+      dragged = null;
+      clearMarkers();
+    });
+  })();
 })();
 </script>
 {% endblock %}
