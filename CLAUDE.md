@@ -155,11 +155,14 @@ Used in `colleges/_cell_edit.html` and `_cell_edit_select.html`.
 **`applicant` context processor**: injects `applicant` (the `Applicant` instance) into every template. Use `applicant` in templates, `request.user.applicant` in views.
 
 **`LoginRequiredMiddleware`**: all URLs require auth except:
-- `/` (landing), `/accounts/` (allauth), `/admin/`, `/switch-applicant/`, `/widgets/` (all widgets are public), `/time`, `/words`, `/are-you-sure`
+- `/` (landing), `/accounts/` (allauth), `/admin/`, `/widgets/` (all widgets are public), `/time`, `/words`, `/are-you-sure`
+- `/switch-applicant/` is exempt **only when `DEBUG=True`**.
 
 **New user signup**: `SocialAccountAdapter` redirects new social logins to `/are-you-sure` before creating an account.
 
-**Dev shortcut**: `/switch-applicant/<pk>/` logs in as the user linked to that Applicant.
+**Dev shortcut**: `/switch-applicant/<pk>/` logs in as the user linked to that Applicant. It grants a session for any applicant with no credentials, so it is **routed only under `DEBUG`** (`core/urls.py`) and the view re-checks `settings.DEBUG` independently. Never register this route unconditionally.
+
+**Ownership**: every per-applicant object must be fetched with `get_object_or_404(Model, pk=pk, applicant=request.user.applicant)`. A bare `pk=pk` lookup is an IDOR — the app is multi-user.
 
 ---
 

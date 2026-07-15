@@ -44,7 +44,7 @@ def supplements_home(request):
     college_essays = []
     if selected_college_pk:
         try:
-            selected_college = UserCollege.objects.get(pk=int(selected_college_pk))
+            selected_college = UserCollege.objects.get(pk=int(selected_college_pk), applicant=applicant)
             college_essays = [e for e in all_essays if e.college_id == selected_college.pk]
         except (UserCollege.DoesNotExist, ValueError):
             pass
@@ -92,7 +92,7 @@ def supplements_home(request):
 
 @require_POST
 def essay_status_edit(request, pk):
-    essay = get_object_or_404(SupplementEssay, pk=pk)
+    essay = get_object_or_404(SupplementEssay, pk=pk, applicant=request.user.applicant)
     status = request.POST.get('status', '')
     valid_statuses = {v for v, _ in SupplementEssay.STATUS_CHOICES}
     if status in valid_statuses:
@@ -103,7 +103,7 @@ def essay_status_edit(request, pk):
 
 @require_http_methods(['POST'])
 def essay_save(request, pk):
-    essay = get_object_or_404(SupplementEssay, pk=pk)
+    essay = get_object_or_404(SupplementEssay, pk=pk, applicant=request.user.applicant)
     response = request.POST.get('response', '')
     essay.response = response
     essay.save()
@@ -114,7 +114,7 @@ def essay_save(request, pk):
 
 @require_http_methods(['POST'])
 def essay_category_edit(request, pk):
-    essay = get_object_or_404(SupplementEssay, pk=pk)
+    essay = get_object_or_404(SupplementEssay, pk=pk, applicant=request.user.applicant)
     cat_pk = request.POST.get('category', '')
     if cat_pk == '':
         essay.category = None
@@ -130,14 +130,14 @@ def essay_category_edit(request, pk):
 
 
 def essay_focus(request, pk):
-    essay = get_object_or_404(SupplementEssay, pk=pk)
+    essay = get_object_or_404(SupplementEssay, pk=pk, applicant=request.user.applicant)
     _augment_essays([essay])
     return render(request, 'supplements/focus.html', {'essay': essay})
 
 
 @require_POST
 def uc_piq_status_edit(request, pk):
-    piq = get_object_or_404(UCPersonalInsightQuestion, pk=pk)
+    piq = get_object_or_404(UCPersonalInsightQuestion, pk=pk, applicant=request.user.applicant)
     status = request.POST.get('status', '')
     if status in {v for v, _ in UCPersonalInsightQuestion.STATUS_CHOICES}:
         piq.status = status
@@ -147,7 +147,7 @@ def uc_piq_status_edit(request, pk):
 
 @require_POST
 def uc_piq_save(request, pk):
-    piq = get_object_or_404(UCPersonalInsightQuestion, pk=pk)
+    piq = get_object_or_404(UCPersonalInsightQuestion, pk=pk, applicant=request.user.applicant)
     piq.response = request.POST.get('response', '')
     piq.save()
     return JsonResponse({'word_count': piq.word_count})
@@ -155,7 +155,7 @@ def uc_piq_save(request, pk):
 
 @require_POST
 def common_essay_status_edit(request, pk):
-    essay = get_object_or_404(CommonAppEssay, pk=pk)
+    essay = get_object_or_404(CommonAppEssay, pk=pk, applicant=request.user.applicant)
     status = request.POST.get('status', '')
     if status in {v for v, _ in CommonAppEssay.STATUS_CHOICES}:
         essay.status = status
@@ -165,7 +165,7 @@ def common_essay_status_edit(request, pk):
 
 @require_POST
 def common_essay_save(request, pk):
-    essay = get_object_or_404(CommonAppEssay, pk=pk)
+    essay = get_object_or_404(CommonAppEssay, pk=pk, applicant=request.user.applicant)
     essay.response = request.POST.get('response', '')
     essay.prompt_choice = request.POST.get('prompt_choice') or None
     essay.save()

@@ -245,7 +245,7 @@ def uc_slot_add(request, slot):
 
 def uc_estimator_data(request, pk):
     """GET: return saved estimator rows. POST: save them."""
-    entry = get_object_or_404(UCEntry, pk=pk)
+    entry = get_object_or_404(UCEntry, pk=pk, applicant=request.user.applicant)
     if request.method == 'POST':
         data = json.loads(request.body)
         entry.estimator_data = data.get('rows')
@@ -257,7 +257,7 @@ def uc_estimator_data(request, pk):
 @require_POST
 def uc_set_time(request, pk):
     """Set hours_per_week and weeks_per_year together (from estimator modal)."""
-    entry = get_object_or_404(UCEntry, pk=pk)
+    entry = get_object_or_404(UCEntry, pk=pk, applicant=request.user.applicant)
     entry.hours_per_week = request.POST.get('hours_per_week', '').strip()
     entry.weeks_per_year = request.POST.get('weeks_per_year', '').strip()
     entry.save()

@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import redirect
 
 
@@ -34,8 +35,8 @@ class LoginRequiredMiddleware:
             if (path not in self.EXEMPT_EXACT
                     and not path.startswith('/accounts/')
                     and not path.startswith('/admin/')
-                    and not path.startswith('/switch-applicant/')
                     and not path.startswith('/widgets/')
+                    and not (settings.DEBUG and path.startswith('/switch-applicant/'))
                     and path not in ('/time', '/words', '/are-you-sure')):
                 return redirect(f'/accounts/login/?next={path}')
         return self.get_response(request)

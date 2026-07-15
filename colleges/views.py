@@ -264,7 +264,7 @@ def _build_platform_tracker(applicant):
 
 
 def college_detail(request, pk):
-    college = get_object_or_404(UserCollege, pk=pk)
+    college = get_object_or_404(UserCollege, pk=pk, applicant=request.user.applicant)
     if request.method == 'POST':
         form = CollegeForm(request.POST, instance=college)
         if form.is_valid():
@@ -284,7 +284,7 @@ def college_detail(request, pk):
 
 def college_edit_cell(request, pk, field):
     """Inline cell editing via htmx."""
-    college = get_object_or_404(UserCollege, pk=pk)
+    college = get_object_or_404(UserCollege, pk=pk, applicant=request.user.applicant)
 
     if field not in EDITABLE_FIELDS:
         return HttpResponse('Invalid field', status=400)
@@ -411,7 +411,7 @@ def college_json(request):
 @require_http_methods(['POST'])
 def college_update(request, pk):
     """Save a single field edit from Tabulator's cellEdited callback."""
-    college = get_object_or_404(UserCollege, pk=pk)
+    college = get_object_or_404(UserCollege, pk=pk, applicant=request.user.applicant)
     try:
         body = json.loads(request.body)
         field = body.get('field')
@@ -500,7 +500,7 @@ def college_quick_add(request):
 
 @require_POST
 def college_delete(request, pk):
-    college = get_object_or_404(UserCollege, pk=pk)
+    college = get_object_or_404(UserCollege, pk=pk, applicant=request.user.applicant)
     college.delete()
     if request.headers.get('HX-Request'):
         return HttpResponse('')

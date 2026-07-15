@@ -1,7 +1,8 @@
+from django.conf import settings
 from django.contrib.auth import login as auth_login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -49,7 +50,14 @@ def are_you_sure(request):
 
 
 def switch_applicant(request, pk):
-    """Dev shortcut: log in as the user linked to the given Applicant pk."""
+    """Dev shortcut: log in as the user linked to the given Applicant pk.
+
+    Grants a session for an arbitrary applicant without credentials, so it is
+    routed only under DEBUG (see core/urls.py). This check is the second lock:
+    it must stay even if the route is ever registered unconditionally again.
+    """
+    if not settings.DEBUG:
+        raise Http404
     applicant = get_object_or_404(Applicant, pk=pk)
     if applicant.user is None:
         # Create a placeholder User for this test applicant
