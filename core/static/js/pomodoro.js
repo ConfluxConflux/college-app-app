@@ -66,7 +66,11 @@
       pausedRemainingMs: null,
       hidden: false,
       event: null,
-      pendingBreak: false
+      pendingBreak: false,
+      // "Leaving the tab is part of my task" only holds for the pomodoro you
+      // said it in. Set explicitly rather than relying on a fresh object, so
+      // this path and the break_done path below can't drift apart again.
+      leaveOk: false
     };
     unlockAudio();
     save(s);
@@ -155,6 +159,11 @@
       s.endAt = null;
       s.phase = 'work';
       s.pendingBreak = false;
+      // A new work period, so the hippo gets to ask again. Without this, a
+      // break that expired on its own carried leaveOk forward and the guard
+      // stayed silent forever — while clicking "start another" reset it. Which
+      // path you took is invisible, so the hippo looked arbitrary.
+      s.leaveOk = false;
     }
     restoreChrome();
     save(s);
