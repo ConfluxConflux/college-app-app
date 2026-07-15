@@ -1,8 +1,10 @@
 {% load college_tags %}
 <tr id="college-row-{{ college.pk }}" class="status-{{ college.apply_status }}" data-pk="{{ college.pk }}">
-  {# Handle is always rendered; #college-tbody[data-reorder-url] decides whether
-     it shows, so rows swapped in by htmx (cell edit, quick-add) stay correct
-     without every view having to know about reordering. #}
+  {% comment %}
+    Handle is always rendered; #college-tbody[data-reorder-url] decides whether
+    it shows, so rows swapped in by htmx (cell edit, quick-add) stay correct
+    without every view having to know about reordering.
+  {% endcomment %}
   <td class="col-drag">
     <span class="drag-handle" draggable="true" title="Drag to reorder" aria-hidden="true">&#8942;&#8942;</span>
   </td>
