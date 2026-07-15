@@ -1,13 +1,13 @@
 import json
 from collections import defaultdict
 
-from django.db.models import Case, When, Value, IntegerField, Q
+from django.db.models import Case, When, Value, IntegerField, FloatField, F, Q
+from django.db.models.functions import Cast, Coalesce, Lower, NullIf, Replace
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST, require_http_methods
 
-from .forms import CollegeForm
 from .models import UserCollege
 from activities.models import UCEntry, CommonAppActivity, CommonAppHonor, MITEntry
 from core.models import Applicant
@@ -162,28 +162,27 @@ def college_list(request, tab='applications'):
     if view_config['statuses']:
         colleges = colleges.filter(apply_status__in=view_config['statuses'])
 
-    # Sorting — "all" defaults to likelihood order; others default to model ordering
-    # Map UI field names to actual DB field names for ORM ordering
-    SORT_FIELD_MAP = {
-        'name': 'college__name',
-        'acceptance_rate': 'acceptance_rate_override',
-        'app_platform': 'app_platform_override',
-        'terms': 'academic_calendar_override',
-        'ea_deadline': 'ea_deadline_override',
-        'ed1_deadline': 'ed1_deadline_override',
-        'ed2_deadline': 'ed2_deadline_override',
-        'rd_deadline': 'rd_deadline_override',
-        'sat_avg': 'sat_avg_override',
-        'undergrad_enrollment': 'undergrad_enrollment_override',
-    }
     sort = request.GET.get('sort', '')
     sort_dir = request.GET.get('dir', 'asc')
     if sort in EDITABLE_FIELDS:
-        db_field = SORT_FIELD_MAP.get(sort, sort)
-        order = db_field if sort_dir == 'asc' else f'-{db_field}'
-        colleges = colleges.order_by(order)
-    elif current_view in ('all', 'applications'):
-        colleges = colleges.annotate(status_order=STATUS_ORDER).order_by('status_order', 'college__name')
+        if sort in SORT_ANNOTATIONS:
+            colleges = colleges.annotate(_sortkey=SORT_ANNOTATIONS[sort]())
+            db_field = '_sortkey'
+        else:
+            db_field = sort
+        # nulls_last so blanks sink instead of leading the list — and so SQLite
+        # (nulls first) and Postgres (nulls last) agree.
+        key = F(db_field)
+        colleges = colleges.order_by(
+            key.asc(nulls_last=True) if sort_dir == 'asc' else key.desc(nulls_last=True)
+        )
+    elif current_view == 'all':
+        # Jacob-certified alphabetically, then everything else alphabetically.
+        colleges = colleges.annotate(certified=CERTIFIED_FIRST, eff_name=effective_name()) \
+                           .order_by('certified', 'eff_name')
+    elif current_view == 'applications':
+        colleges = colleges.annotate(status_order=STATUS_ORDER, eff_name=effective_name()) \
+                           .order_by('status_order', 'eff_name')
 
     # Search (display_name if set, else canonical name)
     search = request.GET.get('q', '')
@@ -233,24 +232,90 @@ def college_list(request, tab='applications'):
     return render(request, 'colleges/college_list.html', context)
 
 
+def effective(field, canonical=None):
+    """Annotation for a text override falling back to its canonical College value.
+
+    Mirrors the property fallback in the model, but in SQL, so it can be
+    filtered and sorted on. An override of '' means "unset", not "empty".
+    """
+    canonical = canonical or field
+    return Coalesce(
+        NullIf(field + '_override', Value('')),
+        NullIf('college__' + canonical, Value('')),
+        Value(''),
+    )
+
+
+def effective_num(field, canonical=None):
+    """Same as effective(), for numeric fields where NULL already means unset."""
+    canonical = canonical or field
+    return Coalesce(field + '_override', 'college__' + canonical)
+
+
+def effective_pct(field):
+    """A percentage stored as text ('8.7%'), as a number, for sorting.
+
+    Sorting these as strings puts 3.5% after 27.8%. Every stored value matches
+    NN.N% or is empty; NullIf keeps the empty ones from blowing up the cast on
+    Postgres, where CAST('' AS float) is an error rather than 0.
+    """
+    return Cast(
+        NullIf(Replace(effective(field), Value('%'), Value('')), Value('')),
+        FloatField(),
+    )
+
+
+def effective_name():
+    """What uc.name resolves to: display_name if set, else the canonical name.
+
+    Lowercased so "alphabetical" means the same thing on SQLite (BINARY
+    collation, uppercase first: 'MIT' < 'McGill') as on Postgres in prod.
+    """
+    return Lower(Coalesce(NullIf('display_name', Value('')), 'college__name', Value('')))
+
+
+# Sorting on a *_override column alone ignores canonical data entirely, which
+# is every college now that IPEDS is imported and redundant overrides pruned.
+SORT_ANNOTATIONS = {
+    'name': effective_name,
+    'acceptance_rate': lambda: effective_pct('acceptance_rate'),
+    'app_platform': lambda: effective('app_platform'),
+    'terms': lambda: effective('academic_calendar', 'academic_calendar'),
+    'ea_deadline': lambda: effective('ea_deadline'),
+    'ed1_deadline': lambda: effective('ed1_deadline'),
+    'ed2_deadline': lambda: effective('ed2_deadline'),
+    'rd_deadline': lambda: effective('rd_deadline'),
+    'sat_avg': lambda: effective_num('sat_avg'),
+    'undergrad_enrollment': lambda: effective_num('undergrad_enrollment'),
+}
+
+# Jacob-certified first (someone he knows got in), then the IPEDS bulk.
+CERTIFIED_FIRST = Case(
+    When(college__proof_acceptances__gt=0, then=Value(0)),
+    default=Value(1),
+    output_field=IntegerField(),
+)
+
+
 def _build_platform_tracker(applicant):
     APPLYING_STATUSES = {'applying', 'applied', 'deferred', 'waitlisted', 'accepted', 'enrolled'}
     CONSIDERING_STATUSES = {'considering'}
+    qs = UserCollege.objects.filter(applicant=applicant).annotate(eff_platform=effective('app_platform'))
     applying_platforms = set(
-        UserCollege.objects.filter(applicant=applicant, apply_status__in=APPLYING_STATUSES)
-        .values_list('app_platform_override', flat=True)
+        qs.filter(apply_status__in=APPLYING_STATUSES).values_list('eff_platform', flat=True)
     )
     considering_platforms = set(
-        UserCollege.objects.filter(applicant=applicant, apply_status__in=CONSIDERING_STATUSES)
-        .values_list('app_platform_override', flat=True)
+        qs.filter(apply_status__in=CONSIDERING_STATUSES).values_list('eff_platform', flat=True)
     )
-    def _state(keyword):
-        if any(keyword.lower() in (p or '').lower() for p in applying_platforms):
+    def _state(key):
+        # Exact match: substring matching made 'uc' match 'ucas', lighting up
+        # the UC tracker for UK schools.
+        if key in applying_platforms:
             return 'applying'
-        if any(keyword.lower() in (p or '').lower() for p in considering_platforms):
+        if key in considering_platforms:
             return 'considering'
         return 'none'
-    mit = UserCollege.objects.filter(applicant=applicant, app_platform_override__iexact='mit').first()
+    mit = qs.filter(eff_platform='mit').first()
     return [
         {'label': 'Common App', 'state': _state('common'),     'supported': True,  'href': '/applications/common/'},
         {'label': 'UC App',     'state': _state('uc'),         'supported': True,  'href': '/applications/uc/'},
@@ -261,25 +326,6 @@ def _build_platform_tracker(applicant):
         {'label': 'Georgetown', 'state': _state('georgetown'), 'supported': False, 'href': None},
         {'label': 'Minerva',    'state': _state('minerva'),    'supported': False, 'href': None},
     ]
-
-
-def college_detail(request, pk):
-    college = get_object_or_404(UserCollege, pk=pk, applicant=request.user.applicant)
-    if request.method == 'POST':
-        form = CollegeForm(request.POST, instance=college)
-        if form.is_valid():
-            form.save()
-            if request.headers.get('HX-Request'):
-                return render(request, 'colleges/_college_row.html', {
-                    'college': college, 'table_fields': ALL_TABLE_FIELDS
-                })
-            return redirect('colleges:list')
-    else:
-        form = CollegeForm(instance=college)
-
-    return render(request, 'colleges/college_detail.html', {
-        'college': college, 'form': form
-    })
 
 
 def college_edit_cell(request, pk, field):
@@ -327,35 +373,32 @@ def college_edit_cell(request, pk, field):
 
 @require_POST
 def college_add_row(request):
+    """Add a college the canonical database doesn't have.
+
+    Reached from the add-college modal when a search returns nothing. The row
+    has no College FK, so every field is the user's own — that is what a custom
+    college is.
+    """
     applicant = request.user.applicant
+    name = request.POST.get('name', '').strip()
+    if not name:
+        return HttpResponse('A name is required', status=400)
+
     college = UserCollege.objects.create(
         applicant=applicant,
-        display_name='',
+        display_name=name,
         apply_status='applying',
         order=UserCollege.objects.filter(applicant=applicant).count(),
     )
-    return render(request, 'colleges/_cell_edit.html', {
+    ctx = {
         'college': college,
-        'field': 'name',
-        'field_label': 'College',
-        'current_value': '',
         'table_fields': ALL_TABLE_FIELDS,
-    })
-
-
-def college_add(request):
-    if request.method == 'POST':
-        form = CollegeForm(request.POST)
-        if form.is_valid():
-            college = form.save(commit=False)
-            college.applicant = request.user.applicant
-            college.order = UserCollege.objects.filter(applicant=college.applicant).count()
-            college.save()
-            return redirect('colleges:list')
-    else:
-        form = CollegeForm(initial={'apply_status': 'not_applying'})
-
-    return render(request, 'colleges/college_add.html', {'form': form})
+        'optional_field_names': {f[0] for f in OPTIONAL_FIELDS},
+        'platform_tracker': _build_platform_tracker(applicant),
+    }
+    response = render(request, 'colleges/_college_row_with_tracker.html', ctx)
+    response['HX-Trigger'] = 'college-added'
+    return response
 
 
 def college_json(request):
@@ -526,8 +569,8 @@ def _build_dropdown_colleges(applicant):
     inserted at the top of their respective status category."""
     colleges = list(
         UserCollege.objects.filter(applicant=applicant)
-        .annotate(status_order=APP_PROGRESS_STATUS_ORDER)
-        .order_by('status_order', 'college__name', 'display_name')
+        .annotate(status_order=APP_PROGRESS_STATUS_ORDER, eff_name=effective_name())
+        .order_by('status_order', 'eff_name')
     )
 
     APPLYING_STATUSES = {'applying', 'applied', 'deferred', 'waitlisted', 'accepted', 'enrolled'}

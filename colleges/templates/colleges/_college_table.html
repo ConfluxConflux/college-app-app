@@ -15,6 +15,7 @@
           </a>
         </th>
         {% endfor %}
+        <th class="col-actions" style="width:1%;"><span class="is-sr-only">Remove</span></th>
       </tr>
     </thead>
     <tbody id="college-tbody">
@@ -22,7 +23,7 @@
         {% include "colleges/_college_row.html" %}
       {% empty %}
       <tr>
-        <td colspan="{{ table_fields|length }}" class="has-text-centered has-text-grey py-5">
+        <td colspan="{{ table_fields|length|add:1 }}" class="has-text-centered has-text-grey py-5">
           No colleges match your filters.
         </td>
       </tr>

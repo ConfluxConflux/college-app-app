@@ -23,5 +23,13 @@
   {% endfor %}
 </ul>
 {% elif q|length >= 2 %}
-<p class="add-college-no-results">No colleges found for "{{ q }}"</p>
+<p class="add-college-no-results">No colleges found for &ldquo;{{ q }}&rdquo;</p>
+<button class="add-college-result add-college-result--custom"
+        hx-post="{% url 'colleges:add_row' %}"
+        hx-vals='{"name": "{{ q|escapejs }}"}'
+        hx-target="#college-tbody"
+        hx-swap="beforeend">
+  <span class="add-college-result-name">Add &ldquo;{{ q }}&rdquo; as a custom college</span>
+  <span class="add-college-result-location">You fill in the details yourself</span>
+</button>
 {% endif %}

@@ -32,6 +32,7 @@ APP_PLATFORM_CHOICES = [
     ('ucas', 'UCAS (UK)'),
     ('csu', 'CSU Application'),
     ('canada', 'Canada'),
+    ('minerva', 'Minerva'),
     ('other', 'Other'),
 ]
 

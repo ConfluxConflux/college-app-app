@@ -1135,6 +1135,37 @@ td.compare-cell [x-show="!open"] {
   font-size: 0.88rem;
   padding: 0.4rem 0;
 }
+/* Offered only when the search finds nothing, so it can't be mistaken for a
+   real result and quietly create an unlinked duplicate. */
+.add-college-result--custom {
+  border: 1px dashed #dbdbdb;
+  border-radius: 6px;
+}
+.add-college-result--custom:hover { background: #f5f8ff; border-color: var(--bulma-primary, #14b8a6); }
+
+/* Remove-from-list control (last cell of every college row) */
+.col-actions {
+  width: 1%;
+  text-align: right;
+  white-space: nowrap;
+}
+.college-remove {
+  border: none;
+  background: none;
+  color: #c9c9c9;
+  font-size: 1.15rem;
+  line-height: 1;
+  padding: 0 0.35rem;
+  cursor: pointer;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.1s, color 0.1s, background 0.1s;
+}
+/* Hidden until the row is hovered: destructive, and the list is read far more
+   often than it is edited. Always visible to keyboard users. */
+tr:hover .college-remove,
+.college-remove:focus-visible { opacity: 1; }
+.college-remove:hover { color: #cc0f35; background: #feecf0; }
 
 /* ===================================================================
    HIPPOMODORO — background timer chip, interstitials, and timer page
