@@ -1254,8 +1254,8 @@ td.compare-cell [x-show="!open"] {
   margin-left: 0.35rem;
   vertical-align: middle;
 }
-.gender-women { background: #f6e2f0; color: #8a3a72; }
-.gender-men   { background: #dfe8f5; color: #2f5a8a; }
+.gender-women { background: #e4e0f8; color: #4a3a9c; }
+.gender-men   { background: #f8d4d4; color: #8c1a1a; }
 
 /* All Colleges: marks a college someone you know has gotten into. */
 .certified-dot {
