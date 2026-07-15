@@ -10,7 +10,7 @@
   </td>
   {% for field_name, field_label in table_fields %}
   <td class="col-{{ field_name }}"
-      {% if field_name != 'apply_status' and field_name != 'difficulty' %}
+      {% if field_name != 'apply_status' and field_name != 'difficulty' and field_name != 'application_round' %}
       hx-get="{% url 'colleges:edit_cell' college.pk field_name %}"
       hx-target="#college-row-{{ college.pk }}"
       hx-swap="outerHTML"
@@ -50,6 +50,27 @@
           {% endfor %}
         </select>
       </form>
+    {% elif field_name == 'application_round' %}
+      {% if college.application_round %}<span class="round-tag">{{ college.get_application_round_display }}</span>{% endif %}
+      <form style="position:absolute;inset:0;margin:0;padding:0;"
+            hx-post="{% url 'colleges:edit_cell' college.pk 'application_round' %}"
+            hx-target="#college-row-{{ college.pk }}"
+            hx-swap="outerHTML">
+        {% csrf_token %}
+        <select name="value" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;"
+                onchange="this.form.requestSubmit()">
+          <option value=""></option>
+          {% for val, label in college.APPLICATION_ROUND_CHOICES %}
+          <option value="{{ val }}" {% if val == college.application_round %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </form>
+    {% elif field_name == 'deadline' %}
+      {% comment %}
+        Grey means this is the RD date shown because no round is picked yet — a
+        guess, not a commitment. With no data at all the cell stays empty.
+      {% endcomment %}
+      <span {% if college.deadline_is_fallback %}class="deadline-fallback" title="No round picked — showing the RD deadline"{% endif %}>{{ college.deadline }}</span>
     {% elif field_name == 'applicant_notes' %}
       {{ college.applicant_notes|truncatewords:12 }}
     {% else %}

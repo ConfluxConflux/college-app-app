@@ -8,16 +8,24 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST, require_http_methods
 
-from .models import UserCollege
+from .models import (
+    APPLICATION_ROUND_CHOICES,
+    APPLY_STATUS_CHOICES,
+    DIFFICULTY_CHOICES,
+    UserCollege,
+)
 from activities.models import UCEntry, CommonAppActivity, CommonAppHonor, MITEntry
 from core.models import Applicant
 from supplements.models import SupplementEssay, UCPersonalInsightQuestion, CommonAppEssay, UC_PIQ_PROMPTS, COMMON_APP_PROMPTS
 
 
-# Always-visible columns
+# Always-visible columns — what a student acts on. Everything else is nerd
+# information until they ask for it.
 DEFAULT_FIELDS = [
     ('name', 'College'),
     ('apply_status', 'Status'),
+    ('application_round', 'Round'),
+    ('deadline', 'Deadline'),
     ('applicant_notes', 'Notes'),
 ]
 
@@ -43,6 +51,16 @@ OPTIONAL_FIELDS = [
 ALL_TABLE_FIELDS = DEFAULT_FIELDS + OPTIONAL_FIELDS
 ALL_TABLE_FIELDS_DICT = dict(ALL_TABLE_FIELDS)
 EDITABLE_FIELDS = {f[0] for f in ALL_TABLE_FIELDS}
+
+# Fields the UI edits through a <select>. The cell editor setattr()s whatever
+# it is posted, so without this any string reaches the column — and a bogus
+# application_round in particular would resolve the deadline to the RD date
+# without being marked a fallback, i.e. quietly showing the wrong date.
+CHOICE_FIELDS = {
+    'apply_status': APPLY_STATUS_CHOICES,
+    'difficulty': DIFFICULTY_CHOICES,
+    'application_round': APPLICATION_ROUND_CHOICES,
+}
 
 # The two views and which statuses they show
 VIEWS = {
@@ -291,6 +309,9 @@ SORT_ANNOTATIONS = {
     'rd_deadline': lambda: effective('rd_deadline'),
     'sat_avg': lambda: effective_num('sat_avg'),
     'undergrad_enrollment': lambda: effective_num('undergrad_enrollment'),
+    # The cached cycle ordinal, so "sort by deadline" puts Nov 30 before Jan 1
+    # instead of sorting '11/30' and '1/1' as strings.
+    'deadline': lambda: F('deadline_ordinal'),
 }
 
 # Jacob-certified first (someone he knows got in), then the IPEDS bulk.
@@ -341,6 +362,9 @@ def college_edit_cell(request, pk, field):
 
     if request.method == 'POST':
         value = request.POST.get('value', '')
+        if field in CHOICE_FIELDS and value:
+            if value not in {v for v, _ in CHOICE_FIELDS[field]}:
+                return HttpResponse(f'Invalid {field}', status=400)
         setattr(college, field, value)
         college.save()
         ctx = {'college': college, 'table_fields': ALL_TABLE_FIELDS, 'optional_field_names': {f[0] for f in OPTIONAL_FIELDS}}

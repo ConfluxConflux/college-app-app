@@ -1,4 +1,60 @@
+import re
+
 from django.db import models
+
+
+# Which round the applicant is actually applying in. Picking one is what makes
+# "the deadline" answerable for a given college.
+APPLICATION_ROUND_CHOICES = [
+    ('ea', 'EA'),
+    ('ed1', 'ED I'),
+    ('ed2', 'ED II'),
+    ('rd', 'RD'),
+    ('rolling', 'Rolling'),
+]
+
+ROUND_DEADLINE_FIELD = {
+    'ea': 'ea_deadline',
+    'ed1': 'ed1_deadline',
+    'ed2': 'ed2_deadline',
+    'rd': 'rd_deadline',
+}
+
+# Values that mean "no date here" rather than a date: the en-dash sentinel for
+# "this college doesn't offer this round", and free text like "any".
+_NON_DATES = {'', '-', '–', '—', 'n/a', 'na', 'any', 'none', 'tbd', 'rolling', '?'}
+_MD_RE = re.compile(r'(\d{1,2})\s*/\s*(\d{1,2})')
+
+_CYCLE_START_MONTH = 8  # an application cycle runs August -> July
+
+
+def parse_month_day(text):
+    """'11/30' -> (11, 30). None for blanks, sentinels, or anything unparseable.
+
+    Deliberately narrow: a deadline tracker showing a date it guessed at is
+    worse than one showing nothing.
+    """
+    if not text:
+        return None
+    s = str(text).strip().strip('()').strip()
+    if s.lower() in _NON_DATES:
+        return None
+    m = _MD_RE.search(s)
+    if not m:
+        return None
+    month, day = int(m.group(1)), int(m.group(2))
+    if not (1 <= month <= 12 and 1 <= day <= 31):
+        return None
+    return month, day
+
+
+def cycle_ordinal(month, day):
+    """Position within the application cycle, so Nov 30 sorts before Jan 1.
+
+    Deadlines recur every year, so storing a real year would go stale each
+    cycle. Ordering from August instead keeps the comparison true forever.
+    """
+    return ((month - _CYCLE_START_MONTH) % 12) * 31 + day
 
 
 APPLY_STATUS_CHOICES = [
@@ -95,6 +151,7 @@ class UserCollege(models.Model):
     APPLY_STATUS_CHOICES = APPLY_STATUS_CHOICES
     DIFFICULTY_CHOICES = DIFFICULTY_CHOICES
     APP_PLATFORM_CHOICES = APP_PLATFORM_CHOICES
+    APPLICATION_ROUND_CHOICES = APPLICATION_ROUND_CHOICES
 
     applicant = models.ForeignKey(
         'core.Applicant', null=True, blank=True,
@@ -126,6 +183,17 @@ class UserCollege(models.Model):
     parent_notes = models.TextField(blank=True)
     random_notes = models.TextField(blank=True)
     order = models.IntegerField(default=0)
+
+    # Which round this applicant is applying in, and their own deadline if they
+    # disagree with (or don't have) canonical data.
+    application_round = models.CharField(
+        max_length=10, choices=APPLICATION_ROUND_CHOICES, blank=True
+    )
+    deadline_override = models.CharField(max_length=20, blank=True)
+    # Cache of real_deadline as a cycle ordinal. Denormalised because the value
+    # resolves through an override, a round, and a fallback — too tangled to
+    # express in SQL, and sorting has to happen in the database.
+    deadline_ordinal = models.IntegerField(null=True, blank=True, editable=False)
 
     # Override fields — when set, shadow the canonical College value
     city_override = models.CharField(max_length=200, blank=True)
@@ -168,6 +236,59 @@ class UserCollege(models.Model):
     # ------------------------------------------------------------------ #
     # effective() — canonical fallback logic                               #
     # ------------------------------------------------------------------ #
+
+    def save(self, *args, **kwargs):
+        # Keep the sort cache honest no matter which field changed.
+        md = parse_month_day(self.real_deadline)
+        self.deadline_ordinal = cycle_ordinal(*md) if md else None
+        update_fields = kwargs.get('update_fields')
+        if update_fields is not None:
+            kwargs['update_fields'] = set(update_fields) | {'deadline_ordinal'}
+        super().save(*args, **kwargs)
+
+    # ------------------------------------------------------------------ #
+    # real_deadline — the one date that actually applies                   #
+    # ------------------------------------------------------------------ #
+
+    @property
+    def real_deadline(self):
+        """What you type is the deadline; else the round's date; else RD.
+
+        Falling back to RD is a guess at what the applicant probably means, so
+        deadline_is_fallback marks it and the template greys it out. With no
+        data at all this is '' and the cell renders blank — no placeholder.
+        """
+        if self.deadline_override:
+            return self.deadline_override
+        rnd = self.application_round
+        if rnd == 'rolling':
+            return ''
+        if rnd in ROUND_DEADLINE_FIELD:
+            return getattr(self, ROUND_DEADLINE_FIELD[rnd]) or ''
+        return self.rd_deadline or ''
+
+    @real_deadline.setter
+    def real_deadline(self, value):
+        self.deadline_override = value
+
+    # Alias so the table can address this as a plain column, the way `terms`
+    # aliases academic_calendar.
+    @property
+    def deadline(self):
+        return self.real_deadline
+
+    @deadline.setter
+    def deadline(self, value):
+        self.deadline_override = value
+
+    @property
+    def deadline_is_fallback(self):
+        """True when showing RD only because no round has been picked."""
+        return (
+            not self.deadline_override
+            and not self.application_round
+            and bool(self.rd_deadline)
+        )
 
     def _effective_str(self, field):
         """Return override if non-empty, else canonical value (for string fields)."""

@@ -1143,6 +1143,20 @@ td.compare-cell [x-show="!open"] {
 }
 .add-college-result--custom:hover { background: #f5f8ff; border-color: var(--bulma-primary, #14b8a6); }
 
+/* Round + Deadline */
+.round-tag {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #4a3a9c;
+  background: #e4e0f8;
+  border-radius: 4px;
+  padding: 0.1em 0.45em;
+  white-space: nowrap;
+}
+/* The RD date standing in because no round is picked: shown, but visibly not
+   a commitment. */
+.deadline-fallback { color: #aaa; }
+
 /* Drag-to-reorder handle (first cell of every college row).
    Hidden unless the tbody is reorderable — i.e. no sort, search, or filter is
    deciding the order instead. */
