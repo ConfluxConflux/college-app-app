@@ -2,6 +2,8 @@ import json
 from collections import defaultdict
 from urllib.parse import urlparse
 
+from django.core.paginator import Paginator
+
 from django.db.models import Case, When, Value, IntegerField, FloatField, F, Q
 from django.db.models.functions import Cast, Coalesce, Lower, NullIf, Replace
 from django.http import HttpResponse, JsonResponse
@@ -13,6 +15,7 @@ from .models import (
     APPLICATION_ROUND_CHOICES,
     APPLY_STATUS_CHOICES,
     DIFFICULTY_CHOICES,
+    College,
     UserCollege,
 )
 from activities.models import UCEntry, CommonAppActivity, CommonAppHonor, MITEntry
@@ -177,8 +180,76 @@ def college_map(request):
     })
 
 
+def college_browse(request):
+    """All Colleges: the whole canonical table, not just your list.
+
+    Your List is the 20-odd schools you're working on. This is the database —
+    every college there is, so you can find one you hadn't thought of. Rows you
+    already have keep their status and notes; the rest are read-only until you
+    add them.
+
+    Jacob-certified first (someone he knows got in), then everyone else, both
+    alphabetical. Otherwise the page opens on whatever happens to start with A,
+    which is the slop pile.
+    """
+    applicant = request.user.applicant
+
+    qs = College.objects.annotate(certified=Case(
+        When(proof_acceptances__gt=0, then=Value(0)),
+        default=Value(1),
+        output_field=IntegerField(),
+    ))
+
+    search = request.GET.get('q', '').strip()
+    if search:
+        qs = qs.filter(Q(name__icontains=search) | Q(city__icontains=search)
+                       | Q(state__icontains=search))
+
+    only_certified = request.GET.get('certified') == '1'
+    if only_certified:
+        qs = qs.filter(proof_acceptances__gt=0)
+
+    qs = qs.order_by('certified', Lower('name'))
+
+    # 2,504 rows is too many for one page, and nobody scrolls that far anyway.
+    paginator = Paginator(qs, 100)
+    page = paginator.get_page(request.GET.get('page'))
+
+    # One query for the user's colleges, then matched in Python — a subquery
+    # per row would be 100 extra queries a page.
+    mine = {
+        uc.college_id: uc
+        for uc in UserCollege.objects.filter(
+            applicant=applicant, college__in=[c.pk for c in page.object_list]
+        )
+    }
+    rows = [{'college': c, 'user_college': mine.get(c.pk)} for c in page.object_list]
+
+    querystring = request.GET.copy()
+    querystring.pop('page', None)
+
+    return render(request, 'colleges/all_colleges.html', {
+        'rows': rows,
+        'page': page,
+        'paginator': paginator,
+        'search': search,
+        'only_certified': only_certified,
+        'total': paginator.count,
+        'certified_total': College.objects.filter(proof_acceptances__gt=0).count(),
+        'current_view': 'all',
+        'querystring': querystring.urlencode(),
+        'platform_tracker': _build_platform_tracker(applicant),
+        'status_choices': [
+            (v, l) for v, l in UserCollege.APPLY_STATUS_CHOICES
+            if v not in {'likely', 'unlikely', 'enrolled', 'withdrawn'}
+        ],
+    })
+
+
 def college_list(request, tab='applications'):
     current_view = tab if tab in VIEWS else 'applications'
+    if current_view == 'all':
+        return college_browse(request)
 
     applicant = request.user.applicant
     view_config = VIEWS[current_view]

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}All Colleges - HIPPOCAMPUS{% endblock %}
+
+{% block content %}
+
+<h1 class="title">College List</h1>
+
+<div class="college-toolbar mb-3">
+  <div class="buttons has-addons mb-0">
+    <a class="button" href="{% url 'colleges:list' %}">Your List</a>
+    <a class="button is-dark is-selected" href="{% url 'colleges:list_all' %}">All Colleges</a>
+    <a class="button" href="{% url 'colleges:map' %}">Map</a>
+  </div>
+
+  <div class="college-toolbar-actions">
+    <form method="get" style="display:flex; gap:0.5rem; align-items:center;">
+      <input class="input is-small" type="text" name="q" value="{{ search }}"
+             placeholder="Search all {{ total }} colleges…" style="width:15rem;">
+      {% if only_certified %}<input type="hidden" name="certified" value="1">{% endif %}
+      <button class="button is-small" type="submit">Search</button>
+      {% if search %}<a class="button is-small is-light" href="{% url 'colleges:list_all' %}">Clear</a>{% endif %}
+    </form>
+  </div>
+</div>
+
+{% comment %}
+  This is the database, not your list — every college there is. Certified ones
+  come first so the page doesn't open on whatever happens to start with A.
+{% endcomment %}
+<p class="has-text-grey is-size-7 mb-3" style="max-width:640px;">
+  Every college in the database{% if search %} matching &ldquo;{{ search }}&rdquo;{% endif %}.
+  The {{ certified_total }} that someone you know has gotten into come first.
+  {% if only_certified %}
+  <a href="?{% if search %}q={{ search }}{% endif %}">Show all {{ certified_total }}+</a>
+  {% else %}
+  <a href="?certified=1{% if search %}&q={{ search }}{% endif %}">Show only those {{ certified_total }}</a>
+  {% endif %}
+</p>
+
+<div class="table-container">
+  <table class="table is-bordered is-hoverable is-fullwidth is-narrow">
+    <thead>
+      <tr>
+        <th>College</th>
+        <th style="white-space:nowrap;">Where</th>
+        <th style="white-space:nowrap;">Acc. rate</th>
+        <th style="white-space:nowrap;">On your list</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr class="{% if row.user_college %}status-{{ row.user_college.apply_status }}{% endif %}">
+        <td>
+          <strong>{{ row.college.name }}</strong>
+          {% if row.college.proof_acceptances %}
+          <span class="certified-dot" title="{{ row.college.proof_acceptances }} known acceptance{{ row.college.proof_acceptances|pluralize }}">&#9679;</span>
+          {% endif %}
+        </td>
+        <td class="has-text-grey is-size-7" style="white-space:nowrap;">
+          {% if row.college.city %}{{ row.college.city }}{% if row.college.state %}, {{ row.college.state }}{% endif %}
+          {% elif row.college.country %}{{ row.college.country }}{% endif %}
+        </td>
+        <td class="is-size-7" style="white-space:nowrap;">{{ row.college.acceptance_rate }}</td>
+        <td style="white-space:nowrap;">
+          {% if row.user_college and row.user_college.apply_status != 'not_applying' %}
+            <a href="{% url 'colleges:list' %}" class="tag {{ row.user_college.status_color }} is-light"
+               style="text-decoration:none;">{{ row.user_college.get_apply_status_display }}</a>
+          {% else %}
+            {% comment %}
+              Re-adding a college you'd set to Not Applying goes through the
+              same quick_add, which promotes it back rather than duplicating.
+            {% endcomment %}
+            <button class="button is-small is-light"
+                    hx-post="{% url 'colleges:quick_add' %}"
+                    hx-vals='{"college_pk": "{{ row.college.pk }}"}'
+                    hx-swap="outerHTML"
+                    hx-target="this">+ Add</button>
+          {% endif %}
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" class="has-text-centered has-text-grey py-5">
+        No colleges match &ldquo;{{ search }}&rdquo;.
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if page.paginator.num_pages > 1 %}
+<nav class="pagination is-small" role="navigation" aria-label="pagination" style="margin-top:1rem;">
+  {% if page.has_previous %}
+  <a class="pagination-previous" href="?page={{ page.previous_page_number }}{% if querystring %}&{{ querystring }}{% endif %}">Previous</a>
+  {% else %}
+  <span class="pagination-previous" disabled>Previous</span>
+  {% endif %}
+  {% if page.has_next %}
+  <a class="pagination-next" href="?page={{ page.next_page_number }}{% if querystring %}&{{ querystring }}{% endif %}">Next</a>
+  {% else %}
+  <span class="pagination-next" disabled>Next</span>
+  {% endif %}
+  <ul class="pagination-list">
+    <li>
+      <span class="has-text-grey is-size-7">
+        Page {{ page.number }} of {{ page.paginator.num_pages }} &middot; {{ total }} colleges
+      </span>
+    </li>
+  </ul>
+</nav>
+{% endif %}
+
+{% endblock %}

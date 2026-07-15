@@ -1215,6 +1215,14 @@ td.compare-cell [x-show="!open"] {
 }
 .add-college-result--custom:hover { background: #f5f8ff; border-color: var(--bulma-primary, #14b8a6); }
 
+/* All Colleges: marks a college someone you know has gotten into. */
+.certified-dot {
+  color: #2a9d8f;
+  font-size: 0.55rem;
+  vertical-align: middle;
+  margin-left: 0.3rem;
+}
+
 /* By Topic reuse signal — a tag on more than one college is the same question
    asked twice, which is the whole reason the matrix exists. */
 .matrix-reuse-note {
