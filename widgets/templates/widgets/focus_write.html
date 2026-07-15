@@ -125,11 +125,11 @@
     <button @click="(!canSave && text.length >= 2) ? showBackPrompt = true : goBack()" class="focus-back-btn">← Other Widgets</button>
     <span class="focus-college-label">Focus Write</span>
     <div style="display:flex; align-items:center; gap:0.75rem;">
-      <span x-show="showCount" class="focus-counter" style="font-size:0.8rem;">
+      <span x-show="showCount" class="focus-counter focus-counter--wide">
         <span x-text="wc + (wc === 1 ? ' word' : ' words')"></span> &nbsp;·&nbsp; <span x-text="cc + (cc === 1 ? ' char' : ' chars')"></span>
       </span>
-      <button class="focus-back-btn" @click="showCount = !showCount" x-text="showCount ? 'Hide Word Count' : 'Show Word Count'"></button>
-      <button class="focus-back-btn" @click="toggleFs()" x-text="fs ? '⤡ Exit Fullscreen' : '⤢ Fullscreen'"></button>
+      <button class="focus-back-btn focus-toggle-btn" @click="showCount = !showCount" x-text="showCount ? 'Hide Word Count' : 'Show Word Count'"></button>
+      <button class="focus-back-btn focus-fs-btn" @click="toggleFs()" x-text="fs ? '⤡ Exit Fullscreen' : '⤢ Fullscreen'"></button>
     </div>
   </div>
 

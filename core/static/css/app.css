@@ -631,10 +631,50 @@ body.focus-mode {
   font-size: 0.9rem;
   color: #555;
   flex: 1;
+  /* Absorb the slack, and ellipsize rather than shove the toolbar around when
+     the label is a long college name (Essays focus mode). */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Nothing in the toolbar may change width while you type. Everything here that
+   updates live gets a reserved slot sized for its widest state; otherwise the
+   right-hand group grows leftward and the buttons walk across the screen.
+   (Height was already defended — see .pomo-chip--inline below.) */
+.focus-counter {
+  display: inline-block;
+  font-size: 0.8rem;
+  /* Fits "1234 / 250 words" (Essays focus). Right-aligned so digits grow
+     leftward into the reserved slot instead of pushing the buttons. */
+  min-width: 9rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+/* Focus Write shows both counts: "1234 words · 5678 chars". */
+.focus-counter--wide { min-width: 13rem; }
+
+/* "Show Word Count" / "Hide Word Count" */
+.focus-toggle-btn {
+  min-width: 9.5rem;
+  text-align: center;
+}
+/* "⤢ Fullscreen" / "⤡ Exit Fullscreen" */
+.focus-fs-btn {
+  min-width: 9.5rem;
+  text-align: center;
 }
 .focus-saved-label {
   font-size: 0.75rem;
   font-weight: 600;
+  /* Cycles Saving… / Saved / Unsaved on every autosave, i.e. while you type.
+     Reserve the widest so the toolbar doesn't twitch mid-sentence. */
+  display: inline-block;
+  min-width: 4.5rem;
+  text-align: right;
+  white-space: nowrap;
 }
 .focus-saved-label.is-saved { color: #43A047; }
 .focus-saved-label.is-saving { color: #aaa; }
@@ -1243,6 +1283,13 @@ tr:hover .college-remove,
   font-weight: 700;
   color: #2a9d8f;
   font-variant-numeric: tabular-nums;
+  /* tabular-nums keeps digits even, but the text still changes shape: 25:00 ->
+     9:59 loses a character, and on expiry it becomes "time's up". Reserve the
+     widest so the pill is one size for its whole life. */
+  display: inline-block;
+  min-width: 4.6rem;
+  text-align: right;
+  white-space: nowrap;
 }
 .pomo-chip--break .pomo-chip-clock { color: #b0895b; }
 .pomo-chip-toggle { font-size: 0.72rem !important; padding: 0.15rem 0.5rem !important; }

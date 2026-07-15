@@ -46,12 +46,12 @@ function fireConfetti() {
     </a>
     <span class="focus-college-label">{{ essay.college.name }}</span>
     <div style="display:flex; align-items:center; gap:0.75rem;">
-      <span x-show="showCount" class="focus-counter" style="font-size:0.8rem;">
+      <span x-show="showCount" class="focus-counter">
         <span x-text="count"></span>
         <span x-show="limitVal > 0"> / <span x-text="limitVal"></span> <span x-text="limitType === 'char' ? (limitVal === 1 ? 'char' : 'chars') : (limitVal === 1 ? 'word' : 'words')"></span></span>
         <span x-show="limitVal === 0" x-text="count === 1 ? ' word' : ' words'"></span>
       </span>
-      <button class="focus-back-btn" @click="showCount = !showCount" x-text="showCount ? 'Hide Word Count' : 'Show Word Count'"></button>
+      <button class="focus-back-btn focus-toggle-btn" @click="showCount = !showCount" x-text="showCount ? 'Hide Word Count' : 'Show Word Count'"></button>
       <span class="focus-saved-label" :class="saving ? 'is-saving' : (saved ? 'is-saved' : 'is-unsaved')">
         <span x-show="saving">Saving…</span>
         <span x-show="!saving && saved">Saved</span>
