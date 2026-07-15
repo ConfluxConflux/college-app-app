@@ -204,7 +204,14 @@ def college_browse(request):
 
     # The status is on UserCollege, but the rows are Colleges, so it has to be
     # pulled across. Never touched reads as Not Applying, which is true.
-    mine_qs = UserCollege.objects.filter(applicant=applicant, college=OuterRef('pk'))
+    # order_by('pk') because a college can have more than one UserCollege for
+    # the same applicant (Jacob's list had Colorado State twice, under two
+    # names). Without it the subquery and the row below pick different rows,
+    # so the sort key and the name on screen disagree and the order looks
+    # random.
+    mine_qs = UserCollege.objects.filter(
+        applicant=applicant, college=OuterRef('pk')
+    ).order_by('pk')
     qs = College.objects.annotate(
         my_status=Subquery(mine_qs.values('apply_status')[:1]),
         my_display=Subquery(mine_qs.values('display_name')[:1]),
@@ -230,12 +237,13 @@ def college_browse(request):
 
     # One query for the user's colleges, matched in Python. A lookup per row
     # would be 100 extra queries a page.
-    mine = {
-        uc.college_id: uc
-        for uc in UserCollege.objects.filter(
-            applicant=applicant, college__in=[c.pk for c in page.object_list]
-        ).select_related('college')
-    }
+    # Same order as the subquery above, and first-wins, so the row shown is the
+    # row sorted on.
+    mine = {}
+    for uc in UserCollege.objects.filter(
+        applicant=applicant, college__in=[c.pk for c in page.object_list]
+    ).select_related('college').order_by('pk'):
+        mine.setdefault(uc.college_id, uc)
     rows = []
     for c in page.object_list:
         uc = mine.get(c.pk)
