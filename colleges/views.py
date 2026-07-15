@@ -887,7 +887,6 @@ def applications(request):
     essays = []
     essay_status_counts = []
     essay_done = essay_wip = essay_total = 0
-    essay_done_pct = essay_wip_pct = 0
 
     platform = ''
     platform_display = ''
@@ -912,16 +911,19 @@ def applications(request):
         # Count each real status rather than deriving "not started" by
         # subtraction, which quietly lumped To Do, Idea Stage and Drafted
         # together the moment the status set grew.
-        essay_status_counts = [
-            {'key': key, 'label': label, 'count': sum(1 for e in essays if e.status == key)}
-            for key, label in ESSAY_STATUS_CHOICES
-        ]
+        # One row per status, with its share of the bar, so the bar and the
+        # pills are the same numbers in the same colours.
+        essay_status_counts = []
+        for key, label in ESSAY_STATUS_CHOICES:
+            n = sum(1 for e in essays if e.status == key)
+            essay_status_counts.append({
+                'key': key,
+                'label': label,
+                'count': n,
+                'pct': (n * 100 // essay_total) if essay_total else 0,
+            })
         essay_done = sum(1 for e in essays if e.status == 'done')
         essay_wip = sum(1 for e in essays if e.status in ('wip', 'drafted'))
-
-        if essay_total > 0:
-            essay_done_pct = int(essay_done / essay_total * 100)
-            essay_wip_pct = int(essay_wip / essay_total * 100)
 
         # Augment each essay with computed display fields
         for essay in essays:
@@ -1000,8 +1002,6 @@ def applications(request):
         'essay_wip': essay_wip,
         'essay_status_counts': essay_status_counts,
         'essay_total': essay_total,
-        'essay_done_pct': essay_done_pct,
-        'essay_wip_pct': essay_wip_pct,
         # activities
         'platform': platform,
         'platform_display': platform_display,
@@ -1035,7 +1035,18 @@ def applications_uc(request):
     piqs = list(UCPersonalInsightQuestion.objects.filter(applicant=applicant).order_by('question_number'))
 
     piq_done = sum(1 for p in piqs if p.status == 'done')
-    piq_wip = sum(1 for p in piqs if p.status == 'wip')
+    piq_wip = sum(1 for p in piqs if p.status in ('wip', 'drafted'))
+    # Same shape as the supplements bar: every status, in its own colour. UC
+    # answers 4 of 8, but the bar is over the 8 that exist.
+    piq_status_counts = [
+        {
+            'key': key,
+            'label': label,
+            'count': sum(1 for p in piqs if p.status == key),
+            'pct': sum(1 for p in piqs if p.status == key) * 100 // (len(piqs) or 1),
+        }
+        for key, label in ESSAY_STATUS_CHOICES
+    ]
     piq_maybe = sum(1 for p in piqs if p.status == 'maybe')
 
     return render(request, 'colleges/applications_uc.html', {
@@ -1045,6 +1056,7 @@ def applications_uc(request):
         'piqs': piqs,
         'piq_done': piq_done,
         'piq_wip': piq_wip,
+        'piq_status_counts': piq_status_counts,
         'piq_maybe': piq_maybe,
         'status_choices': UCPersonalInsightQuestion.STATUS_CHOICES,
     })

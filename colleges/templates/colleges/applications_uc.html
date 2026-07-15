@@ -44,11 +44,17 @@
     <div class="box" style="height:100%;">
       <p class="app-tile-heading">PIQ Progress</p>
       {% with total_words=piqs|length %}
-      <div class="app-progress-bar" style="margin:0.6rem 0 0.3rem;">
-        {% if piq_done %}<div style="width:{% widthratio piq_done 8 100 %}%; background:#48c78e;"></div>{% endif %}
-        {% if piq_wip %}<div style="width:{% widthratio piq_wip 8 100 %}%; background:#ffe08a;"></div>{% endif %}
+      <div class="essay-status-bar" style="margin:0.6rem 0 0.5rem;">
+        {% for s in piq_status_counts %}{% if s.count %}
+        <div class="essay-status-bar-seg seg-{{ s.key }}" style="width:{{ s.pct }}%;"
+             title="{{ s.count }} {{ s.label }}"></div>
+        {% endif %}{% endfor %}
       </div>
-      <p style="font-size:0.85rem; color:#555;">{{ piq_done }}/8 done</p>
+      <div style="display:flex; gap:0.3rem; flex-wrap:wrap;">
+        {% for s in piq_status_counts %}{% if s.count %}
+        <span class="essay-status-pill {{ s.key }}" style="font-size:0.72rem; cursor:default;">{{ s.count }} {{ s.label }}</span>
+        {% endif %}{% endfor %}
+      </div>
       {% endwith %}
       <p style="font-size:0.78rem; color:#aaa; margin-top:0.6rem; border-top:1px solid #eee; padding-top:0.5rem;">
         Pick any 4 of 8 to submit

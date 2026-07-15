@@ -84,14 +84,25 @@
     </a>
   </div>
 
-  {# Essays tile #}
-  <div class="column is-one-third">
+  {% comment %}
+    One essays tile, not two. "1/7 complete", "14% done" and the pills were
+    three sayings of the same thing, and the bar was green/yellow from before
+    there were five statuses. The bar is now the pills: same colours, same
+    counts, so it needs no legend and no percentage.
+  {% endcomment %}
+  <div class="column is-two-thirds">
     <a href="{% url 'supplements:home' %}{% if selected %}?college={{ selected.pk }}{% endif %}"
        class="box is-block" style="text-decoration:none; color:inherit; height:100%;">
       <p class="app-tile-heading">Supplemental Essays</p>
       {% if essay_total %}
-        <p class="app-tile-stat">{{ essay_done }}<span class="app-tile-denom">/{{ essay_total }} complete</span></p>
-        <div style="display:flex; gap:0.3rem; flex-wrap:wrap; margin-top:0.25rem;">
+        <div class="essay-status-bar" role="img"
+             aria-label="{% for s in essay_status_counts %}{% if s.count %}{{ s.count }} {{ s.label }}. {% endif %}{% endfor %}">
+          {% for s in essay_status_counts %}{% if s.count %}
+          <div class="essay-status-bar-seg seg-{{ s.key }}" style="width:{{ s.pct }}%;"
+               title="{{ s.count }} {{ s.label }}"></div>
+          {% endif %}{% endfor %}
+        </div>
+        <div style="display:flex; gap:0.3rem; flex-wrap:wrap; margin-top:0.55rem;">
           {% for s in essay_status_counts %}{% if s.count %}
           <span class="essay-status-pill {{ s.key }}" style="font-size:0.72rem; cursor:default;">{{ s.count }} {{ s.label }}</span>
           {% endif %}{% endfor %}
@@ -102,28 +113,6 @@
       {% endif %}
       <p class="app-tile-link">→ edit in Essays</p>
     </a>
-  </div>
-
-  {# Overall / progress tile #}
-  <div class="column is-one-third">
-    <div class="box" style="height:100%;">
-      <p class="app-tile-heading">Essay Progress</p>
-      {% if essay_total %}
-      <div class="app-progress-bar" style="margin:0.6rem 0 0.3rem;">
-        {% if essay_done_pct %}<div style="width:{{ essay_done_pct }}%; background:#48c78e;"></div>{% endif %}
-        {% if essay_wip_pct %}<div style="width:{{ essay_wip_pct }}%; background:#ffe08a;"></div>{% endif %}
-      </div>
-      <p style="font-size:0.85rem; color:#555;">{{ essay_done_pct }}% done</p>
-      {% else %}
-      <div class="app-progress-bar" style="margin:0.6rem 0 0.3rem;"></div>
-      <p style="font-size:0.85rem; color:#aaa;">No essays yet</p>
-      {% endif %}
-      {% if act_max %}
-      <p style="font-size:0.78rem; color:#aaa; margin-top:0.6rem; border-top:1px solid #eee; padding-top:0.5rem;">
-        Activities filled: {{ act_filled }}/{{ act_max }}
-      </p>
-      {% endif %}
-    </div>
   </div>
 
 </div>
@@ -254,9 +243,11 @@
         <h2 class="subtitle mb-1" style="font-weight:700; font-size:1.1rem;">Supplemental Essays</h2>
         {% if essay_total %}
         <div style="display:flex; align-items:center; gap:0.5rem;">
-          <div class="app-progress-bar" style="width:100px; margin:0;">
-            {% if essay_done_pct %}<div style="width:{{ essay_done_pct }}%; background:#48c78e;"></div>{% endif %}
-            {% if essay_wip_pct %}<div style="width:{{ essay_wip_pct }}%; background:#ffe08a;"></div>{% endif %}
+          <div class="essay-status-bar" style="width:100px; margin:0;">
+            {% for s in essay_status_counts %}{% if s.count %}
+            <div class="essay-status-bar-seg seg-{{ s.key }}" style="width:{{ s.pct }}%;"
+                 title="{{ s.count }} {{ s.label }}"></div>
+            {% endif %}{% endfor %}
           </div>
           <span style="font-size:0.8rem; color:#666;">{{ essay_done }}/{{ essay_total }} done</span>
         </div>
