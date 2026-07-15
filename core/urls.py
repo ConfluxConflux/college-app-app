@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.urls import path
 from . import views
 
@@ -19,11 +18,10 @@ urlpatterns = [
     path('core-activities/<int:pk>/mit-cell/<str:field>/', views.core_activity_mit_cell, name='core_activity_mit_cell'),
     path('are-you-sure', views.are_you_sure, name='are_you_sure'),
     path('feedback/', views.feedback, name='feedback'),
+    # switch_applicant logs you in as an arbitrary applicant with no
+    # credentials. The view refuses unless DEBUG, and LoginRequiredMiddleware
+    # only exempts this path under DEBUG — those are the locks. The route stays
+    # registered so {% url %} still reverses in templates; registering it
+    # conditionally 500s every page that references it.
+    path('switch-applicant/<int:pk>/', views.switch_applicant, name='switch_applicant'),
 ]
-
-# switch_applicant logs you in as an arbitrary applicant with no credentials.
-# The route must not exist off localhost.
-if settings.DEBUG:
-    urlpatterns += [
-        path('switch-applicant/<int:pk>/', views.switch_applicant, name='switch_applicant'),
-    ]

@@ -154,10 +154,12 @@
       <a href="/widgets/" class="btn btn-purple">Explore widgets</a>
       <a href="/accounts/google/login/" class="btn btn-primary">Sign up/in with Google</a>
     </div>
+    {% if debug %}
     <div class="dev-links">
       <a href="{% url 'core:switch_applicant' 1 %}">View as Jacob (dev)</a>
       <a href="{% url 'core:switch_applicant' 2 %}">View as Hedgie (dev)</a>
     </div>
+    {% endif %}
     <img src="{% static 'img/potamus_proud_aligned.png' %}" alt="HIPPOCAMPUS logo" class="logo v1-only">
     <img src="{% static 'img/professor_potamus_aligned.png' %}" alt="HIPPOCAMPUS logo" class="logo v2-only">
   </div>

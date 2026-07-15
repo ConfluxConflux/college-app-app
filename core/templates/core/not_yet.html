@@ -71,8 +71,10 @@
 <body>
   <div class="center">
     <p>Sorry, this feature doesn't exist yet!</p>
+    {% if debug %}
     <a href="{% url 'core:switch_applicant' 1 %}">View as test user (Jacob)</a>
     <a href="{% url 'core:switch_applicant' 2 %}">View as test user (Hedgie Wedgie)</a>
+    {% endif %}
     <a href="{% url 'core:landing' %}" class="secondary">Go home</a>
   </div>
 </body>
