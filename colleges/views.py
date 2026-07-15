@@ -1,5 +1,6 @@
 import json
 from collections import defaultdict
+from urllib.parse import urlparse
 
 from django.db.models import Case, When, Value, IntegerField, FloatField, F, Q
 from django.db.models.functions import Cast, Coalesce, Lower, NullIf, Replace
@@ -16,7 +17,14 @@ from .models import (
 )
 from activities.models import UCEntry, CommonAppActivity, CommonAppHonor, MITEntry
 from core.models import Applicant
-from supplements.models import SupplementEssay, UCPersonalInsightQuestion, CommonAppEssay, UC_PIQ_PROMPTS, COMMON_APP_PROMPTS
+from supplements.models import (
+    ESSAY_STATUS_CHOICES,
+    SupplementEssay,
+    UCPersonalInsightQuestion,
+    CommonAppEssay,
+    UC_PIQ_PROMPTS,
+    COMMON_APP_PROMPTS,
+)
 
 
 # Always-visible columns — what a student acts on. Everything else is nerd
@@ -598,12 +606,34 @@ def college_reorder(request):
 
 
 @require_POST
-def college_delete(request, pk):
+def college_remove(request, pk):
+    """Take a college off Your List by marking it Not Applying.
+
+    Deliberately not a delete. The college stays in All Colleges with its
+    notes, essays and deadlines intact, so changing your mind costs nothing —
+    searching for it again in the add modal promotes it back to Applying.
+
+    On Your List the row is filtered out, so returning an empty body makes it
+    disappear. On All Colleges the college still belongs there, so the row is
+    re-rendered with its new status instead.
+    """
     college = get_object_or_404(UserCollege, pk=pk, applicant=request.user.applicant)
-    college.delete()
-    if request.headers.get('HX-Request'):
-        return HttpResponse('')
-    return redirect('colleges:list')
+    college.apply_status = 'not_applying'
+    college.save()
+
+    if not request.headers.get('HX-Request'):
+        return redirect('colleges:list')
+
+    current_url = request.headers.get('HX-Current-URL', '')
+    on_all_colleges = urlparse(current_url).path.rstrip('/').endswith('/colleges/all')
+    if on_all_colleges:
+        return render(request, 'colleges/_college_row_with_tracker.html', {
+            'college': college,
+            'table_fields': ALL_TABLE_FIELDS,
+            'optional_field_names': {f[0] for f in OPTIONAL_FIELDS},
+            'platform_tracker': _build_platform_tracker(request.user.applicant),
+        })
+    return HttpResponse('')
 
 
 APP_STATUS_ORDER_MAP = {
@@ -699,7 +729,8 @@ def applications(request):
 
     # Per-college dashboard data (only computed when a college is selected)
     essays = []
-    essay_done = essay_wip = essay_maybe = essay_blank = essay_total = 0
+    essay_status_counts = []
+    essay_done = essay_wip = essay_total = 0
     essay_done_pct = essay_wip_pct = 0
 
     platform = ''
@@ -722,10 +753,15 @@ def applications(request):
             .order_by('sort_order')
         )
         essay_total = len(essays)
+        # Count each real status rather than deriving "not started" by
+        # subtraction, which quietly lumped To Do, Idea Stage and Drafted
+        # together the moment the status set grew.
+        essay_status_counts = [
+            {'key': key, 'label': label, 'count': sum(1 for e in essays if e.status == key)}
+            for key, label in ESSAY_STATUS_CHOICES
+        ]
         essay_done = sum(1 for e in essays if e.status == 'done')
-        essay_wip = sum(1 for e in essays if e.status == 'wip')
-        essay_maybe = sum(1 for e in essays if e.status == 'maybe')
-        essay_blank = essay_total - essay_done - essay_wip - essay_maybe
+        essay_wip = sum(1 for e in essays if e.status in ('wip', 'drafted'))
 
         if essay_total > 0:
             essay_done_pct = int(essay_done / essay_total * 100)
@@ -806,8 +842,7 @@ def applications(request):
         'essay_status_choices': SupplementEssay.STATUS_CHOICES,
         'essay_done': essay_done,
         'essay_wip': essay_wip,
-        'essay_maybe': essay_maybe,
-        'essay_blank': essay_blank,
+        'essay_status_counts': essay_status_counts,
         'essay_total': essay_total,
         'essay_done_pct': essay_done_pct,
         'essay_wip_pct': essay_wip_pct,

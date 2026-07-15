@@ -79,12 +79,16 @@
   </td>
   {% endfor %}
   <td class="col-actions">
+    {% comment %}
+      Removing marks the college Not Applying rather than deleting it, so this
+      needs no scary confirmation: nothing is lost, and the college stays in
+      All Colleges with its notes and essays.
+    {% endcomment %}
     <button class="college-remove"
             type="button"
             aria-label="Remove {{ college.name }} from your list"
-            title="Remove from your list"
-            hx-post="{% url 'colleges:delete' college.pk %}"
-            hx-confirm="Remove {{ college.name }} from your list?{% if college.essays.exists %} This also deletes the {{ college.essays.count }} essay{{ college.essays.count|pluralize }} you have for it.{% endif %}"
+            title="Not applying — take off your list"
+            hx-post="{% url 'colleges:remove' college.pk %}"
             hx-target="#college-row-{{ college.pk }}"
             hx-swap="outerHTML">&times;</button>
   </td>

@@ -12,7 +12,7 @@ urlpatterns = [
     path('search-suggestions/', views.college_search_suggestions, name='search_suggestions'),
     path('quick-add/', views.college_quick_add, name='quick_add'),
     path('reorder/', views.college_reorder, name='reorder'),
-    path('<int:pk>/delete/', views.college_delete, name='delete'),
+    path('<int:pk>/remove/', views.college_remove, name='remove'),
     path('<int:pk>/update/', views.college_update, name='update'),
     path('<int:pk>/edit/<str:field>/', views.college_edit_cell, name='edit_cell'),
 ]

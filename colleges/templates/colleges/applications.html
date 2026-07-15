@@ -92,10 +92,9 @@
       {% if essay_total %}
         <p class="app-tile-stat">{{ essay_done }}<span class="app-tile-denom">/{{ essay_total }} complete</span></p>
         <div style="display:flex; gap:0.3rem; flex-wrap:wrap; margin-top:0.25rem;">
-          {% if essay_done %}<span class="tag is-success is-light" style="font-size:0.72rem;">{{ essay_done }} done</span>{% endif %}
-          {% if essay_wip %}<span class="tag is-warning is-light" style="font-size:0.72rem;">{{ essay_wip }} WIP</span>{% endif %}
-          {% if essay_maybe %}<span class="tag is-info is-light" style="font-size:0.72rem;">{{ essay_maybe }} maybe</span>{% endif %}
-          {% if essay_blank %}<span class="tag is-light" style="font-size:0.72rem;">{{ essay_blank }} not started</span>{% endif %}
+          {% for s in essay_status_counts %}{% if s.count %}
+          <span class="essay-status-pill {{ s.key }}" style="font-size:0.72rem; cursor:default;">{{ s.count }} {{ s.label }}</span>
+          {% endif %}{% endfor %}
         </div>
       {% else %}
         <p class="app-tile-stat" style="color:#bbb;">—</p>

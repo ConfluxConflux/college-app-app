@@ -23,6 +23,21 @@ COMMON_APP_PROMPTS = [
 ]
 
 
+# One vocabulary for every kind of essay — supplements, UC PIQs, the Common App
+# essay — so a pill means the same thing wherever it appears.
+#
+# The 'wip' and 'done' keys are deliberately unchanged: the dashboard and the
+# applications page count status='done', and renaming the key would silently
+# zero those without breaking anything loudly enough to notice.
+ESSAY_STATUS_CHOICES = [
+    ('todo', 'To Do'),
+    ('idea', 'Idea Stage'),
+    ('wip', 'WIP'),
+    ('drafted', 'Drafted'),
+    ('done', 'DONE'),
+]
+
+
 class EssayCategory(models.Model):
     """Thematic category for grouping essays across colleges."""
     name = models.CharField(max_length=200)
@@ -38,12 +53,7 @@ class EssayCategory(models.Model):
 
 class SupplementEssay(models.Model):
     """One essay prompt+response for one college."""
-    STATUS_CHOICES = [
-        ('', '—'),
-        ('wip', 'WIP'),
-        ('done', 'Done'),
-        ('maybe', 'Maybe'),
-    ]
+    STATUS_CHOICES = ESSAY_STATUS_CHOICES
 
     applicant = models.ForeignKey(
         'core.Applicant', null=True, blank=True,
@@ -61,7 +71,7 @@ class SupplementEssay(models.Model):
     word_limit = models.IntegerField(null=True, blank=True)
     char_limit = models.IntegerField(null=True, blank=True)
     response = models.TextField(blank=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='todo')
     notes = models.TextField(blank=True)
     sort_order = models.IntegerField(default=0)
 
@@ -83,29 +93,16 @@ class SupplementEssay(models.Model):
     def char_count(self):
         return len(self.response)
 
-    @property
-    def status_color(self):
-        return {
-            'wip': 'is-warning',
-            'done': 'is-success',
-            'maybe': 'is-info',
-        }.get(self.status, '')
-
 
 class UCPersonalInsightQuestion(models.Model):
-    STATUS_CHOICES = [
-        ('', '—'),
-        ('wip', 'WIP'),
-        ('done', 'Done'),
-        ('maybe', 'Maybe'),
-    ]
+    STATUS_CHOICES = ESSAY_STATUS_CHOICES
 
     applicant = models.ForeignKey(
         'core.Applicant', on_delete=models.CASCADE, related_name='uc_piqs'
     )
     question_number = models.IntegerField()  # 1–8
     response = models.TextField(blank=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='todo')
 
     class Meta:
         unique_together = [['applicant', 'question_number']]
@@ -125,19 +122,14 @@ class UCPersonalInsightQuestion(models.Model):
 
 
 class CommonAppEssay(models.Model):
-    STATUS_CHOICES = [
-        ('', '—'),
-        ('wip', 'WIP'),
-        ('done', 'Done'),
-        ('maybe', 'Maybe'),
-    ]
+    STATUS_CHOICES = ESSAY_STATUS_CHOICES
 
     applicant = models.OneToOneField(
         'core.Applicant', on_delete=models.CASCADE, related_name='common_app_essay'
     )
     prompt_choice = models.IntegerField(null=True, blank=True)  # 1–7; null = not chosen
     response = models.TextField(blank=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='todo')
 
     @property
     def prompt(self):

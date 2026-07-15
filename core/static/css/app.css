@@ -271,10 +271,16 @@ body {
   appearance: none;
   text-align: center;
 }
-.essay-status-pill.done  { background-color: #c6f0dc; color: #1a7a4a; }
-.essay-status-pill.wip   { background-color: #fef3cd; color: #926800; }
-.essay-status-pill.maybe { background-color: #d0e8f8; color: #1a4f7a; }
-.essay-status-pill.blank { background-color: #f0f0f0; color: #888; }
+.essay-status-pill.todo    { background-color: #eeeeee; color: #666666; }
+.essay-status-pill.idea    { background-color: #fde8cd; color: #8a5200; }
+.essay-status-pill.wip     { background-color: #e0d8f5; color: #4a3a9c; }
+.essay-status-pill.drafted { background-color: #d4e4fa; color: #1a4a9c; }
+/* Same green as a Submitted college (.tag.pill-applied) — an essay being done
+   and an application being in should read as the same kind of finished. */
+.essay-status-pill.done    { background-color: #c4e8c4; color: #1e5c20; }
+/* Legacy: a pill whose status didn't resolve. Kept so an unmigrated row is
+   visibly odd rather than invisible. */
+.essay-status-pill.blank   { background-color: #f0f0f0; color: #888; }
 
 /* Drag handle */
 .drag-handle {

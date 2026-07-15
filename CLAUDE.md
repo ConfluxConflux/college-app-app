@@ -83,7 +83,7 @@ Personal college application tracker. Django 6 + htmx 2 + Alpine.js 3 + Bulma 1.
 | Namespace | Prefix | Notes |
 |-----------|--------|-------|
 | `core` | `/` | `landing`, `home`, `profile`, `core_activity_cell`, `core_activity_add/delete`, `core_activity_uc/ca/honor/mit_cell` |
-| `colleges` | `/colleges/` | `list`, `list_all`, `add`, `add_row`, `detail`, `delete`, `edit_cell`, `update`, `search_suggestions`, `quick_add`, `json` |
+| `colleges` | `/colleges/` | `list`, `list_all`, `add_row`, `remove`, `reorder`, `edit_cell`, `update`, `search_suggestions`, `quick_add`, `json` |
 | `applications` | `/applications/` | `home` (MIT/Common/individual), `uc`, `common` |
 | `activities` | `/activities/` | `home_uc/common/mit/compare/brainstorm`, cell edit/delete for all 4 entry types, export endpoints |
 | `supplements` | `/essays/` | `home`, `essay_save/status/focus/category`, `uc_piq_save/status`, `common_essay_save/status` |
@@ -188,6 +188,9 @@ Handled globally in both base templates via `htmx:configRequest`. Do NOT add `{%
 ## Behavioral Rules
 
 - **No submit/cancel buttons on inline inputs.** Submit on Enter/blur, Escape cancels.
+- **Removing a college never deletes it.** `colleges:remove` sets `apply_status='not_applying'`, which drops it from Your List while keeping it in All Colleges with its notes, deadlines and essays. Re-adding it from the search modal promotes it back to `applying`. Never call `.delete()` on a `UserCollege` — essays cascade off it.
+- **A college's Round drives its Deadline.** `real_deadline` = `deadline_override` → the chosen round's date → the RD date (greyed, `deadline_is_fallback`) → blank. Deadlines are month/day sorted by `deadline_ordinal`, a cycle ordinal counted from August so Nov 30 precedes Jan 1. `save()` recomputes the ordinal; don't set it by hand.
+- **Essay statuses** are `todo` / `idea` / `wip` / `drafted` / `done` (`ESSAY_STATUS_CHOICES`), shared by supplements, UC PIQs and the Common App essay. The `done` key is load-bearing: the dashboard and applications page count `status='done'`.
 - When modifying `UserCollege` fields, always use property setters, never `_override` fields directly.
 - Check `if request.headers.get('HX-Request')` to return partials vs. full pages.
 - `HX-Trigger` response header fires cross-component events (`confetti` on add, `college-added` after quick-add).
