@@ -574,6 +574,8 @@ body {
 .essay-saved-indicator.is-unsaved { color: #e0a020; }
 
 /* Design decision callout boxes */
+/* Collapsed by default: these are Jacob thinking out loud about the design,
+   which is worth keeping but isn't what the page is for. */
 .design-decision {
   background: #fffbea;
   border: 1.5px solid #f0c030;
@@ -583,6 +585,26 @@ body {
   color: #7a6000;
   line-height: 1.55;
 }
+.design-decision > summary {
+  cursor: pointer;
+  color: #5a4000;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  list-style: none;
+}
+.design-decision > summary::-webkit-details-marker { display: none; }
+.design-decision > summary::before { content: '▸ '; }
+.design-decision[open] > summary::before { content: '▾ '; }
+.design-decision[open] > summary { margin-bottom: 0.4rem; }
+/* Collapsed, it should read as a quiet footnote, not a warning banner. */
+.design-decision:not([open]) {
+  background: transparent;
+  border-color: transparent;
+  padding: 0.15rem 0;
+}
+.design-decision:not([open]) > summary { color: #b9a06a; font-weight: 600; }
 .design-decision strong {
   color: #5a4000;
   display: block;
@@ -1188,6 +1210,50 @@ td.compare-cell [x-show="!open"] {
   border-radius: 6px;
 }
 .add-college-result--custom:hover { background: #f5f8ff; border-color: var(--bulma-primary, #14b8a6); }
+
+/* Essay tag manager */
+.tag-manager-disclosure > summary {
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #555;
+  list-style: none;
+}
+.tag-manager-disclosure > summary::-webkit-details-marker { display: none; }
+.tag-manager-disclosure > summary::before { content: '▸ '; }
+.tag-manager-disclosure[open] > summary::before { content: '▾ '; }
+.tag-manager { max-width: 340px; }
+.tag-manager-list { list-style: none; margin: 0 0 0.5rem; padding: 0; }
+.tag-manager-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.28rem 0.1rem;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.84rem;
+}
+.tag-manager-item > span:first-child { flex: 1; min-width: 0; }
+.tag-manager-count {
+  font-size: 0.72rem;
+  color: #999;
+  font-variant-numeric: tabular-nums;
+}
+.tag-manager-del {
+  border: none;
+  background: none;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  padding: 0 0.2rem;
+  border-radius: 3px;
+  opacity: 0;
+  transition: opacity 0.1s, color 0.1s, background 0.1s;
+}
+.tag-manager-item:hover .tag-manager-del,
+.tag-manager-del:focus-visible { opacity: 1; }
+.tag-manager-del:hover { color: #cc0f35; background: #feecf0; }
+.tag-manager-add { margin-top: 0.4rem; }
 
 /* Time calculator sanity checks — a note, not an error: the numbers still
    stand, you are just told what might be off. */

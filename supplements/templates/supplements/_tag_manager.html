@@ -1,0 +1,36 @@
+{% comment %}
+  The applicant's own tag list. Returned by tag_create / tag_delete so the
+  whole block swaps in place.
+{% endcomment %}
+<div id="tag-manager" class="tag-manager">
+  <ul class="tag-manager-list">
+    {% for cat in all_categories %}
+    <li class="tag-manager-item">
+      <span>{{ cat.name }}</span>
+      <span class="tag-manager-count">{{ cat.essays.count }}</span>
+      <button class="tag-manager-del"
+              type="button"
+              aria-label="Delete the {{ cat.name }} tag"
+              title="Delete this tag"
+              hx-post="{% url 'supplements:tag_delete' cat.pk %}"
+              {% if cat.essays.count %}
+              hx-confirm="Delete the &ldquo;{{ cat.name }}&rdquo; tag? The {{ cat.essays.count }} essay{{ cat.essays.count|pluralize }} using it stay, just untagged."
+              {% endif %}
+              hx-target="#tag-manager"
+              hx-swap="outerHTML">&times;</button>
+    </li>
+    {% empty %}
+    <li class="has-text-grey is-size-7">No tags yet.</li>
+    {% endfor %}
+  </ul>
+
+  <form class="tag-manager-add"
+        hx-post="{% url 'supplements:tag_create' %}"
+        hx-target="#tag-manager"
+        hx-swap="outerHTML"
+        {% comment %}Clear the box after the tag lands, ready for the next one.{% endcomment %}
+        hx-on::after-request="if(event.detail.successful) this.reset()">
+    <input class="input is-small" type="text" name="name" maxlength="200"
+           placeholder="New tag…" autocomplete="off" required>
+  </form>
+</div>

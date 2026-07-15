@@ -5,6 +5,8 @@ app_name = 'supplements'
 
 urlpatterns = [
     path('', views.supplements_home, name='home'),
+    path('tags/add/', views.tag_create, name='tag_create'),
+    path('tags/<int:pk>/delete/', views.tag_delete, name='tag_delete'),
     path('<int:pk>/status/', views.essay_status_edit, name='essay_status'),
     path('<int:pk>/save/', views.essay_save, name='essay_save'),
     path('<int:pk>/focus/', views.essay_focus, name='essay_focus'),

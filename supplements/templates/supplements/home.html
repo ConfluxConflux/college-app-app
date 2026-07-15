@@ -84,14 +84,14 @@ function fireConfetti() {
   </p>
 
   {# Design decision: single-click behavior on cells #}
-  <div class="design-decision">
-    <strong>DESIGN DECISION</strong> — Click behavior in the matrix<br>
+  <details class="design-decision">
+    <summary>Design decision &mdash; Click behavior in the matrix</summary>
     <em>Current choice:</em> Single-click on a cell switches to By College view for that school
     (so any click on a row navigates away from the matrix). Double-click goes to focus mode.<br>
     <em>Alternative:</em> Single-click on a cell does nothing (or highlights it); only clicking
     the column header navigates to By College. Double-click still → focus. This keeps the matrix
     stable and browsable without accidentally leaving it.
-  </div>
+  </details>
 
   <div class="table-container" style="margin-top:1rem;">
     <table class="table is-bordered matrix-table">
@@ -148,15 +148,29 @@ function fireConfetti() {
     </table>
   </div>
 
+  {% comment %}
+    Tag management lives here because this is the view tags are for: the rows
+    of this matrix are your tags, so adding or removing one visibly changes it.
+  {% endcomment %}
+  <details class="tag-manager-disclosure" style="margin-top:1.5rem;">
+    <summary>Your tags ({{ all_categories|length }})</summary>
+    <p class="has-text-grey is-size-7" style="margin:0.5rem 0 0.75rem; max-width:420px;">
+      Tags are yours — these are just a starting set. Rows in this matrix are your tags,
+      so two colleges sharing one is the signal that an essay might be reusable.
+      Deleting a tag never deletes an essay.
+    </p>
+    {% include "supplements/_tag_manager.html" %}
+  </details>
+
   {# Design decision: empty cell behavior #}
-  <div class="design-decision" style="margin-top:1.25rem;">
-    <strong>DESIGN DECISION</strong> — Clicking an empty matrix cell<br>
+  <details class="design-decision" style="margin-top:1.25rem;">
+    <summary>Design decision &mdash; Clicking an empty matrix cell</summary>
     <em>Current choice:</em> Empty cells are not clickable — you'd need to go to "By College"
     and create a new essay manually. This keeps data creation intentional.<br>
     <em>Alternative:</em> Clicking an empty cell auto-creates a blank essay for that
     college + category combination and immediately opens it in focus mode. Much faster
     workflow, but might create accidental essays that are hard to delete.
-  </div>
+  </details>
 
 </div>{# end by_topic #}
 
@@ -179,22 +193,22 @@ function fireConfetti() {
 
   <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-top:0.75rem; margin-bottom:1.25rem;">
     {# Design decision: always-visible textarea #}
-    <div class="design-decision" style="flex:1; min-width:260px;">
-      <strong>DESIGN DECISION</strong> — Textarea visibility<br>
-      <em>Current choice:</em> Textareas are always visible and immediately editable —
+    <details class="design-decision" style="flex:1; min-width:260px;">
+    <summary>Design decision &mdash; Textarea visibility</summary>
+    <em>Current choice:</em> Textareas are always visible and immediately editable —
       no clicking needed to start writing.<br>
       <em>Alternative:</em> Show only the prompt + a word count chip by default; click anywhere
       on the card to expand the textarea. Cleaner when just reviewing, but adds friction for editing.
-    </div>
+  </details>
 
     {# Design decision: topic tagging UI #}
-    <div class="design-decision" style="flex:1; min-width:260px;">
-      <strong>DESIGN DECISION</strong> — Topic tagging interface<br>
-      <em>Current choice:</em> A compact dropdown on each card lets you assign any existing
+    <details class="design-decision" style="flex:1; min-width:260px;">
+    <summary>Design decision &mdash; Topic tagging interface</summary>
+    <em>Current choice:</em> A compact dropdown on each card lets you assign any existing
       category (topic). Changes immediately update the matrix.<br>
       <em>Alternative:</em> A drag-and-drop or type-ahead tag picker — more discoverable
       and faster when there are many categories, but much more complex to build.
-    </div>
+  </details>
   </div>
 
   {# Per-college essay cards #}
@@ -323,15 +337,15 @@ function fireConfetti() {
   {% endfor %}
 
   {# Design decision: personal essay inclusion #}
-  <div class="design-decision" style="margin-top:1.5rem;">
-    <strong>DESIGN DECISION</strong> — Personal Essay in the Essays tab<br>
+  <details class="design-decision" style="margin-top:1.5rem;">
+    <summary>Design decision &mdash; Personal Essay in the Essays tab</summary>
     <em>Current choice:</em> The Common App personal statement appears as a row in the matrix
     and as an essay card in By College view, just like any other essay. This keeps it all in
     one place.<br>
     <em>Alternative:</em> Give the personal essay its own pinned section at the top (above the
     tab switcher), since it's the same essay submitted to every school and is a fundamentally
     different kind of writing task.
-  </div>
+  </details>
 
 </div>{# end by_college #}
 

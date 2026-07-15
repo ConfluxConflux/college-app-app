@@ -38,17 +38,68 @@ ESSAY_STATUS_CHOICES = [
 ]
 
 
+# Seeded for every new applicant, then theirs to change. Jacob's original
+# taxonomy makes a reasonable starting vocabulary, but people group essays the
+# way they think about them, so nobody is stuck with it.
+DEFAULT_ESSAY_TAGS = [
+    'Personal Essay',
+    'Major / Academics',
+    'Learning / Semi-Why Us',
+    'Lived Experience / World / Diversity',
+    'Activities',
+    'Community / Diversity',
+    'Why Us',
+    'Personal Challenge',
+    'Inspiration / Joy / Philosophical',
+    'Future / Global Challenge',
+    'Quirky / Misc',
+    'Hypothetical',
+    'Catchall',
+    'Other',
+]
+
+
 class EssayCategory(models.Model):
-    """Thematic category for grouping essays across colleges."""
+    """A tag for grouping essays across colleges. Owned by one applicant.
+
+    Per-applicant rather than shared: the tags are what drive the By Topic
+    view, and their whole job is to reflect how *this* person sees their
+    essays. A global list meant renaming one renamed it for everyone.
+    """
+    applicant = models.ForeignKey(
+        'core.Applicant', null=True, blank=True,
+        on_delete=models.CASCADE, related_name='essay_tags'
+    )
     name = models.CharField(max_length=200)
     sort_order = models.IntegerField(default=0)
 
     class Meta:
         ordering = ['sort_order', 'name']
         verbose_name_plural = 'essay categories'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['applicant', 'name'], name='unique_tag_name_per_applicant'
+            )
+        ]
 
     def __str__(self):
         return self.name
+
+
+def ensure_default_tags(applicant):
+    """Give an applicant the default tags if they have none.
+
+    Called lazily on page load rather than only at signup, so applicants that
+    predate per-applicant tags get seeded too.
+    """
+    if applicant is None:
+        return
+    if EssayCategory.objects.filter(applicant=applicant).exists():
+        return
+    EssayCategory.objects.bulk_create([
+        EssayCategory(applicant=applicant, name=name, sort_order=i)
+        for i, name in enumerate(DEFAULT_ESSAY_TAGS)
+    ])
 
 
 class SupplementEssay(models.Model):

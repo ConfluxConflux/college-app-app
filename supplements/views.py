@@ -5,7 +5,13 @@ from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_POST, require_http_methods
 
 from colleges.models import UserCollege
-from .models import EssayCategory, SupplementEssay, UCPersonalInsightQuestion, CommonAppEssay
+from .models import (
+    EssayCategory,
+    SupplementEssay,
+    UCPersonalInsightQuestion,
+    CommonAppEssay,
+    ensure_default_tags,
+)
 
 
 def _augment_essays(essays):
@@ -33,6 +39,7 @@ def _augment_essays(essays):
 
 def supplements_home(request):
     applicant = request.user.applicant
+    ensure_default_tags(applicant)
     all_essays = list(
         SupplementEssay.objects.filter(applicant=applicant).select_related('college', 'category').order_by('sort_order')
     )
@@ -58,7 +65,7 @@ def supplements_home(request):
         UserCollege.objects.filter(essays__applicant=applicant).distinct().order_by('college__name')
     )
     categories = list(
-        EssayCategory.objects.filter(essays__applicant=applicant).distinct()
+        EssayCategory.objects.filter(applicant=applicant, essays__isnull=False).distinct()
     )
 
     matrix_rows = []
@@ -84,7 +91,7 @@ def supplements_home(request):
         'matrix_rows': matrix_rows,
         'by_college_list': by_college_list,
         'selected_college': selected_college,
-        'all_categories': EssayCategory.objects.all(),
+        'all_categories': EssayCategory.objects.filter(applicant=applicant),
         'status_choices': SupplementEssay.STATUS_CHOICES,
     }
     return render(request, 'supplements/home.html', context)
@@ -121,12 +128,44 @@ def essay_category_edit(request, pk):
         essay.save()
     else:
         try:
-            cat = EssayCategory.objects.get(pk=int(cat_pk))
+            # Scoped to the applicant: tags are owned now, and an unscoped
+            # lookup would let one applicant tag an essay with another's tag.
+            cat = EssayCategory.objects.get(pk=int(cat_pk), applicant=request.user.applicant)
             essay.category = cat
             essay.save()
         except (EssayCategory.DoesNotExist, ValueError):
             return JsonResponse({'error': 'Invalid category'}, status=400)
     return HttpResponse(status=204)
+
+
+@require_POST
+def tag_create(request):
+    """Add a tag of the applicant's own."""
+    applicant = request.user.applicant
+    name = request.POST.get('name', '').strip()
+    if not name:
+        return HttpResponse('A name is required', status=400)
+    if EssayCategory.objects.filter(applicant=applicant, name__iexact=name).exists():
+        return HttpResponse('You already have a tag with that name', status=400)
+    last = EssayCategory.objects.filter(applicant=applicant).order_by('-sort_order').first()
+    EssayCategory.objects.create(
+        applicant=applicant, name=name,
+        sort_order=(last.sort_order + 1) if last else 0,
+    )
+    return render(request, 'supplements/_tag_manager.html', {
+        'all_categories': EssayCategory.objects.filter(applicant=applicant),
+    })
+
+
+@require_POST
+def tag_delete(request, pk):
+    """Delete a tag. Essays keep their text and simply become untagged."""
+    applicant = request.user.applicant
+    tag = get_object_or_404(EssayCategory, pk=pk, applicant=applicant)
+    tag.delete()  # SupplementEssay.category is SET_NULL — no essay is lost
+    return render(request, 'supplements/_tag_manager.html', {
+        'all_categories': EssayCategory.objects.filter(applicant=applicant),
+    })
 
 
 def essay_focus(request, pk):
