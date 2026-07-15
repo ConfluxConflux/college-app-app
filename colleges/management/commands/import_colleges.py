@@ -11,6 +11,7 @@ human, because binding an application record to the wrong school is worse than
 leaving it unlinked.
 """
 import csv
+import os
 import re
 
 from django.core.management.base import BaseCommand
@@ -150,8 +151,9 @@ class Command(BaseCommand):
         parser.add_argument('--csv', default='colleges_ipeds.csv')
         parser.add_argument('--dry-run', action='store_true',
                             help='Report what would happen; write nothing.')
-        parser.add_argument('--matches', default=None,
-                            help='CSV of college_id,unitid resolving reported ambiguities.')
+        parser.add_argument('--matches', default='colleges_manual_matches.csv',
+                            help='CSV of name,unitid resolving reported ambiguities. Keyed by '
+                                 'name rather than pk so the same file works against any database.')
         parser.add_argument('--keep-display-names', action='store_true', default=True,
                             help='Preserve the old canonical name as UserCollege.display_name '
                                  'when IPEDS renames a college (default: on).')
@@ -161,41 +163,74 @@ class Command(BaseCommand):
         self._validate_aliases(rows)
 
         manual = {}
-        if opts['matches']:
+        if opts['matches'] and os.path.exists(opts['matches']):
             with open(opts['matches'], newline='', encoding='utf-8') as f:
                 for r in csv.DictReader(f):
-                    manual[int(r['college_id'])] = r['unitid'].strip()
+                    manual[norm(r['name'])] = r['unitid'].strip()
 
         matcher = Matcher(rows)
         by_unitid = {r['unitid']: r for r in rows if r['unitid']}
 
         existing = list(College.objects.all())
-        adopted, ambiguous, unmatched_db = [], [], []
+        adopted, ambiguous, unmatched_db, conflicts = [], [], [], []
+        claimed = {}   # id(csv row) -> College that claimed it
+
+        def claim(col, row, how):
+            """Bind col to row unless another college already took it.
+
+            Two colleges resolving to one CSV row would collide on the unique
+            unitid. That means a duplicate in the College table, which is a
+            merge, not an import — so report it instead.
+            """
+            owner = claimed.get(id(row))
+            if owner is not None:
+                conflicts.append((col, row, owner))
+                return
+            claimed[id(row)] = col
+            adopted.append((col, row, how))
 
         for col in existing:
-            if col.pk in manual:
-                hit = by_unitid.get(manual[col.pk])
+            # A unitid is identity. Matching those by name again is what made
+            # a second run try to re-adopt (and duplicate) everything.
+            if col.unitid:
+                hit = by_unitid.get(col.unitid)
                 if hit:
-                    adopted.append((col, hit, 'manual'))
+                    claim(col, hit, 'unitid')
                 else:
-                    unmatched_db.append((col, f'manual unitid {manual[col.pk]!r} not in CSV'))
+                    unmatched_db.append((col, f'unitid {col.unitid} no longer in CSV'))
                 continue
+
+            key = norm(col.name)
+            if key in manual:
+                hit = by_unitid.get(manual[key])
+                if hit:
+                    claim(col, hit, 'manual')
+                else:
+                    unmatched_db.append((col, f'manual unitid {manual[key]!r} not in CSV'))
+                continue
+
             hit, info = matcher.match(col.name)
             if hit:
-                adopted.append((col, hit, info))
+                claim(col, hit, info)
             elif info:
                 ambiguous.append((col, info))
             else:
                 unmatched_db.append((col, 'no candidate in CSV'))
 
-        claimed = {id(r) for _, r, _ in adopted}
         new_rows = [r for r in rows if id(r) not in claimed]
 
-        self._report(adopted, ambiguous, unmatched_db, new_rows)
+        self._report(adopted, ambiguous, unmatched_db, new_rows, conflicts)
 
         if opts['dry_run']:
             self.stdout.write(self.style.WARNING('\n--dry-run: nothing written.'))
             return
+
+        if conflicts:
+            raise SystemExit(
+                '\nRefusing to write: the colleges above are duplicates competing for the '
+                'same IPEDS row. Merge them first (repoint the UserCollege rows and delete '
+                'the loser), then re-run.'
+            )
 
         with transaction.atomic():
             renamed = 0
@@ -279,7 +314,7 @@ class Command(BaseCommand):
             n += 1
         return n
 
-    def _report(self, adopted, ambiguous, unmatched_db, new_rows):
+    def _report(self, adopted, ambiguous, unmatched_db, new_rows, conflicts=()):
         from collections import Counter
         methods = Counter(m for _, _, m in adopted)
         w = self.stdout.write
@@ -288,6 +323,13 @@ class Command(BaseCommand):
         w(f'New colleges to create    : {len(new_rows)}')
         w(f'Ambiguous (left alone)    : {len(ambiguous)}')
         w(f'Unmatched (left alone)    : {len(unmatched_db)}')
+        if conflicts:
+            w(self.style.ERROR(f'Duplicate collisions       : {len(conflicts)}'))
+            for col, row, owner in conflicts:
+                w(self.style.ERROR(
+                    f'  id={col.pk} {col.name!r} wants {row["name"]!r} ({row["unitid"]}), '
+                    f'already claimed by id={owner.pk} {owner.name!r}'
+                ))
 
         inferred = [(c, r, m) for c, r, m in adopted if m not in ('exact', 'normalized', 'stem')]
         if inferred:
