@@ -4,7 +4,9 @@ from urllib.parse import urlparse
 
 from django.core.paginator import Paginator
 
-from django.db.models import Case, When, Value, IntegerField, FloatField, F, Q
+from django.db.models import (
+    Case, When, Value, IntegerField, FloatField, F, OuterRef, Q, Subquery,
+)
 from django.db.models.functions import Cast, Coalesce, Lower, NullIf, Replace
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -181,69 +183,115 @@ def college_map(request):
 
 
 def college_browse(request):
-    """All Colleges: the whole canonical table, not just your list.
+    """All Colleges: the same table as Your List, over every college.
 
-    Your List is the 20-odd schools you're working on. This is the database —
-    every college there is, so you can find one you hadn't thought of. Rows you
-    already have keep their status and notes; the rest are read-only until you
-    add them.
+    Your List is the schools you're working on. This is the database, so you
+    can find one you hadn't thought of. It renders the identical row template —
+    same Status dropdown, same Columns menu — because it is the same thing:
+    most of these are simply Not Applying.
 
-    Jacob-certified first (someone he knows got in), then everyone else, both
-    alphabetical. Otherwise the page opens on whatever happens to start with A,
-    which is the slop pile.
+    Colleges you have no row for get a placeholder UserCollege that is never
+    saved. Touching any cell creates it for real (see college_canonical_cell).
+    Materialising 2,504 rows per user just to look at a list is the duplication
+    the canonical/UserCollege split exists to avoid.
+
+    Ordered by status first, in the same meaning-order Your List uses, so the
+    colleges you're actually applying to stay on top. Everything you've never
+    touched counts as Not Applying, and that block — nearly the whole table —
+    is certified first, then the rest, both alphabetical.
     """
     applicant = request.user.applicant
 
-    qs = College.objects.annotate(certified=Case(
-        When(proof_acceptances__gt=0, then=Value(0)),
-        default=Value(1),
-        output_field=IntegerField(),
-    ))
+    # The status is on UserCollege, but the rows are Colleges, so it has to be
+    # pulled across. Never touched reads as Not Applying, which is true.
+    mine_qs = UserCollege.objects.filter(applicant=applicant, college=OuterRef('pk'))
+    qs = College.objects.annotate(
+        my_status=Subquery(mine_qs.values('apply_status')[:1]),
+        my_display=Subquery(mine_qs.values('display_name')[:1]),
+        certified=CERTIFIED_FIRST_CANONICAL,
+        status_rank=STATUS_ORDER_CANONICAL,
+    ).annotate(
+        # Sort by the name actually on screen. The table shows display_name
+        # when you have one ("Caltech"), so ordering by College.name sorts by
+        # a string nobody can see and looks random.
+        shown_name=Lower(Coalesce(NullIf('my_display', Value('')), 'name')),
+    )
 
     search = request.GET.get('q', '').strip()
     if search:
         qs = qs.filter(Q(name__icontains=search) | Q(city__icontains=search)
                        | Q(state__icontains=search))
 
-    only_certified = request.GET.get('certified') == '1'
-    if only_certified:
-        qs = qs.filter(proof_acceptances__gt=0)
+    qs = qs.order_by('status_rank', 'certified', 'shown_name')
 
-    qs = qs.order_by('certified', Lower('name'))
-
-    # 2,504 rows is too many for one page, and nobody scrolls that far anyway.
+    # 2,504 rows is too many for one page, and nobody scrolls that far.
     paginator = Paginator(qs, 100)
     page = paginator.get_page(request.GET.get('page'))
 
-    # One query for the user's colleges, then matched in Python — a subquery
-    # per row would be 100 extra queries a page.
+    # One query for the user's colleges, matched in Python. A lookup per row
+    # would be 100 extra queries a page.
     mine = {
         uc.college_id: uc
         for uc in UserCollege.objects.filter(
             applicant=applicant, college__in=[c.pk for c in page.object_list]
-        )
+        ).select_related('college')
     }
-    rows = [{'college': c, 'user_college': mine.get(c.pk)} for c in page.object_list]
+    rows = []
+    for c in page.object_list:
+        uc = mine.get(c.pk)
+        if uc is None:
+            # Unsaved: a college you've never touched isn't a row you own.
+            uc = UserCollege(applicant=applicant, college=c, apply_status='not_applying')
+        rows.append(uc)
 
     querystring = request.GET.copy()
     querystring.pop('page', None)
 
-    return render(request, 'colleges/all_colleges.html', {
-        'rows': rows,
+    return render(request, 'colleges/college_list.html', {
+        'colleges': rows,
         'page': page,
-        'paginator': paginator,
+        'is_browse': True,
+        # Every row here has a canonical college, so cells address it by
+        # College pk and the UserCollege is created on first edit.
+        'use_canonical_urls': True,
+        'reorderable': False,
+        'table_fields': ALL_TABLE_FIELDS,
+        'optional_fields': OPTIONAL_FIELDS,
+        'optional_field_names': {f[0] for f in OPTIONAL_FIELDS},
+        'sort': '',
+        'sort_dir': 'asc',
+        'status_filter': '',
         'search': search,
-        'only_certified': only_certified,
-        'total': paginator.count,
-        'certified_total': College.objects.filter(proof_acceptances__gt=0).count(),
-        'current_view': 'all',
-        'querystring': querystring.urlencode(),
-        'platform_tracker': _build_platform_tracker(applicant),
         'status_choices': [
             (v, l) for v, l in UserCollege.APPLY_STATUS_CHOICES
             if v not in {'likely', 'unlikely', 'enrolled', 'withdrawn'}
         ],
+        'current_view': 'all',
+        'views': VIEWS,
+        'platform_tracker': _build_platform_tracker(applicant),
+        'tab_url': reverse('colleges:list_all'),
+        'total': paginator.count,
+        'querystring': querystring.urlencode(),
     })
+
+
+@require_http_methods(['GET', 'POST'])
+def college_canonical_cell(request, college_pk, field):
+    """Edit a cell on All Colleges, addressing the college by its canonical pk.
+
+    Creates the UserCollege on first touch. Browsing 2,504 colleges shouldn't
+    write 2,504 rows; deciding something about one should write exactly one.
+    """
+    applicant = request.user.applicant
+    canonical = get_object_or_404(College, pk=college_pk)
+    uc, _created = UserCollege.objects.get_or_create(
+        applicant=applicant, college=canonical,
+        defaults={
+            'apply_status': 'not_applying',
+            'order': UserCollege.objects.filter(applicant=applicant).count(),
+        },
+    )
+    return college_edit_cell(request, uc.pk, field)
 
 
 def college_list(request, tab='applications'):
@@ -401,6 +449,31 @@ SORT_ANNOTATIONS = {
 CERTIFIED_FIRST = Case(
     When(college__proof_acceptances__gt=0, then=Value(0)),
     default=Value(1),
+    output_field=IntegerField(),
+)
+# Same, from College itself rather than through UserCollege.
+CERTIFIED_FIRST_CANONICAL = Case(
+    When(proof_acceptances__gt=0, then=Value(0)),
+    default=Value(1),
+    output_field=IntegerField(),
+)
+
+# _RELEVANCE_ORDER over an annotated my_status, for All Colleges. A college
+# you've never touched has no row at all, so NULL falls to the default and
+# reads as Not Applying — which is what it is.
+STATUS_ORDER_CANONICAL = Case(
+    When(my_status='applying',    then=Value(1)),
+    When(my_status='likely',      then=Value(2)),
+    When(my_status='considering', then=Value(3)),
+    When(my_status='unlikely',    then=Value(4)),
+    When(my_status='deferred',    then=Value(5)),
+    When(my_status='waitlisted',  then=Value(6)),
+    When(my_status='applied',     then=Value(7)),
+    When(my_status='accepted',    then=Value(8)),
+    When(my_status='enrolled',    then=Value(9)),
+    When(my_status='rejected',    then=Value(10)),
+    When(my_status='withdrawn',   then=Value(11)),
+    default=Value(12),
     output_field=IntegerField(),
 )
 

@@ -1,5 +1,5 @@
 {% load college_tags %}
-<tr id="college-row-{{ college.pk }}" class="status-{{ college.apply_status }}" data-pk="{{ college.pk }}">
+<tr id="college-row-{% if college.pk %}{{ college.pk }}{% else %}new-{{ college.college_id }}{% endif %}" class="status-{{ college.apply_status }}" data-pk="{{ college.pk }}">
   {% comment %}
     Handle is always rendered; #college-tbody[data-reorder-url] decides whether
     it shows, so rows swapped in by htmx (cell edit, quick-add) stay correct
@@ -11,8 +11,8 @@
   {% for field_name, field_label in table_fields %}
   <td class="col-{{ field_name }}"
       {% if field_name != 'apply_status' and field_name != 'difficulty' and field_name != 'application_round' %}
-      hx-get="{% url 'colleges:edit_cell' college.pk field_name %}"
-      hx-target="#college-row-{{ college.pk }}"
+      hx-get="{% if use_canonical_urls %}{% url 'colleges:canonical_cell' college.college_id field_name %}{% else %}{% url 'colleges:edit_cell' college.pk field_name %}{% endif %}"
+      hx-target="#college-row-{% if college.pk %}{{ college.pk }}{% else %}new-{{ college.college_id }}{% endif %}"
       hx-swap="outerHTML"
       {% if field_name == 'name' %}hx-trigger="click[event.shiftKey||event.ctrlKey||event.altKey]"{% endif %}
       {% endif %}
@@ -23,8 +23,8 @@
     {% elif field_name == 'apply_status' %}
       <span class="tag {{ college.status_color|default:'pill-not_applying' }} is-light">{{ college.get_apply_status_display|default:"Not Applying" }}</span>
       <form style="position:absolute;inset:0;margin:0;padding:0;"
-            hx-post="{% url 'colleges:edit_cell' college.pk 'apply_status' %}"
-            hx-target="#college-row-{{ college.pk }}"
+            hx-post="{% if use_canonical_urls %}{% url 'colleges:canonical_cell' college.college_id 'apply_status' %}{% else %}{% url 'colleges:edit_cell' college.pk 'apply_status' %}{% endif %}"
+            hx-target="#college-row-{% if college.pk %}{{ college.pk }}{% else %}new-{{ college.college_id }}{% endif %}"
             hx-swap="outerHTML">
         {% csrf_token %}
         <select name="value" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;"
@@ -38,8 +38,8 @@
     {% elif field_name == 'difficulty' %}
       {% if college.difficulty %}<span class="tag" style="{{ college.difficulty_color }}">{{ college.get_difficulty_display }}</span>{% else %}<span>—</span>{% endif %}
       <form style="position:absolute;inset:0;margin:0;padding:0;"
-            hx-post="{% url 'colleges:edit_cell' college.pk 'difficulty' %}"
-            hx-target="#college-row-{{ college.pk }}"
+            hx-post="{% if use_canonical_urls %}{% url 'colleges:canonical_cell' college.college_id 'difficulty' %}{% else %}{% url 'colleges:edit_cell' college.pk 'difficulty' %}{% endif %}"
+            hx-target="#college-row-{% if college.pk %}{{ college.pk }}{% else %}new-{{ college.college_id }}{% endif %}"
             hx-swap="outerHTML">
         {% csrf_token %}
         <select name="value" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;"
@@ -53,8 +53,8 @@
     {% elif field_name == 'application_round' %}
       {% if college.application_round %}<span class="round-tag">{{ college.get_application_round_display }}</span>{% endif %}
       <form style="position:absolute;inset:0;margin:0;padding:0;"
-            hx-post="{% url 'colleges:edit_cell' college.pk 'application_round' %}"
-            hx-target="#college-row-{{ college.pk }}"
+            hx-post="{% if use_canonical_urls %}{% url 'colleges:canonical_cell' college.college_id 'application_round' %}{% else %}{% url 'colleges:edit_cell' college.pk 'application_round' %}{% endif %}"
+            hx-target="#college-row-{% if college.pk %}{{ college.pk }}{% else %}new-{{ college.college_id }}{% endif %}"
             hx-swap="outerHTML">
         {% csrf_token %}
         <select name="value" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;"
@@ -83,7 +83,11 @@
       Removing marks the college Not Applying rather than deleting it, so this
       needs no scary confirmation: nothing is lost, and the college stays in
       All Colleges with its notes and essays.
+
+      Not offered on All Colleges: there is nothing to take off a list you
+      aren't on, and a placeholder has no pk to address.
     {% endcomment %}
+    {% if college.pk and not use_canonical_urls %}
     <button class="college-remove"
             type="button"
             aria-label="Remove {{ college.name }} from your list"
@@ -91,5 +95,6 @@
             hx-post="{% url 'colleges:remove' college.pk %}"
             hx-target="#college-row-{{ college.pk }}"
             hx-swap="outerHTML">&times;</button>
+    {% endif %}
   </td>
 </tr>

@@ -139,13 +139,7 @@ function celebrateStage(from, to) {
                   &middot; <span class="matrix-reuse-warn">{{ row.limit_range.0 }} vs {{ row.limit_range.1 }} words</span>
                 {% endif %}
               {% endif %}
-              {% if row.longest_written %}
-              <br><a href="{% url 'supplements:essay_focus' row.longest_written.pk %}"
-                     title="Your longest answer on this topic — the one to adapt">
-                reuse your {{ row.longest_written.college.name }} answer ({{ row.longest_written.word_count }}w)
-              </a>
-              {% endif %}
-            </span>
+              </span>
             {% endif %}
           </td>
           {% for cell in row.cells %}
@@ -260,7 +254,18 @@ function celebrateStage(from, to) {
     </div>
 
     {% for essay in item.essays %}
-    {# Per-essay Alpine component #}
+    {% comment %}
+      Per-essay Alpine component.
+
+      Nothing inside the x-data attribute may contain a double quote — the
+      attribute is delimited by one, so a quoted word ends it early and dumps
+      the rest of the object onto the page as text. Comments about this code
+      belong out here, not in there.
+
+      underMin: a range ("5-500 words") makes too-short a real state, not just
+      too-long — but only once something is written, since an empty essay is
+      unstarted rather than short.
+    {% endcomment %}
     <div class="essay-card box"
          x-data="{
            text: '{{ essay.response|escapejs }}',
@@ -276,9 +281,6 @@ function celebrateStage(from, to) {
            get count() { return this.limitType === 'char' ? this.cc : this.wc; },
            get overLimit() { return this.limitVal > 0 && this.count > this.limitVal; },
            get nearLimit() { return this.limitVal > 0 && this.count >= Math.floor(this.limitVal * 0.9) && !this.overLimit; },
-           /* A range ("5-500 words") makes too-short a real state, not just
-              too-long. Only once something is written — an empty essay isn't
-              "too short", it's unstarted. */
            get underMin() { return this.limitMin > 0 && this.count > 0 && this.count < this.limitMin; },
            onInput(val) {
              const wasAtOrOver = this.limitVal > 0 && this.count >= this.limitVal;

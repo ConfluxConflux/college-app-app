@@ -15,4 +15,7 @@ urlpatterns = [
     path('<int:pk>/remove/', views.college_remove, name='remove'),
     path('<int:pk>/update/', views.college_update, name='update'),
     path('<int:pk>/edit/<str:field>/', views.college_edit_cell, name='edit_cell'),
+    # All Colleges addresses cells by canonical College pk; the UserCollege is
+    # created on first edit.
+    path('canonical/<int:college_pk>/edit/<str:field>/', views.college_canonical_cell, name='canonical_cell'),
 ]

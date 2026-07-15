@@ -113,7 +113,6 @@ def supplements_home(request):
         # Compare ceilings: a 250-word answer fits a 250-word box regardless of
         # whether the other college also sets a floor.
         limits = sorted({e.word_limit for e in row_essays if e.word_limit})
-        written = [e for e in row_essays if e.response.strip()]
 
         matrix_rows.append({
             'category': cat,
@@ -126,8 +125,6 @@ def supplements_home(request):
             'limits_compatible': (
                 len(limits) > 1 and limits[-1] <= limits[0] * 2
             ) if limits else False,
-            'written_count': len(written),
-            'longest_written': max(written, key=lambda e: e.word_count) if written else None,
         })
 
     # Most-shared tags first: those are where the reuse is.

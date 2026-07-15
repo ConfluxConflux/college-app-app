@@ -69,6 +69,25 @@
   {% include "colleges/_college_table.html" %}
 </div>
 
+{% comment %}
+  All Colleges is 2,504 rows, so it pages. Your List is yours and fits.
+{% endcomment %}
+{% if page and page.paginator.num_pages > 1 %}
+<nav class="pagination is-small" role="navigation" aria-label="pagination" style="margin-top:1rem;">
+  {% if page.has_previous %}
+  <a class="pagination-previous" href="?page={{ page.previous_page_number }}{% if querystring %}&{{ querystring }}{% endif %}">Previous</a>
+  {% else %}<span class="pagination-previous" disabled>Previous</span>{% endif %}
+  {% if page.has_next %}
+  <a class="pagination-next" href="?page={{ page.next_page_number }}{% if querystring %}&{{ querystring }}{% endif %}">Next</a>
+  {% else %}<span class="pagination-next" disabled>Next</span>{% endif %}
+  <ul class="pagination-list">
+    <li><span class="has-text-grey is-size-7">
+      Page {{ page.number }} of {{ page.paginator.num_pages }} &middot; {{ total }} colleges
+    </span></li>
+  </ul>
+</nav>
+{% endif %}
+
 <!-- Add-college modal -->
 <div x-data="{ open: false }"
      @open-add-modal.window="open = true"
