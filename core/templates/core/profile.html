@@ -31,6 +31,32 @@
   </div>
 </div>
 
+{% comment %}
+  These only ever sink single-gender colleges down the list — never hide them —
+  so answering wrongly costs nothing but scrolling.
+{% endcomment %}
+<div style="margin-top: 2.5rem; max-width: 720px;">
+  <p class="has-text-grey subtitle" style="margin-bottom: 0.75rem;">What you're open to</p>
+  <form hx-post="{% url 'core:profile' %}" hx-trigger="change" hx-swap="none"
+        style="display:flex; flex-direction:column; gap:0.45rem;">
+    {% csrf_token %}
+    <input type="hidden" name="form" value="preferences">
+    <label class="checkbox" style="font-size:0.92rem;">
+      <input type="checkbox" name="considering_womens_colleges"
+             {% if applicant.considering_womens_colleges %}checked{% endif %}>
+      Are you considering women&rsquo;s colleges?
+    </label>
+    <label class="checkbox" style="font-size:0.92rem;">
+      <input type="checkbox" name="considering_mens_colleges"
+             {% if applicant.considering_mens_colleges %}checked{% endif %}>
+      Are you considering men&rsquo;s colleges?
+    </label>
+    <p class="has-text-grey is-size-7" style="margin-top:0.15rem;">
+      Saying no doesn&rsquo;t hide them — they just sink to the bottom of All Colleges.
+    </p>
+  </form>
+</div>
+
 <div style="margin-top: 2.5rem; max-width: 720px;">
   <p class="has-text-grey subtitle" style="margin-bottom: 0.75rem;">
     A space to brainstorm info about yourself that you want to ensure comes through in your application

@@ -123,7 +123,22 @@ class College(models.Model):
     app_platform = models.CharField(max_length=50, blank=True)
     fafsa_required = models.BooleanField(null=True, blank=True)
     css_profile_required = models.BooleanField(null=True, blank=True)
-    proof_acceptances = models.IntegerField(default=0)
+    # Relevance proxy, not really a count any more: whole numbers are people
+    # Jacob knows who got in, and 0.1 marks a college that is obviously worth
+    # showing without anyone having got in. Float because 0.1 in an
+    # IntegerField silently truncates to 0 and means the opposite.
+    proof_acceptances = models.FloatField(default=0)
+
+    # Who the college admits. IPEDS doesn't carry this in our CSV, so it is
+    # hand-entered and 'all' is the assumption until someone says otherwise.
+    GENDER_ADMISSION_CHOICES = [
+        ('all', 'All genders'),
+        ('women', "Women's college"),
+        ('men', "Men's college"),
+    ]
+    gender_admission = models.CharField(
+        max_length=10, choices=GENDER_ADMISSION_CHOICES, default='all'
+    )
 
     # Future canonical (blank for now; will be populated from official sources)
     restrictive_ea = models.CharField(max_length=5, blank=True)

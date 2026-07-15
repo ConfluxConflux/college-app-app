@@ -14,6 +14,13 @@ class Applicant(models.Model):
     focus_draft = models.TextField(blank=True)  # shared Focus Write scratchpad
     word_counter_draft = models.TextField(blank=True)  # Word Counter scratchpad
 
+    # Single-gender colleges are irrelevant to most applicants and essential to
+    # some, and the app has no business inferring which from anything else it
+    # knows. Default True so nobody is quietly filtered out of anywhere; saying
+    # no sinks them down the list rather than hiding them.
+    considering_womens_colleges = models.BooleanField(default=True)
+    considering_mens_colleges = models.BooleanField(default=True)
+
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
 

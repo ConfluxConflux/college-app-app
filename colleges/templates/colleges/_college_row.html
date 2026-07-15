@@ -20,6 +20,15 @@
       title="{% if field_name == 'name' %}Shift-click to edit name{% else %}Click to edit {{ field_label }}{% endif %}">
     {% if field_name == 'name' %}
       <strong>{{ college.name }}</strong>
+      {% comment %}
+        Who a college admits is a fact about it, so it's stated plainly rather
+        than being the reason a row quietly went missing.
+      {% endcomment %}
+      {% if college.college.gender_admission == 'women' %}
+      <span class="gender-flag gender-women">women&rsquo;s college</span>
+      {% elif college.college.gender_admission == 'men' %}
+      <span class="gender-flag gender-men">men&rsquo;s college</span>
+      {% endif %}
     {% elif field_name == 'apply_status' %}
       <span class="tag {{ college.status_color|default:'pill-not_applying' }} is-light">{{ college.get_apply_status_display|default:"Not Applying" }}</span>
       <form style="position:absolute;inset:0;margin:0;padding:0;"

@@ -1242,6 +1242,21 @@ td.compare-cell [x-show="!open"] {
 }
 .add-college-result--custom:hover { background: #f5f8ff; border-color: var(--bulma-primary, #14b8a6); }
 
+/* Single-gender colleges, stated next to the name. */
+.gender-flag {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+  padding: 0.1em 0.4em;
+  border-radius: 3px;
+  white-space: nowrap;
+  margin-left: 0.35rem;
+  vertical-align: middle;
+}
+.gender-women { background: #f6e2f0; color: #8a3a72; }
+.gender-men   { background: #dfe8f5; color: #2f5a8a; }
+
 /* All Colleges: marks a college someone you know has gotten into. */
 .certified-dot {
   color: #2a9d8f;

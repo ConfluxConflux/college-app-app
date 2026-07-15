@@ -253,7 +253,24 @@ def college_browse(request):
         qs = qs.filter(Q(name__icontains=search) | Q(city__icontains=search)
                        | Q(state__icontains=search))
 
-    qs = qs.order_by('status_rank', 'certified', 'shown_name')
+    # A single-gender college you've said you're not considering goes to the
+    # scrapheap — below everything else, but still there and still findable.
+    # Only within a status block: if you've marked one Applying, you clearly
+    # mean it, and it stays where it belongs.
+    excluded_genders = []
+    if not applicant.considering_womens_colleges:
+        excluded_genders.append('women')
+    if not applicant.considering_mens_colleges:
+        excluded_genders.append('men')
+    if excluded_genders:
+        qs = qs.annotate(gender_rank=Case(
+            When(gender_admission__in=excluded_genders, then=Value(1)),
+            default=Value(0),
+            output_field=IntegerField(),
+        ))
+        qs = qs.order_by('status_rank', 'gender_rank', 'certified', 'shown_name')
+    else:
+        qs = qs.order_by('status_rank', 'certified', 'shown_name')
 
     # 2,504 rows is too many for one page, and nobody scrolls that far.
     paginator = Paginator(qs, 100)

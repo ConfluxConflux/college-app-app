@@ -90,8 +90,20 @@ def feedback(request):
 def profile(request):
     applicant = request.user.applicant
     if request.method == 'POST':
-        applicant.brainstorm = request.POST.get('brainstorm', '')
-        applicant.save()
+        # Two forms post here. The brainstorm box autosaves on every keystroke
+        # and sends only itself, so each form must say what it is — otherwise
+        # typing a note would read the absent checkboxes as unchecked and
+        # quietly switch them off.
+        form = request.POST.get('form', 'brainstorm')
+        if form == 'preferences':
+            applicant.considering_womens_colleges = 'considering_womens_colleges' in request.POST
+            applicant.considering_mens_colleges = 'considering_mens_colleges' in request.POST
+            applicant.save(update_fields=[
+                'considering_womens_colleges', 'considering_mens_colleges',
+            ])
+        else:
+            applicant.brainstorm = request.POST.get('brainstorm', '')
+            applicant.save(update_fields=['brainstorm'])
     return render(request, 'core/profile.html', {'applicant': applicant})
 
 
