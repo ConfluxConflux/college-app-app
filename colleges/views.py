@@ -124,16 +124,12 @@ STATUS_DOT_COLOR = {
     'withdrawn':   '#5a4038',
 }
 
-# Hearing back is the part of this that is actually an event, so those statuses
-# get confetti in their own colours — saturated versions of the row colours,
-# since the row backgrounds are pale enough to vanish against the page.
-# Rejections get it too: you still did the thing, and a grey page is no kinder.
+# Only the two good outcomes get confetti, in their own colours — saturated
+# versions of the row colours, since the row backgrounds are pale enough to
+# vanish against the page. A deferral or a rejection is not a celebration.
 STATUS_CONFETTI = {
-    'applied':    ['#43a047', '#2e7d32', '#a5dba8'],
-    'accepted':   ['#4caf50', '#1e7d22', '#b6e8b8'],
-    'deferred':   ['#f0b429', '#c98a00', '#ffe6a8'],
-    'waitlisted': ['#f08c2e', '#c25f00', '#ffd7ad'],
-    'rejected':   ['#e05252', '#b02020', '#f7bcbc'],
+    'applied':  ['#43a047', '#2e7d32', '#a5dba8'],
+    'accepted': ['#4caf50', '#1e7d22', '#b6e8b8'],
 }
 
 
