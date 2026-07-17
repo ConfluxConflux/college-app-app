@@ -1559,6 +1559,36 @@ body.focus-mode .pomo-chip-show { top: 14px; }
 .pomo-chip-show.pomo-chip--inline { position: static; background: transparent; }
 .pomo-chip--inline .pomo-chip-task { max-width: 160px; }
 
+/* --- Timer-done alert --- */
+/* Bottom-right, opposite the chip's top-right, so a timer ending while you
+   work never covers the countdown or the page. It waits as long as it takes:
+   no auto-dismiss, because it is asking a question. */
+.pomo-alert {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 45;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  max-width: min(20rem, calc(100vw - 32px));
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-left: 3px solid var(--bulma-primary, #2a9d8f);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.14);
+  backdrop-filter: blur(3px);
+}
+.pomo-alert-title { font-weight: 700; font-size: 0.95rem; color: #2a2a2a; }
+.pomo-alert-sub {
+  font-size: 0.8rem;
+  color: #777;
+  margin-top: 0.15rem;
+  overflow-wrap: anywhere;
+}
+.pomo-alert-actions { display: flex; gap: 0.5rem; align-items: center; }
+
 /* --- Interstitial overlays (enraged Potamus + neutral confirm) --- */
 .pomo-lock {
   position: fixed;
@@ -1678,6 +1708,31 @@ body.focus-mode .pomo-chip-show { top: 14px; }
 .pomo-dur-in .input { width: 5rem; }
 .pomo-start { align-self: flex-start; }
 .pomo-hint { font-size: 0.82rem; color: #999; font-style: italic; }
+.pomo-label-opt { font-weight: 400; color: #999; font-size: 0.85em; }
+
+/* Goal nag (Hippomodoro started with no goal) — small, centred, dismissible.
+   Same shape as the paste warning: it interrupts, then gets out of the way. */
+.pomo-nag {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 1rem;
+}
+.pomo-nag-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.18);
+  font-family: 'Libre Baskerville', Georgia, serif;
+}
+.pomo-nag-hippo { width: 120px; max-width: 50%; margin: 0 auto 0.75rem; display: block; }
 
 /* Running view */
 .pomo-running { text-align: center; padding-top: 0.5rem; }

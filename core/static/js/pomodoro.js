@@ -6,7 +6,8 @@
  *
  * Responsibilities:
  *   - own the localStorage state + expose window.Hippomodoro for the Timer page
- *   - tick once/second, render the top-right chip, handle phase expiry (force-return to timer)
+ *   - tick once/second, render the top-right chip, handle phase expiry (park the
+ *     session and raise the corner alert — expiry never navigates for you)
  *   - enforce Hippomodoro deterrents (snort, tab title/favicon flip, enraged-Potamus interstitial,
  *     beforeunload close-dialog) and the neutral plain-Pomodoro Focus-Write guard
  */
@@ -118,12 +119,6 @@
     s.task = (task || '').trim();
     save(s);
   }
-  function consumeEvent() {
-    var s = load();
-    if (!s || !s.event) return;
-    s.event = null;
-    save(s);
-  }
   function setHidden(hidden) {
     var s = load();
     if (!s) return;
@@ -142,17 +137,13 @@
   function handleExpiry(s) {
     if (s.phase === 'work') {
       s.event = 'work_done';
-      if (s.mode === 'hippomodoro') {
-        // Hold — the break starts only after the focus check-in is resolved.
-        s.running = false;
-        s.endAt = null;
-        s.pendingBreak = true;
-      } else {
-        // Plain Pomodoro: break starts immediately.
-        s.phase = 'break';
-        s.endAt = Date.now() + s.breakMin * 60000;
-        s.running = true;
-      }
+      // Both modes hold: the break starts when you say so, not when the clock
+      // says so. Plain Pomodoro used to start it here, which meant the break
+      // burned down while you kept working and "keep working" was a lie.
+      // Hippomodoro additionally gates it behind the focus check-in.
+      s.running = false;
+      s.endAt = null;
+      s.pendingBreak = true;
     } else {
       s.event = 'break_done';
       s.running = false;
@@ -168,13 +159,18 @@
     restoreChrome();
     save(s);
     playDing();
-    redirectToTimer();
+    announceExpiry(s);
   }
 
-  function redirectToTimer() {
+  // Expiry never navigates. It parks the session and says so; you decide when
+  // to move. s.event is the unresolved marker that outlives the alert — it
+  // keeps the chip reading "time's up" and the timer page showing the choice,
+  // so dismissing the alert defers the decision instead of losing it.
+  function announceExpiry(s) {
+    // On the timer page the page itself already shows the choice.
     if (window.location.pathname === TIMER_PATH) { notify(); return; }
-    suppressUnload = true;
-    window.location.href = TIMER_URL;
+    showAlert(s);
+    notify();
   }
 
   // ---------------------------------------------------------------- navigation guards
@@ -349,6 +345,28 @@
     var el = document.getElementById('hippo-lock');
     if (el) el.style.display = 'none';
   }
+  // Timer-done alert: a corner card, not an overlay — it announces, it doesn't
+  // seize. Wording and buttons flex between the two things that can expire.
+  function showAlert(s) {
+    var el = document.getElementById('hippo-alert');
+    if (!el) return;
+    var workDone = s.event === 'work_done';
+    var title = document.getElementById('hippo-alert-title');
+    var sub = document.getElementById('hippo-alert-sub');
+    var go = document.getElementById('hippo-alert-go');
+    var stay = document.getElementById('hippo-alert-stay');
+    if (title) title.textContent = workDone ? "Time's up." : "Break's over.";
+    if (sub) sub.textContent = workDone ? (s.task || '') : '';
+    if (sub) sub.style.display = (workDone && s.task) ? '' : 'none';
+    if (go) go.textContent = workDone ? 'Start break' : 'Start another';
+    if (stay) stay.textContent = workDone ? 'Keep working' : 'Dismiss';
+    el.style.display = 'flex';
+  }
+  function hideAlert() {
+    var el = document.getElementById('hippo-alert');
+    if (el) el.style.display = 'none';
+  }
+
   function showConfirm() {
     var el = document.getElementById('hippo-confirm');
     if (el) el.style.display = 'flex';
@@ -373,6 +391,20 @@
       hideLock();
       if (pendingNav) { var u = pendingNav; pendingNav = null; doNavigate(u); }
     });
+    var alertGo = document.getElementById('hippo-alert-go');
+    var alertStay = document.getElementById('hippo-alert-stay');
+    if (alertGo) alertGo.addEventListener('click', function () {
+      hideAlert();
+      var s = load();
+      // Plain Pomodoro has no gate, so the button means what it says: the break
+      // starts here and you land on it running. Hippomodoro's break waits for
+      // the check-in the timer page puts in front of you.
+      if (s && s.event === 'work_done' && s.mode === 'pomodoro') startBreak();
+      doNavigate(TIMER_URL);
+    });
+    // Leaves s.event set on purpose — see announceExpiry.
+    if (alertStay) alertStay.addEventListener('click', function () { hideAlert(); });
+
     if (confStay) confStay.addEventListener('click', function () { pendingNav = null; hideConfirm(); });
     if (confLeave) confLeave.addEventListener('click', function () {
       hideConfirm();
@@ -389,8 +421,11 @@
   function render() {
     var chip = document.getElementById('hippo-chip');
     var showBtn = document.getElementById('hippo-chip-show');
-    if (!chip) return;
     var s = load();
+    // The alert never outlives the event it announces — resolving or resetting
+    // in another tab lands here via the storage listener.
+    if (!s || !s.event) hideAlert();
+    if (!chip) return;
     if (!isActive(s)) {
       chip.style.display = 'none';
       if (showBtn) showBtn.style.display = 'none';
@@ -406,7 +441,7 @@
     var task = document.getElementById('hippo-chip-task');
     var icon = document.getElementById('hippo-chip-icon');
     var clock = document.getElementById('hippo-chip-clock');
-    if (task) task.textContent = s.phase === 'break' ? 'Break' : (s.task || '(no task)');
+    if (task) task.textContent = s.phase === 'break' ? 'Break' : (s.task || '(no goal)');
     if (icon) icon.textContent = s.mode === 'hippomodoro' ? '🦛' : '⏳';
     if (clock) clock.textContent = s.event ? "time's up" : fmt(remainingMs(s));
     chip.classList.toggle('pomo-chip--break', s.phase === 'break');
@@ -427,7 +462,7 @@
   window.Hippomodoro = {
     start: start, pause: pause, resume: resume, reset: reset,
     startBreak: startBreak, startAnother: startAnother,
-    setTask: setTask, consumeEvent: consumeEvent, setHidden: setHidden,
+    setTask: setTask, setHidden: setHidden,
     getState: load, remainingMs: remainingMs, attemptNavigate: attemptNavigate,
     unlockAudio: unlockAudio, playSnort: playSnort, PENALTY_TEXT: PENALTY_TEXT
   };

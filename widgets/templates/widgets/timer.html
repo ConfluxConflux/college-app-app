@@ -14,8 +14,6 @@
 
   {# ------------------------------------------------------------- SETUP #}
   <div x-show="view === 'setup'" class="pomo-setup">
-    <p x-show="toast" class="pomo-toast" x-text="toast"></p>
-
     <h1 class="pomo-h1">Pick your timer</h1>
 
     <div class="pomo-modes">
@@ -32,8 +30,12 @@
     </div>
 
     <div class="pomo-form">
-      <label class="pomo-label">What are you working on?</label>
-      <input type="text" class="input" x-model="task" placeholder="e.g. Draft my Common App essay"
+      <label class="pomo-label">
+        Goal
+        <span class="pomo-label-opt" x-show="mode === 'pomodoro'">(optional)</span>
+      </label>
+      <input type="text" class="input" x-model="task" x-ref="goalInput"
+             placeholder="e.g. Draft my Common App essay"
              @keydown.enter="startTimer()" maxlength="120">
 
       <div class="pomo-durations">
@@ -47,16 +49,26 @@
         </label>
       </div>
 
-      <button type="button" class="button is-primary is-medium pomo-start" :disabled="!canStart" @click="startTimer()">Start</button>
-      <p class="pomo-hint" x-show="!canStart">Name your task to begin.</p>
+      {# Never disabled: a plain Pomodoro needs no goal, and Hippomodoro would
+         rather have the hippo say why than grey the button out silently. #}
+      <button type="button" class="button is-primary is-medium pomo-start" @click="startTimer()">Start</button>
+    </div>
+  </div>
+
+  {# Hippomodoro started with no goal — the hippo asks for one. #}
+  <div x-show="goalNag" x-cloak class="pomo-nag" @click.self="dismissGoalNag()">
+    <div class="pomo-nag-card">
+      <img class="pomo-nag-hippo" src="{% static 'img/professor_potamus.png' %}" alt="Professor Potamus">
+      <p class="pomo-bubble pomo-bubble--angry">Hold on! What are you working on? I cannot hold you accountable for
+        &ldquo;nothing in particular.&rdquo; Name your goal and I will keep you locked in.</p>
+      <button type="button" class="button is-primary" @click="dismissGoalNag()">Fine, I will name it</button>
     </div>
   </div>
 
   {# ------------------------------------------------------------- RUNNING #}
   <div x-show="view === 'running'" class="pomo-running">
-    <p x-show="toast" class="pomo-toast" x-text="toast"></p>
     <div class="pomo-phase" x-text="s && s.phase === 'break' ? 'Break' : 'Focus'"></div>
-    <div class="pomo-task-label" x-text="s ? (s.phase === 'break' ? 'Break' : s.task) : ''"></div>
+    <div class="pomo-task-label" x-text="s ? (s.phase === 'break' ? 'Break' : (s.task || '(no goal)')) : ''"></div>
 
     <div class="pomo-ring-wrap">
       <svg viewBox="0 0 200 200" class="pomo-ring">
@@ -151,6 +163,20 @@
     </div>
   </div>
 
+  {# ------------------------------------------------- WORK DONE (plain Pomodoro) #}
+  {# Hippomodoro's equivalent is the check-in above. This is the same choice the
+     corner alert offers, for when you are already looking at the timer. #}
+  <div x-show="view === 'workdone'" class="pomo-checkin">
+    <div class="pomo-checkin-card">
+      <img class="pomo-checkin-hippo" :src="proudImg" @error="$el.src = angryImg" alt="Professor Potamus">
+      <p class="pomo-bubble">Time's up<span x-show="s && s.task" x-text="s ? ' on “' + s.task + '”' : ''"></span>. Ready for your break?</p>
+      <div class="pomo-checkin-opts">
+        <button type="button" class="button is-primary" @click="startBreakNow()">Start break</button>
+        <button type="button" class="focus-back-btn" @click="reset()">I'm done</button>
+      </div>
+    </div>
+  </div>
+
   {# ------------------------------------------------------------- BREAK DONE #}
   <div x-show="view === 'breakdone'" class="pomo-checkin">
     <div class="pomo-checkin-card">
@@ -173,7 +199,7 @@
       return {
         s: null, now: Date.now(),
         mode: 'pomodoro', task: '', workMin: 25, breakMin: 5,
-        branch: null, penalty: '', careMsg: null, editingGoal: false, newGoal: '', toast: null, pasteWarn: false,
+        branch: null, penalty: '', careMsg: null, editingGoal: false, newGoal: '', pasteWarn: false, goalNag: false,
         proudImg: "{% static 'img/potamus_proud.png' %}",
         angryImg: "{% static 'img/professor_potamus.png' %}",
 
@@ -184,17 +210,14 @@
         },
         refresh() {
           this.s = window.Hippomodoro.getState();
-          if (this.s && this.s.event === 'work_done' && this.s.mode === 'pomodoro') {
-            this.toast = "Time's up — break started!";
-            window.Hippomodoro.consumeEvent();
-            this.s = window.Hippomodoro.getState();
-          }
         },
         get view() {
           const s = this.s;
           if (!s) return 'setup';
           if (s.event === 'break_done') return 'breakdone';
-          if (s.event === 'work_done' && s.mode === 'hippomodoro') return 'checkin';
+          // Hippomodoro gates the break behind the check-in; plain Pomodoro
+          // just asks. Neither starts the break on its own any more.
+          if (s.event === 'work_done') return s.mode === 'hippomodoro' ? 'checkin' : 'workdone';
           if (s.running || s.pausedRemainingMs) return 'running';
           return 'setup';
         },
@@ -202,25 +225,33 @@
         get totalMs() { if (!this.s) return 1; return (this.s.phase === 'break' ? this.s.breakMin : this.s.workMin) * 60000; },
         get fraction() { return Math.max(0, Math.min(1, this.remaining / this.totalMs)); },
         get clock() { const t = Math.round(this.remaining / 1000); const m = Math.floor(t / 60), sec = t % 60; return m + ':' + (sec < 10 ? '0' : '') + sec; },
-        get canStart() { return this.task.trim().length > 0; },
         get penaltyText() { return window.Hippomodoro.PENALTY_TEXT; },
         norm(x) { return (x || '').replace(/\s+/g, ' ').trim().toLowerCase(); },
         get penaltyOk() { return this.norm(this.penalty) === this.norm(this.penaltyText); },
         get isHippo() { return this.s && this.s.mode === 'hippomodoro'; },
 
         startTimer() {
-          if (!this.canStart) return;
+          // Hippomodoro is accountability — it needs something to hold you to,
+          // and "nothing in particular" is how a session drifts. A plain
+          // Pomodoro is just a clock, so it asks for nothing.
+          if (this.mode === 'hippomodoro' && !this.task.trim()) {
+            this.goalNag = true;
+            window.Hippomodoro.playSnort();
+            return;
+          }
           window.Hippomodoro.start({ mode: this.mode, task: this.task, workMin: this.workMin, breakMin: this.breakMin });
-          this.toast = null; this.refresh();
+          this.refresh();
         },
+        dismissGoalNag() { this.goalNag = false; this.$nextTick(() => this.$refs.goalInput && this.$refs.goalInput.focus()); },
         pause() { window.Hippomodoro.pause(); this.refresh(); },
         resume() { window.Hippomodoro.resume(); this.refresh(); },
-        reset() { window.Hippomodoro.reset(); this.branch = null; this.penalty = ''; this.careMsg = null; this.toast = null; this.editingGoal = false; this.refresh(); },
+        reset() { window.Hippomodoro.reset(); this.branch = null; this.penalty = ''; this.careMsg = null; this.editingGoal = false; this.refresh(); },
         chooseBranch(b) {
           this.branch = b; this.careMsg = null;
           if (b === 'laser') this.fireConfetti();
           if (b === 'lockin') window.Hippomodoro.playSnort();
         },
+        startBreakNow() { window.Hippomodoro.startBreak(); this.refresh(); },
         resolveCheckin() {
           window.Hippomodoro.startBreak();
           this.branch = null; this.penalty = ''; this.careMsg = null; this.editingGoal = false;
@@ -238,7 +269,7 @@
         },
         saveGoal() { window.Hippomodoro.setTask(this.newGoal); this.editingGoal = false; this.refresh(); },
         blockPaste() { this.pasteWarn = true; if (window.Hippomodoro) window.Hippomodoro.playSnort(); },
-        startAnother() { window.Hippomodoro.startAnother(); this.branch = null; this.penalty = ''; this.careMsg = null; this.toast = null; this.refresh(); },
+        startAnother() { window.Hippomodoro.startAnother(); this.branch = null; this.penalty = ''; this.careMsg = null; this.refresh(); },
         fireConfetti() {
           if (!window.confetti) return;
           confetti({ particleCount: 120, angle: 60, spread: 70, origin: { x: 0, y: 0.65 } });

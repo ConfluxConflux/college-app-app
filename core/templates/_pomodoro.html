@@ -12,6 +12,19 @@
 </div>
 <button id="hippo-chip-show" type="button" class="pomo-chip-show focus-back-btn" style="display:none" data-hippo-ui>Show timer</button>
 
+{# Timer-done alert — a corner card, deliberately not an overlay. Wording and
+   buttons are set by pomodoro.js depending on whether work or a break ended. #}
+<div id="hippo-alert" class="pomo-alert" style="display:none" data-hippo-ui role="status" aria-live="polite">
+  <div class="pomo-alert-body">
+    <p id="hippo-alert-title" class="pomo-alert-title">Time's up.</p>
+    <p id="hippo-alert-sub" class="pomo-alert-sub"></p>
+  </div>
+  <div class="pomo-alert-actions">
+    <button id="hippo-alert-go" type="button" class="button is-primary is-small">Start break</button>
+    <button id="hippo-alert-stay" type="button" class="focus-back-btn">Keep working</button>
+  </div>
+</div>
+
 {# Enraged Professor Potamus interstitial (Hippomodoro: leaving a productive zone / return ambush) #}
 <div id="hippo-lock" class="pomo-lock" style="display:none" data-hippo-ui>
   <div class="pomo-lock-card">
