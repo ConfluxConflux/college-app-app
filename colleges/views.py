@@ -124,6 +124,18 @@ STATUS_DOT_COLOR = {
     'withdrawn':   '#5a4038',
 }
 
+# Hearing back is the part of this that is actually an event, so those statuses
+# get confetti in their own colours — saturated versions of the row colours,
+# since the row backgrounds are pale enough to vanish against the page.
+# Rejections get it too: you still did the thing, and a grey page is no kinder.
+STATUS_CONFETTI = {
+    'applied':    ['#43a047', '#2e7d32', '#a5dba8'],
+    'accepted':   ['#4caf50', '#1e7d22', '#b6e8b8'],
+    'deferred':   ['#f0b429', '#c98a00', '#ffe6a8'],
+    'waitlisted': ['#f08c2e', '#c25f00', '#ffd7ad'],
+    'rejected':   ['#e05252', '#b02020', '#f7bcbc'],
+}
+
 
 def college_map(request):
     """Map tab: plots the applicant's list colleges (those with coordinates),
@@ -570,13 +582,18 @@ def college_edit_cell(request, pk, field):
         if field in CHOICE_FIELDS and value:
             if value not in {v for v, _ in CHOICE_FIELDS[field]}:
                 return HttpResponse(f'Invalid {field}', status=400)
+        previous = college.apply_status
         setattr(college, field, value)
         college.save()
         ctx = {'college': college, 'table_fields': ALL_TABLE_FIELDS, 'optional_field_names': {f[0] for f in OPTIONAL_FIELDS}}
         if field == 'apply_status':
             applicant = request.user.applicant
             ctx['platform_tracker'] = _build_platform_tracker(applicant)
-            return render(request, 'colleges/_college_row_with_tracker.html', ctx)
+            response = render(request, 'colleges/_college_row_with_tracker.html', ctx)
+            # Only on the way in: re-picking the status you already had isn't news.
+            if value != previous and value in STATUS_CONFETTI:
+                response['HX-Trigger'] = json.dumps({'confetti': {'colors': STATUS_CONFETTI[value]}})
+            return response
         return render(request, 'colleges/_college_row.html', ctx)
 
     current_value = getattr(college, field, '')

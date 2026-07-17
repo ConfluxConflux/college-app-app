@@ -3,16 +3,10 @@
 {% block title %}Essays — HIPPOCAMPUS{% endblock %}
 
 {% block extra_head %}
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 <script>
-function fireConfetti(colors) {
-  const o = colors ? { colors } : {};
-  confetti({ particleCount: 120, angle: 60,  spread: 70, origin: { x: 0,   y: 0.65 }, ...o });
-  confetti({ particleCount: 120, angle: 120, spread: 70, origin: { x: 1,   y: 0.65 }, ...o });
-  confetti({ particleCount: 80,  spread: 360, startVelocity: 20, gravity: 0.6, origin: { x: 0.5, y: 0.45 }, ...o });
-}
+/* fireConfetti lives in base.html.
 
-/* Progress is worth celebrating, not just finishing — every step forward gets
+   Progress is worth celebrating, not just finishing — every step forward gets
    confetti in that stage's colours. Only forward: dropping Drafted back to WIP
    is a correction, and confetti would be mocking you.
    Saturated versions of the pill colours; the pill backgrounds themselves are
