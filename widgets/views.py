@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
@@ -43,6 +44,8 @@ def focus_write(request):
     return render(request, 'widgets/focus_write.html', {
         'draft': applicant.focus_draft if applicant else '',
         'can_save': applicant is not None,
+        # Widgets-only build has no accounts, so don't mention them.
+        'widgets_only': settings.WIDGETS_ONLY,
     })
 
 

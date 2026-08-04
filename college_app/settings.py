@@ -11,6 +11,14 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
+# Widgets-only build. Set WIDGETS_ONLY=True to serve *just* the widget pages —
+# no tracker, no sign-in, no links to anything else — from this same codebase.
+# It swaps the root URLconf (college_app/widgets_only_urls.py), shadows
+# base.html with college_app/widgets_only_templates/base.html, and drops the
+# login-required middleware (there is nothing logged-in to protect).
+# Run it locally with:  WIDGETS_ONLY=True DEBUG=True python manage.py runserver 8001
+WIDGETS_ONLY = os.environ.get('WIDGETS_ONLY', 'False') == 'True'
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -45,6 +53,11 @@ MIDDLEWARE = [
     'core.middleware.LoginRequiredMiddleware',
 ]
 
+if WIDGETS_ONLY:
+    # Every page is public, and /accounts/login/ doesn't exist in this build,
+    # so the gate would only produce broken redirects.
+    MIDDLEWARE.remove('core.middleware.LoginRequiredMiddleware')
+
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
@@ -52,12 +65,18 @@ AUTHENTICATION_BACKENDS = [
 
 SITE_ID = 1
 
-ROOT_URLCONF = 'college_app.urls'
+ROOT_URLCONF = 'college_app.widgets_only_urls' if WIDGETS_ONLY else 'college_app.urls'
+
+# In the widgets-only build this dir comes first, so its base.html shadows
+# core/templates/base.html (the one with the full navbar).
+TEMPLATE_DIRS = [BASE_DIR / 'core' / 'templates']
+if WIDGETS_ONLY:
+    TEMPLATE_DIRS.insert(0, BASE_DIR / 'college_app' / 'widgets_only_templates')
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'core' / 'templates'],
+        'DIRS': TEMPLATE_DIRS,
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

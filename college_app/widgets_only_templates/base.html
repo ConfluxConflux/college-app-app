@@ -1,0 +1,84 @@
+{% load static %}
+{% comment %}
+  base.html for the widgets-only build. This dir is prepended to TEMPLATES DIRS
+  when WIDGETS_ONLY=True, so it shadows core/templates/base.html and every
+  widget page gets this shell instead — same fonts, colours and Pomodoro engine,
+  but a navbar with nothing in it except the widgets themselves. No sign-in, no
+  account modal, no links to the tracker.
+{% endcomment %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <!-- Prevent dark-mode FOUC before external CSS loads -->
+  <style>html,body{background:#fff;color-scheme:light}</style>
+  <title>{% block title %}HIPPOCAMPUS Widgets{% endblock %}</title>
+  <meta property="og:title" content="{% block og_title %}Hippocampus Widgets{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Free writing tools for college applications: word counter, focus write, pomodoro timer, time calculator.{% endblock %}">
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="{% static 'img/professor_potamus.png' %}">
+  <link rel="icon" type="image/png" href="{% static 'img/professor_potamus.png' %}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Open+Sans:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script>
+    /* Same one confetti implementation as the full app — the Pomodoro page
+       fires it directly, and htmx responses can fire it with an HX-Trigger of
+       {"confetti": {"colors": [...]}}. */
+    function fireConfetti(colors) {
+      if (!window.confetti) return;
+      const o = colors && colors.length ? { colors } : {};
+      confetti({ particleCount: 120, angle: 60,  spread: 70, origin: { x: 0,   y: 0.65 }, ...o });
+      confetti({ particleCount: 120, angle: 120, spread: 70, origin: { x: 1,   y: 0.65 }, ...o });
+      confetti({ particleCount: 80,  spread: 360, startVelocity: 20, gravity: 0.6, origin: { x: 0.5, y: 0.45 }, ...o });
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      document.body.addEventListener('confetti', function(evt) {
+        fireConfetti(evt.detail && evt.detail.colors);
+      });
+    });
+  </script>
+  {% block extra_head %}{% endblock %}
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.8/dist/cdn.min.js"></script>
+</head>
+<body>
+  <nav class="navbar is-dark" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+      <a class="navbar-item has-text-weight-bold" href="{% url 'widgets:home' %}">
+        HIPPOCAMPUS
+      </a>
+      <span class="navbar-item has-text-grey-light is-hidden-mobile" style="letter-spacing:0.08em; text-transform:uppercase; font-size:0.75rem;">
+        college application widgets
+      </span>
+    </div>
+  </nav>
+
+  <section class="section">
+    <div class="container is-fluid">
+      {% block content %}{% endblock %}
+    </div>
+  </section>
+
+  {% block extra_js %}{% endblock %}
+
+  {% include "_pomodoro.html" %}
+  <script id="hippo-engine"
+          src="{% static 'js/pomodoro.js' %}"
+          data-timer-url="{% url 'widgets:timer' %}"
+          data-snort-url="{% static 'audio/hippo_snort.mp3' %}"
+          data-angry-img="{% static 'img/professor_potamus.png' %}"></script>
+
+  <script>
+    document.body.addEventListener('htmx:configRequest', function(evt) {
+      evt.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+    });
+  </script>
+</body>
+</html>
