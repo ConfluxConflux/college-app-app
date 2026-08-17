@@ -12,8 +12,8 @@
 </div>
 <button id="hippo-chip-show" type="button" class="pomo-chip-show focus-back-btn" style="display:none" data-hippo-ui>Show timer</button>
 
-{# Timer-done alert — a corner card, deliberately not an overlay. Wording and
-   buttons are set by pomodoro.js depending on whether work or a break ended. #}
+{% comment %}Timer-done alert — a corner card, deliberately not an overlay. Wording and
+   buttons are set by pomodoro.js depending on whether work or a break ended.{% endcomment %}
 <div id="hippo-alert" class="pomo-alert" style="display:none" data-hippo-ui role="status" aria-live="polite">
   <div class="pomo-alert-body">
     <p id="hippo-alert-title" class="pomo-alert-title">Time's up.</p>

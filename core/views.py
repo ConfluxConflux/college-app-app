@@ -49,7 +49,10 @@ def are_you_sure(request):
             return process_signup(request, sociallogin)
         else:
             request.session.pop('socialaccount_sociallogin', None)
-            return redirect('https://hippocampus.college')
+            # Host-relative on purpose: the tracker is not always served from
+            # hippocampus.college, and cancelling signup shouldn't bounce you
+            # to a different site.
+            return redirect('core:landing')
     return render(request, 'core/are_you_sure.html')
 
 

@@ -10,7 +10,7 @@
   <title>{% block title %}HIPPOCAMPUS{% endblock %}</title>
   <meta property="og:title" content="{% block og_title %}Hippocampus{% endblock %}">
   <meta property="og:description" content="{% block og_description %}Your personal college application tracker.{% endblock %}">
-  <meta property="og:url" content="https://hippocampus.college">
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
   <meta property="og:type" content="website">
   <meta property="og:image" content="{% static 'img/professor_potamus.png' %}">
   <link rel="icon" type="image/png" href="{% static 'img/professor_potamus.png' %}">

@@ -49,8 +49,8 @@
         </label>
       </div>
 
-      {# Never disabled: a plain Pomodoro needs no goal, and Hippomodoro would
-         rather have the hippo say why than grey the button out silently. #}
+      {% comment %}Never disabled: a plain Pomodoro needs no goal, and Hippomodoro would
+         rather have the hippo say why than grey the button out silently.{% endcomment %}
       <button type="button" class="button is-primary is-medium pomo-start" @click="startTimer()">Start</button>
     </div>
   </div>
@@ -164,8 +164,8 @@
   </div>
 
   {# ------------------------------------------------- WORK DONE (plain Pomodoro) #}
-  {# Hippomodoro's equivalent is the check-in above. This is the same choice the
-     corner alert offers, for when you are already looking at the timer. #}
+  {% comment %}Hippomodoro's equivalent is the check-in above. This is the same choice the
+     corner alert offers, for when you are already looking at the timer.{% endcomment %}
   <div x-show="view === 'workdone'" class="pomo-checkin">
     <div class="pomo-checkin-card">
       <img class="pomo-checkin-hippo" :src="proudImg" @error="$el.src = angryImg" alt="Professor Potamus">
