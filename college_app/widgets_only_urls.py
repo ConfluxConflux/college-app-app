@@ -7,8 +7,10 @@ to stumble into the half-finished parts of the tracker from here.
 from django.urls import include, path
 from django.views.generic import RedirectView
 
+from widgets import views as widget_views
+
 urlpatterns = [
-    path('', RedirectView.as_view(url='/widgets/', permanent=False)),
+    path('', widget_views.welcome, name='welcome'),
     # Short links that predate /widgets/, kept working.
     path('time', RedirectView.as_view(url='/widgets/time-calculator/', permanent=True)),
     path('words', RedirectView.as_view(url='/widgets/word-counter/', permanent=True)),

@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
@@ -35,6 +34,12 @@ def scratchpad_save(request, slot):
     return HttpResponse(status=204)
 
 
+def welcome(request):
+    """Front door of the widgets-only build (its "/"). Not routed in the full
+    site, which has its own landing page."""
+    return render(request, 'widgets/welcome.html')
+
+
 def estimator(request):
     return render(request, 'widgets/estimator.html')
 
@@ -44,8 +49,6 @@ def focus_write(request):
     return render(request, 'widgets/focus_write.html', {
         'draft': applicant.focus_draft if applicant else '',
         'can_save': applicant is not None,
-        # Widgets-only build has no accounts, so don't mention them.
-        'widgets_only': settings.WIDGETS_ONLY,
     })
 
 

@@ -1902,3 +1902,22 @@ body.focus-mode .pomo-chip-show { top: 14px; }
   .pomo-modes { flex-direction: column; }
   .pomo-chip-task { max-width: 40vw; }
 }
+
+/* --- "Full App Beta" tab (widgets-only build) ---------------------------
+   The single link out of the standalone widgets site. Pushed to the far right
+   of the tab bar and muted, so it reads as a way out rather than as another
+   widget sitting alongside the six. */
+.tabs li.widgets-exit { margin-left: auto; }
+
+.tabs.is-boxed li.widgets-exit a {
+  color: #8c8c8c;
+  background: transparent;
+  border-color: transparent;
+  font-size: 0.85em;
+}
+
+.tabs.is-boxed li.widgets-exit a:hover {
+  color: #2a9d8f;
+  background: rgba(42, 157, 143, 0.07);
+  border-color: transparent;
+}

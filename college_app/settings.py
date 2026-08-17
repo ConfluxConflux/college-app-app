@@ -19,6 +19,12 @@ ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(','
 # Run it locally with:  WIDGETS_ONLY=True DEBUG=True python manage.py runserver 8001
 WIDGETS_ONLY = os.environ.get('WIDGETS_ONLY', 'False') == 'True'
 
+# Where the "HIPPOCAMPUS Beta" tab in the widgets-only build points. This is the
+# full tracker, which is NOT the same host as the widgets build — once
+# hippocampus.college serves the widgets, set this to the tracker's own
+# hostname (e.g. https://app.hippocampus.college) or the tab links to itself.
+TRACKER_URL = os.environ.get('TRACKER_URL', 'https://hippocampus.college')
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -84,6 +90,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.applicant',
+                'widgets.context_processors.widgets_build',
             ],
         },
     },

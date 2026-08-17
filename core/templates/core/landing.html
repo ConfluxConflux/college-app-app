@@ -57,22 +57,26 @@
       justify-content: center;
     }
 
-    /* Small "Beta" roundel riding at the shoulder of the wordmark. */
+    /* Standard product beta tag: a small filled pill riding at the shoulder of
+       the wordmark. Sans-serif and uppercase so it reads as a label on the
+       name rather than as part of it. */
     .beta {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 3.2em;
-      height: 3.2em;
+      display: inline-block;
       flex: none;
-      margin-top: 0.2em;
-      border: 1.5px solid rgba(42, 157, 143, 0.4);
-      border-radius: 50%;
-      font-size: 0.62rem;
+      margin-top: 0.5em;
+      margin-left: 0.5rem;
+      padding: 0.34em 0.6em;
+      border-radius: 999px;
+      background: var(--periwinkle-dark);
+      color: #fff;
+      font-family: 'Open Sans', system-ui, -apple-system, sans-serif;
+      font-size: 0.7rem;
       font-weight: 700;
-      letter-spacing: 0.02em;
       line-height: 1;
-      color: rgba(42, 157, 143, 0.7);
+      letter-spacing: 0.12em;
+      /* Offsets the trailing letter-space so the word sits centred in the pill. */
+      text-indent: 0.12em;
+      text-transform: uppercase;
     }
 
     .tagline {
@@ -166,7 +170,7 @@
 </head>
 <body class="version-{{ pin_version|default:1 }}">
   <div class="center">
-    <h1>HIPPOCAMPUS<span class="beta">Beta</span></h1>
+    <h1>HIPPOCAMPUS<span class="beta">BETA</span></h1>
     <p class="tagline">
       a <span class="key">H</span>opefully <span class="key">I</span>ntuitive <span class="key">P</span>latform for <span class="key">P</span>roperly <span class="key">O</span>rganizing<br>
       <span class="key">C</span>ollege <span class="key">A</span>pplication <span class="key">M</span>aterials to <span class="key">P</span>revent <span class="key">U</span>nnecessary <span class="key">S</span>uffering
