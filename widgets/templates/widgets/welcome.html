@@ -148,7 +148,7 @@
 
     /* --- footer ---------------------------------------------------------- */
     footer {
-      margin-top: 0;
+      margin-top: clamp(0.35rem, 1.1vh, 0.75rem);
       padding: 0 1rem;
       text-align: center;
       font-size: clamp(0.75rem, 1.7vh, 0.85rem);
@@ -166,16 +166,44 @@
     .footer-quotes { display: grid; }
     .footer-quotes > div { grid-area: 1 / 1; }
 
+    /* Teal links in the footer, same as the tracker's landing page. */
     footer a {
-      color: #66716f;
+      color: var(--teal);
       text-decoration: underline;
       text-underline-offset: 2px;
     }
-    footer a:hover { color: var(--teal); }
+    footer a:hover { color: #1f7f74; }
 
-    .footer-beta {
-      font-style: normal;
-      font-size: 0.92em;
+    /* The one door out of the widgets. A soft bubble rather than a seventh
+       card, and plum rather than teal, so it reads as "somewhere else"
+       instead of "another widget". */
+    .beta-strip {
+      display: block;
+      width: 100%;
+      max-width: 940px;
+      padding: clamp(0.65rem, 1.5vh, 0.95rem) clamp(1rem, 2vw, 1.6rem);
+      border: 1px solid rgba(107, 91, 149, 0.22);
+      border-radius: 14px;
+      background: rgba(107, 91, 149, 0.06);
+      font-family: 'Open Sans', system-ui, sans-serif;
+      font-size: clamp(0.7rem, 1.5vh, 0.8rem);
+      line-height: 1.55;
+      text-align: center;
+      text-decoration: none;
+      color: #6a6480;
+      transition: background 0.16s ease, border-color 0.16s ease;
+    }
+
+    .beta-strip:hover, .beta-strip:focus-visible {
+      background: rgba(107, 91, 149, 0.11);
+      border-color: rgba(107, 91, 149, 0.42);
+      outline: none;
+    }
+
+    /* The initials that spell HIPPOCAMPUS, same device as the tracker. */
+    .beta-strip .key {
+      color: #6b5b95;
+      font-weight: 700;
     }
 
     /* Footer oscillation, same mechanism as the tracker's landing page.
@@ -256,6 +284,15 @@
     </a>
   </div>
 
+  <a class="beta-strip" href="{{ tracker_url }}" target="_blank" rel="noopener">
+    or try the beta version of the full
+    <span class="key">H</span>opefully <span class="key">I</span>ntuitive <span class="key">P</span>ersonal
+    <span class="key">P</span>latform for <span class="key">O</span>rganizing
+    <span class="key">C</span>ollege <span class="key">A</span>pplication <span class="key">M</span>aterials
+    to <span class="key">P</span>revent <span class="key">U</span>nnecessary <span class="key">S</span>uffering,
+    but be warned that it has bugs and inadequacies that Jacob will not prioritize fixing
+  </a>
+
   <footer>
     <div class="footer-quotes">
     <div class="v1-only">
@@ -269,7 +306,6 @@
       and a <a href="https://beautifulthorns.wixsite.com/home/post/jacob-s-college-application-faq-wip-week#:~:text=%22college%20application%20industrial%20complex.%22" target="_blank" rel="noopener">hatred for the college application industrial complex</a>
     </div>
     </div>
-    <span class="footer-beta"><a href="{{ tracker_url }}" target="_blank" rel="noopener">Full App Beta &rarr;</a></span>
   </footer>
 
   <script>
