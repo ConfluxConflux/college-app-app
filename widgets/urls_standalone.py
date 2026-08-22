@@ -12,7 +12,7 @@ Redirects are 302 rather than 301 on purpose: a 301 sticks in visitors'
 browsers, and these names are new enough to still be worth changing.
 """
 from django.conf import settings
-from django.urls import path
+from django.urls import path, re_path
 from django.views.generic import RedirectView
 
 from . import views
@@ -50,6 +50,13 @@ urlpatterns += [
     # The way through to the full tracker, which lives on its own hostname.
     path('app', _alias(settings.TRACKER_URL), name='full_app'),
     path('full-app', _alias(settings.TRACKER_URL)),
+
+    # Path-preserving, so /app/colleges/ lands on the tracker's own /colleges/
+    # rather than dumping you on its front page.
+    re_path(r'^app/(?P<rest>.*)$', RedirectView.as_view(
+        url=settings.TRACKER_URL.rstrip('/') + '/%(rest)s', query_string=True)),
+    re_path(r'^full-app/(?P<rest>.*)$', RedirectView.as_view(
+        url=settings.TRACKER_URL.rstrip('/') + '/%(rest)s', query_string=True)),
 
     # Autosave endpoint for the word counter and focus write. A real route,
     # not a redirect — a 302 would drop the POST body.

@@ -220,12 +220,25 @@
       color: #717c7b;
     }
 
-    .beta-card { flex: 1; }
+    .beta-card { flex: 1; position: relative; }
+
+    /* Stretch the title's hit area over the whole card, so the card clicks
+       through to the tracker like the other six do. A nested <a> would be
+       invalid HTML, hence the overlay. */
+    .beta-title::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+    }
     .beta-card .card-name { color: var(--teal); }
     .beta-title { text-decoration: none; }
     .beta-title:hover { text-decoration: underline; }
 
+    /* Sits above the stretched overlay so this link stays clickable. */
     .beta-link {
+      position: relative;
+      z-index: 1;
       color: var(--teal);
       text-decoration: underline;
       text-underline-offset: 2px;
@@ -325,7 +338,7 @@
 
     <a class="card" href="{% url 'widgets:estimator' %}">
       <span class="card-name">Activity Time Calculator</span>
-      <span class="card-desc">Helps estimate hours/week or weeks/year.</span>
+      <span class="card-desc">Estimate hours/week or weeks/year.</span>
     </a>
 
     <a class="card" href="{% url 'widgets:advice' %}">
@@ -335,7 +348,7 @@
 
     <a class="card" href="{% url 'widgets:resources' %}">
       <span class="card-name">Resources</span>
-      <span class="card-desc">Other links that Jacob thinks might be useful.</span>
+      <span class="card-desc">Other links that Jacob think might be useful.</span>
     </a>
   </div>
 

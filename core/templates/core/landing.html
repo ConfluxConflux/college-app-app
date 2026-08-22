@@ -25,6 +25,8 @@
       flex-direction: column;
       align-items: center;
       padding-top: 4vh;
+      padding-left: 1rem;
+      padding-right: 1rem;
     }
 
     footer {
@@ -166,13 +168,48 @@
        versions. Everything else is shared and written once. */
     .version-1 .v2-only { display: none; }
     .version-2 .v1-only { display: none; }
+
+    /* Phones. Everything above is sized for a desktop window; without this
+       the wordmark overflows and the buttons are enormous. */
+    @media (max-width: 560px) {
+      body { padding-top: 2.5vh; }
+
+      /* Sized off viewport width so the wordmark always fits beside the tag. */
+      h1 {
+        font-size: min(7.2vw, 3.1rem);
+        letter-spacing: 0.05em;
+      }
+
+      .beta {
+        font-size: 0.55rem;
+        padding: 0.3em 0.5em;
+        margin-left: 0.35rem;
+        margin-top: 0.55em;
+      }
+
+      .tagline { font-size: 0.95rem; line-height: 1.5; }
+
+      .btn {
+        font-size: 1.15rem;
+        padding: 0.6rem 1.1rem;
+        border-width: 2px;
+      }
+
+      .buttons { gap: 0.65rem; width: 100%; max-width: 340px; }
+      .dev-links { font-size: 0.85rem; gap: 0.75rem; }
+      .logo { width: min(52vw, 190px); height: auto; }
+      footer { font-size: 0.8rem; line-height: 1.55; padding: 0.75rem 1rem 1.25rem; }
+
+      /* Fixed breaks leave ragged half-lines at this width. */
+      .br-wide { display: none; }
+    }
   </style>
 </head>
 <body class="version-{{ pin_version|default:1 }}">
   <div class="center">
     <h1>HIPPOCAMPUS<span class="beta">BETA</span></h1>
     <p class="tagline">
-      a <span class="key">H</span>opefully <span class="key">I</span>ntuitive <span class="key">P</span>latform for <span class="key">P</span>roperly <span class="key">O</span>rganizing<br>
+      a <span class="key">H</span>opefully <span class="key">I</span>ntuitive <span class="key">P</span>latform for <span class="key">P</span>roperly <span class="key">O</span>rganizing<br class="br-wide">
       <span class="key">C</span>ollege <span class="key">A</span>pplication <span class="key">M</span>aterials to <span class="key">P</span>revent <span class="key">U</span>nnecessary <span class="key">S</span>uffering
     </p>
     <div class="buttons">
@@ -187,13 +224,13 @@
     <img src="{% static 'img/professor_potamus_aligned.png' %}" alt="HIPPOCAMPUS logo" class="logo v2-only">
   </div>
   <footer class="v1-only" style="max-width: 680px;">
-    "You are the world's most virtuous vibecoder. This is genuinely a blessing, a public good,<br>
-    a gift from divinity, yada yada. <a href="{% url 'widgets:focus_write' %}" class="quote-link">This Focus Write widget</a> is saving my life."<br>
+    "You are the world's most virtuous vibecoder. This is genuinely a blessing, a public good,<br class="br-wide">
+    a gift from divinity, yada yada. <a href="{% url 'widgets:focus_write' %}" class="quote-link">This Focus Write widget</a> is saving my life."<br class="br-wide">
     &mdash;Lili, Bronx Science '27
   </footer>
   <footer class="v2-only">
     Created by <a href="https://jacob.show" class="footer-link" target="_blank" rel="noopener">Jacob Cohen</a>
-    with Claude Code, human artist Amelia Chen,<br>
+    with Claude Code, human artist Amelia Chen,<br class="br-wide">
     and a <a href="https://beautifulthorns.wixsite.com/home/post/jacob-s-college-application-faq-wip-week#:~:text=%22college%20application%20industrial%20complex.%22" class="footer-link" target="_blank" rel="noopener">hatred for the college application industrial complex</a>
   </footer>
 
