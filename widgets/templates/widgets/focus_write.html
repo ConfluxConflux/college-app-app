@@ -90,8 +90,7 @@
          }
        },
        goBack() {
-         // Standalone build: "/" is the widgets homepage. Full site: the
-         // widgets index, since "/" there is the tracker's landing page.
+         {# Standalone build: root is the widgets homepage. Full site: the widgets index. #}
          var url = '{% if widgets_only %}/{% else %}{% url 'widgets:home' %}{% endif %}';
          if (window.Hippomodoro) { window.Hippomodoro.attemptNavigate(url); }
          else { window.location.href = url; }
