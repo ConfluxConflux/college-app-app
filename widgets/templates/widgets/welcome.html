@@ -201,6 +201,11 @@
     /* The initials that spell HIPPOCAMPUS, same device as the tracker. */
     .beta-strip .key { color: var(--teal); }
 
+    /* Divider between the grey aside and the quote below it. */
+    .rule--footer {
+      margin: clamp(0.65rem, 1.6vh, 1.1rem) 0 0;
+    }
+
     /* Footer oscillation, same mechanism as the tracker's landing page.
        visibility rather than display: the hidden variant must keep occupying
        its grid cell, otherwise the footer changes height on each swap and
@@ -257,7 +262,7 @@
         <path d="M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01"/>
       </svg>
       <span class="card-name">Activity Time Calculator</span>
-      <span class="card-desc">Helps you estimate hours/week or weeks/year for activities.</span>
+      <span class="card-desc">Helps estimate hours/week or weeks/year</span>
     </a>
 
     <a class="card" href="{% url 'widgets:advice' %}">
@@ -287,6 +292,8 @@
     to <span class="key">P</span>revent <span class="key">U</span>nnecessary <span class="key">S</span>uffering<br>
     (but be warned that it has bugs and inadequacies that Jacob will not prioritize fixing!)
   </a>
+
+  <div class="rule rule--footer"></div>
 
   <footer>
     <div class="footer-quotes">
