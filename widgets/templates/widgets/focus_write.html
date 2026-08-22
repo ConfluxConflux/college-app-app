@@ -10,6 +10,8 @@
        saveTimer: null,
        showCount: false,
        fs: false,
+       {# iOS Safari reports this false/undefined — the button would do nothing there. #}
+       fsOk: !!(document.fullscreenEnabled || document.webkitFullscreenEnabled),
        showBackPrompt: false,
        copied: false,
        history: [],
@@ -130,7 +132,7 @@
         <span x-text="wc + (wc === 1 ? ' word' : ' words')"></span> &nbsp;·&nbsp; <span x-text="cc + (cc === 1 ? ' char' : ' chars')"></span>
       </span>
       <button class="focus-back-btn focus-toggle-btn" @click="showCount = !showCount" x-text="showCount ? 'Hide Word Count' : 'Show Word Count'"></button>
-      <button class="focus-back-btn focus-fs-btn" @click="toggleFs()" x-text="fs ? '⤡ Exit Fullscreen' : '⤢ Fullscreen'"></button>
+      <button x-show="fsOk" x-cloak class="focus-back-btn focus-fs-btn" @click="toggleFs()" x-text="fs ? '⤡ Exit Fullscreen' : '⤢ Fullscreen'"></button>
     </div>
   </div>
 
