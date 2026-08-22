@@ -18,7 +18,7 @@
   <title>HIPPOCAMPUS — College Application Widgets</title>
   <meta name="description" content="Six free tools for writing college applications: a Common App word counter, distraction-free writing, pomodoro timers, an activity hours calculator, advice and resources.">
   <meta property="og:title" content="HIPPOCAMPUS Widgets">
-  <meta property="og:description" content="Six widgets to slightly dehellify college apps.">
+  <meta property="og:description" content="Widgets to slightly dehellify college apps.">
   <meta property="og:type" content="website">
   <meta property="og:image" content="{% static 'img/potamus_proud.png' %}">
   <link rel="icon" type="image/png" href="{% static 'img/professor_potamus.png' %}">
@@ -149,6 +149,12 @@
       color: #5c6665;
     }
 
+    /* Quieter aside inside a card blurb. */
+    .card-aside {
+      font-size: 0.88em;
+      font-style: italic;
+    }
+
     /* --- footer ---------------------------------------------------------- */
     footer {
       margin-top: clamp(0.35rem, 1.1vh, 0.75rem);
@@ -243,7 +249,7 @@
   <div class="hero">
     <img src="{% static 'img/potamus_proud_aligned.png' %}" alt="" class="hero-hippo">
     <h1>HIPPOCAMPUS</h1>
-    <p class="tagline">Six widgets to slightly dehellify college apps</p>
+    <p class="tagline">Widgets to slightly dehellify college apps</p>
     <div class="rule"></div>
   </div>
 
@@ -253,7 +259,8 @@
         <path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/><path d="M9 12h6M9 16h4"/>
       </svg>
       <span class="card-name">Word Counter</span>
-      <span class="card-desc">Counts the way the Common App does&mdash;which is subtly different from Google Docs!</span>
+      <span class="card-desc">Counts the way the Common App does<br>
+        <span class="card-aside">(which is subtly different from Google Docs!)</span></span>
     </a>
 
     <a class="card" href="{% url 'widgets:focus_write' %}">
@@ -269,7 +276,7 @@
         <circle cx="12" cy="13" r="8"/><path d="M12 8.5V13l3 2"/><path d="M9.5 2h5"/>
       </svg>
       <span class="card-name">Pomodoro Timer</span>
-      <span class="card-desc">Professor Potamus will snort at you if you get off task.</span>
+      <span class="card-desc">Professor Potamus can hold YOU accountable.</span>
     </a>
 
     <a class="card" href="{% url 'widgets:estimator' %}">
@@ -278,7 +285,7 @@
         <path d="M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01"/>
       </svg>
       <span class="card-name">Activity Time Calculator</span>
-      <span class="card-desc">Helps estimate hours/week or weeks/year</span>
+      <span class="card-desc">Helps estimate hours/week or weeks/year.</span>
     </a>
 
     <a class="card" href="{% url 'widgets:advice' %}">
