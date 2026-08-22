@@ -90,8 +90,8 @@
          }
        },
        goBack() {
-         {# Standalone build: root is the widgets homepage. Full site: the widgets index. #}
-         var url = '{% if widgets_only %}/{% else %}{% url 'widgets:home' %}{% endif %}';
+         {# Leaving Focus Write lands on the Pomodoro Timer. #}
+         var url = '{% url 'widgets:timer' %}';
          if (window.Hippomodoro) { window.Hippomodoro.attemptNavigate(url); }
          else { window.location.href = url; }
        },

@@ -10,6 +10,21 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Open+Sans:wght@400;600;700&display=swap">
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
+{% if widgets_only %}
+  <style>
+    /* Standalone widgets build: plum in place of the Hippocampus teal.
+       app.css routes its accent through --accent, so this recolours the
+       widget chrome (word-counter backing, focus-write controls, pomodoro
+       pinlines) without touching the tracker, which keeps the teal. */
+    :root {
+      --accent: #6b5b95;
+      --accent-rgb: 107, 91, 149;
+      --bulma-primary-h: 255deg;
+      --bulma-primary-s: 24%;
+      --bulma-primary-l: 47%;
+    }
+  </style>
+{% endif %}
   <style>
     html { background: white; }
     .focus-shell { max-width: 95%; padding: 0 1.5rem 1rem; }

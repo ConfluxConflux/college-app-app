@@ -48,7 +48,11 @@
 /* Color palette */
 :root {
   --periwinkle-light: #e4f4f2;
-  --periwinkle-dark: #2a9d8f;
+  /* Accent used by the widget pages. Defaults to the Hippocampus teal; the
+     standalone widgets build overrides it to plum in its base template. */
+  --accent: #2a9d8f;
+  --accent-rgb: 42, 157, 143;
+  --periwinkle-dark: var(--accent);
 
   /* Wire teal into Bulma 1.0's primary color (HSL: 173, 58%, 39%) */
   --bulma-primary-h: 173deg;
@@ -369,8 +373,8 @@ body {
 }
 .essays-tab-btn:hover { color: #444; }
 .essays-tab-btn.is-active {
-  color: #2a9d8f;
-  border-bottom-color: #2a9d8f;
+  color: var(--accent);
+  border-bottom-color: var(--accent);
 }
 
 /* Matrix table */
@@ -397,8 +401,8 @@ body {
   transition: background 0.12s;
 }
 .matrix-col-header:hover {
-  background-color: rgba(42, 157, 143, 0.08) !important;
-  color: #2a9d8f;
+  background-color: rgba(var(--accent-rgb), 0.08) !important;
+  color: var(--accent);
 }
 .matrix-cat-cell {
   font-size: 0.8rem;
@@ -418,7 +422,7 @@ body {
   transition: background 0.12s;
 }
 .matrix-cell-filled:hover {
-  background-color: rgba(42, 157, 143, 0.07) !important;
+  background-color: rgba(var(--accent-rgb), 0.07) !important;
 }
 .matrix-cell-empty {
   background-color: rgba(220, 220, 220, 0.3) !important;
@@ -471,12 +475,12 @@ body {
   transition: all 0.15s;
 }
 .college-selector-btn:hover {
-  border-color: #2a9d8f;
-  color: #2a9d8f;
+  border-color: var(--accent);
+  color: var(--accent);
 }
 .college-selector-btn.is-active {
-  background: #2a9d8f;
-  border-color: #2a9d8f;
+  background: var(--accent);
+  border-color: var(--accent);
   color: white;
 }
 
@@ -504,7 +508,7 @@ body {
   font-size: 0.72rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #2a9d8f;
+  color: var(--accent);
   font-weight: 600;
   background: rgba(42,157,143,0.08);
   padding: 0.15rem 0.55rem;
@@ -518,7 +522,7 @@ body {
 }
 .essay-cat-select:hover, .essay-cat-select:focus {
   background: rgba(42,157,143,0.15);
-  border-color: #2a9d8f;
+  border-color: var(--accent);
   outline: none;
 }
 .essay-limit-chip {
@@ -544,8 +548,8 @@ body {
   transition: all 0.15s;
 }
 .focus-link-btn:hover {
-  color: #2a9d8f;
-  border-color: #2a9d8f;
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 /* Essay prompt */
@@ -574,7 +578,7 @@ body {
 }
 .essay-textarea:focus {
   outline: none;
-  border-color: #2a9d8f;
+  border-color: var(--accent);
   background: white;
 }
 
@@ -673,16 +677,16 @@ body.focus-mode {
 }
 .focus-back-btn {
   font-size: 0.85rem;
-  color: #2a9d8f;
+  color: var(--accent);
   font-weight: 600;
   text-decoration: none;
   padding: 0.3rem 0.7rem;
-  border: 1.5px solid #2a9d8f;
+  border: 1.5px solid var(--accent);
   border-radius: 4px;
   transition: all 0.15s;
 }
 .focus-back-btn:hover {
-  background: #2a9d8f;
+  background: var(--accent);
   color: white;
 }
 .focus-college-label {
@@ -786,7 +790,7 @@ body.focus-mode {
   overflow: hidden;
 }
 .focus-textarea:focus {
-  border-bottom-color: #2a9d8f;
+  border-bottom-color: var(--accent);
 }
 
 .focus-counter-row {
@@ -1259,7 +1263,7 @@ td.compare-cell [x-show="!open"] {
 
 /* All Colleges: marks a college someone you know has gotten into. */
 .certified-dot {
-  color: #2a9d8f;
+  color: var(--accent);
   font-size: 0.55rem;
   vertical-align: middle;
   margin-left: 0.3rem;
@@ -1333,7 +1337,7 @@ td.compare-cell [x-show="!open"] {
   cursor: pointer;
   font-size: 0.88rem;
   font-weight: 600;
-  color: #2a9d8f;
+  color: var(--accent);
   list-style: none;
 }
 .essay-add > summary::-webkit-details-marker { display: none; }
@@ -1521,7 +1525,7 @@ tr:hover .college-remove,
 .pomo-chip-clock {
   font-family: 'Libre Baskerville', Georgia, serif;
   font-weight: 700;
-  color: #2a9d8f;
+  color: var(--accent);
   font-variant-numeric: tabular-nums;
   /* tabular-nums keeps digits even, but the text still changes shape: 25:00 ->
      9:59 loses a character, and on expiry it becomes "time's up". Reserve the
@@ -1574,7 +1578,7 @@ body.focus-mode .pomo-chip-show { top: 14px; }
   max-width: min(20rem, calc(100vw - 32px));
   background: rgba(255, 255, 255, 0.97);
   border: 1px solid rgba(0, 0, 0, 0.08);
-  border-left: 3px solid var(--bulma-primary, #2a9d8f);
+  border-left: 3px solid var(--bulma-primary, var(--accent));
   border-radius: 10px;
   padding: 0.85rem 1rem;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.14);
@@ -1636,7 +1640,7 @@ body.focus-mode .pomo-chip-show { top: 14px; }
   font-family: 'Libre Baskerville', Georgia, serif;
   line-height: 1.2;
 }
-.pomo-btn-green { background: #2a9d8f; color: #fff; font-size: 1.05rem; }
+.pomo-btn-green { background: var(--accent); color: #fff; font-size: 1.05rem; }
 .pomo-btn-green:hover { background: #248277; }
 .pomo-btn-red { background: none; color: #c0392b; font-size: 0.78rem; font-weight: 600; text-decoration: underline; padding: 0.3rem; }
 .pomo-btn-red:hover { color: #922b21; }
@@ -1657,8 +1661,8 @@ body.focus-mode .pomo-chip-show { top: 14px; }
   margin-bottom: 1.25rem;
 }
 .pomo-toast {
-  background: rgba(42, 157, 143, 0.12);
-  border: 1px solid rgba(42, 157, 143, 0.3);
+  background: rgba(var(--accent-rgb), 0.12);
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
   color: #248277;
   border-radius: 8px;
   padding: 0.55rem 0.9rem;
@@ -1681,8 +1685,8 @@ body.focus-mode .pomo-chip-show { top: 14px; }
   align-items: center;
   gap: 0.35rem;
 }
-.pomo-mode-card:hover { border-color: #2a9d8f; }
-.pomo-mode-card.is-active { border-color: #2a9d8f; box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.15); }
+.pomo-mode-card:hover { border-color: var(--accent); }
+.pomo-mode-card.is-active { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(var(--accent-rgb), 0.15); }
 /* Equal-height icon slot so the hourglass and Potamus align — names start at the same y */
 .pomo-mode-icon {
   font-size: 3.6rem;
@@ -1741,7 +1745,7 @@ body.focus-mode .pomo-chip-show { top: 14px; }
   letter-spacing: 0.15em;
   font-size: 0.8rem;
   font-weight: 700;
-  color: #2a9d8f;
+  color: var(--accent);
 }
 .pomo-task-label { font-size: 1.15rem; color: #444; margin-bottom: 1rem; font-style: italic; }
 .pomo-ring-wrap { position: relative; width: 240px; height: 240px; margin: 0 auto 1.25rem; }
@@ -1749,7 +1753,7 @@ body.focus-mode .pomo-chip-show { top: 14px; }
 .pomo-ring-bg { fill: none; stroke: rgba(0, 0, 0, 0.08); stroke-width: 10; }
 .pomo-ring-fg {
   fill: none;
-  stroke: #2a9d8f;
+  stroke: var(--accent);
   stroke-width: 10;
   stroke-linecap: round;
   transition: stroke-dashoffset 0.4s linear;
@@ -1789,7 +1793,7 @@ body.focus-mode .pomo-chip-show { top: 14px; }
   line-height: 1.4;
   margin-bottom: 1rem;
 }
-.pomo-bubble--proud { color: #2a9d8f; font-weight: 700; font-size: 1.25rem; }
+.pomo-bubble--proud { color: var(--accent); font-weight: 700; font-size: 1.25rem; }
 .pomo-bubble--angry { color: #c0392b; font-weight: 700; }
 .pomo-checkin-opts, .pomo-care-opts { display: flex; flex-direction: column; gap: 0.55rem; align-items: stretch; }
 .pomo-opt {
@@ -1803,7 +1807,7 @@ body.focus-mode .pomo-chip-show { top: 14px; }
   cursor: pointer;
   transition: all 0.15s;
 }
-.pomo-opt:hover { border-color: #2a9d8f; color: #2a9d8f; }
+.pomo-opt:hover { border-color: var(--accent); color: var(--accent); }
 .pomo-penalty-target {
   background: #f7f7f7;
   border-left: 3px solid #c0392b;
@@ -1816,7 +1820,7 @@ body.focus-mode .pomo-chip-show { top: 14px; }
   line-height: 1.4;
 }
 .pomo-care-msg {
-  background: rgba(42, 157, 143, 0.1);
+  background: rgba(var(--accent-rgb), 0.1);
   border-radius: 8px;
   padding: 0.65rem 0.85rem;
   color: #248277;
@@ -1827,7 +1831,7 @@ body.focus-mode .pomo-chip-show { top: 14px; }
 .pomo-goal-edit .input { flex: 1; }
 .pomo-believe {
   font-family: 'Libre Baskerville', Georgia, serif;
-  color: #2a9d8f;
+  color: var(--accent);
   font-weight: 700;
   margin-top: 1rem;
 }
@@ -1917,7 +1921,7 @@ body.focus-mode .pomo-chip-show { top: 14px; }
 }
 
 .tabs.is-boxed li.widgets-exit a:hover {
-  color: #2a9d8f;
-  background: rgba(42, 157, 143, 0.07);
+  color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.07);
   border-color: transparent;
 }

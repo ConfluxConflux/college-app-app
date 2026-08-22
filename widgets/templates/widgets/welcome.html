@@ -61,11 +61,16 @@
       max-width: 640px;
     }
 
+    .hero-hippos {
+      display: grid;
+      margin: 0 0 clamp(0.5rem, 1.5vh, 1.2rem);
+    }
+    .hero-hippos > img { grid-area: 1 / 1; }
+
     .hero-hippo {
       width: clamp(120px, 26vh, 290px);
       height: auto;
       filter: drop-shadow(0 8px 16px rgba(42, 106, 98, 0.18));
-      margin: 0 0 clamp(0.5rem, 1.5vh, 1.2rem);
     }
 
     h1 {
@@ -242,8 +247,46 @@
     .version-1 .v2-only { visibility: hidden; }
     .version-2 .v1-only { visibility: hidden; }
 
+    /* Tablet and below: one column of cards. */
     @media (max-width: 760px) {
-      .grid { grid-template-columns: 1fr; max-width: 420px; }
+      .grid { grid-template-columns: 1fr; max-width: 480px; }
+      .beta-row { max-width: 480px; }
+    }
+
+    /* Phones. */
+    @media (max-width: 560px) {
+      /* Content is taller than the viewport here, and centring a too-tall
+         flex column clips its top out of reach — so stack from the top. */
+      body {
+        justify-content: flex-start;
+        padding: 1.25rem 1rem 1.75rem;
+      }
+
+      /* Size the wordmark off the viewport width so it always fits beside
+         the tag, down to a 320px screen. */
+      h1 {
+        font-size: min(7vw, 2.1rem);
+        letter-spacing: 0.05em;
+      }
+
+      .wordmark-tag {
+        font-size: 0.55rem;
+        padding: 0.3em 0.5em;
+        margin-left: 0.35rem;
+        margin-top: 0.5em;
+        letter-spacing: 0.1em;
+      }
+
+      .tagline { font-size: 0.95rem; }
+      .hero-hippo { width: min(46vw, 175px); }
+      .hero-hippos { margin-bottom: 0.9rem; }
+
+      /* "or" reads as a label above the card rather than a column beside it. */
+      .beta-row { flex-direction: column; gap: 0.45rem; }
+      .beta-or { padding: 0.3rem 0; }
+
+      /* Let the prose reflow; fixed breaks leave ragged half-lines this narrow. */
+      .br-wide { display: none; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -256,7 +299,12 @@
   <div class="hero">
     <h1>HIPPOCAMPUS<span class="wordmark-tag">Widgets</span></h1>
     <p class="tagline">Tools to slightly dehellify college apps</p>
-    <img src="{% static 'img/potamus_proud_aligned.png' %}" alt="" class="hero-hippo">
+    {% comment %}Both hippos share one grid cell and the same dimensions, so the
+       15s swap is pixel-stable — nothing below it moves.{% endcomment %}
+    <div class="hero-hippos">
+      <img src="{% static 'img/potamus_proud_aligned.png' %}" alt="" class="hero-hippo v1-only">
+      <img src="{% static 'img/professor_potamus_aligned.png' %}" alt="" class="hero-hippo v2-only">
+    </div>
   </div>
 
   <div class="grid">
@@ -299,9 +347,9 @@
         <span class="key">H</span>opefully <span class="key">I</span>ntuitive <span class="key">P</span>ersonal
         <span class="key">P</span>latform for <span class="key">O</span>rganizing
         <span class="key">C</span>ollege <span class="key">A</span>pplication <span class="key">M</span>aterials
-        to <span class="key">P</span>revent <span class="key">U</span>nnecessary <span class="key">S</span>uffering&hellip;<br>
+        to <span class="key">P</span>revent <span class="key">U</span>nnecessary <span class="key">S</span>uffering&hellip;<br class="br-wide">
         but be warned that it has bugs and inadequacies that Jacob
-        <a class="beta-link" href="https://stanfordaialignment.org/people" target="_blank" rel="noopener">does not have the bandwidth</a>
+        <a class="beta-link" href="https://stanfordaialignment.org/people" target="_blank" rel="noopener">may not have the bandwidth</a>
         to prioritize fixing!</span>
     </div>
   </div>
@@ -309,13 +357,13 @@
   <footer>
     <div class="footer-quotes">
     <div class="v1-only">
-      "You are the world's most virtuous vibecoder. This is genuinely a blessing, a public good,<br>
-      a gift from divinity, yada yada. <a href="{% url 'widgets:focus_write' %}">This Focus Write widget</a> is saving my life."<br>
+      "You are the world's most virtuous vibecoder. This is genuinely a blessing, a public good,<br class="br-wide">
+      a gift from divinity, yada yada. <a href="{% url 'widgets:focus_write' %}">This Focus Write widget</a> is saving my life."<br class="br-wide">
       &mdash;Lili, Bronx Science '27
     </div>
     <div class="v2-only">
       Created by <a href="https://jacob.show" target="_blank" rel="noopener">Jacob Cohen</a>
-      with Claude Code, human artist Amelia Chen,<br>
+      with Claude Code, human artist Amelia Chen,<br class="br-wide">
       and a <a href="https://beautifulthorns.wixsite.com/home/post/jacob-s-college-application-faq-wip-week#:~:text=%22college%20application%20industrial%20complex.%22" target="_blank" rel="noopener">hatred for the college application industrial complex</a>
     </div>
     </div>
