@@ -671,7 +671,7 @@ body.focus-mode {
   margin-bottom: 2rem;
   position: sticky;
   top: 0;
-  background: rgba(228, 244, 242, 0.9);
+  background: rgba(var(--accent-rgb), 0.10);
   backdrop-filter: blur(6px);
   z-index: 10;
 }
@@ -1924,4 +1924,82 @@ body.focus-mode .pomo-chip-show { top: 14px; }
   color: var(--accent);
   background: rgba(var(--accent-rgb), 0.07);
   border-color: transparent;
+}
+
+
+/* ── Word counter banner ───────────────────────────────────────────
+   Was a block of inline styles, which no accent variable could reach and
+   which overflowed on a phone. Now it follows --accent and the type scales
+   with the viewport, wrapping rather than clipping "characters". */
+.wc-banner {
+  position: relative;
+  background: rgba(var(--accent-rgb), 0.12);
+  border-radius: 6px 6px 0 0;
+  padding: 0.65rem 1rem;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  font-family: 'Libre Baskerville', Georgia, serif;
+}
+
+.wc-num {
+  font-size: clamp(1.35rem, 5.6vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.wc-unit {
+  font-size: clamp(1.35rem, 5.6vw, 2.4rem);
+  color: #555;
+  margin-left: 0.3rem;
+  font-style: italic;
+}
+.wc-unit--first { margin-right: 0.75rem; }
+
+.wc-dot {
+  font-size: clamp(1.1rem, 4.6vw, 2rem);
+  color: #aaa;
+  margin-right: 0.75rem;
+}
+
+.wc-save {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.85rem;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 0.85rem;
+  font-style: normal;
+}
+
+/* Widget tab bar: the active tab takes the accent rather than Bulma's link
+   blue, so it is teal on the tracker and plum on the standalone widgets. */
+.tabs.is-boxed li.is-active a,
+.tabs.is-boxed li.is-active a:hover {
+  color: var(--accent);
+}
+
+/* ── Focus mode on a phone ─────────────────────────────────────────
+   The toolbar reserves fixed widths so buttons never shift while you type;
+   at phone widths those reservations do not fit, so drop them and let the
+   right-hand group take its own row. */
+@media (max-width: 560px) {
+  .focus-shell { max-width: 100%; padding: 0 0.9rem 1rem; }
+
+  .focus-topbar {
+    flex-wrap: wrap;
+    gap: 0.5rem 0.6rem;
+    padding: 0.55rem 0;
+    margin-bottom: 1.1rem;
+  }
+
+  .focus-topbar > div {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  .focus-college-label { flex: 0 1 auto; }
+  .focus-back-btn { font-size: 0.75rem; padding: 0.25rem 0.55rem; }
+  .focus-toggle-btn, .focus-fs-btn { min-width: 0; }
+  .focus-counter, .focus-counter--wide { min-width: 0; }
 }

@@ -2,7 +2,7 @@
   The widgets tab bar. Include with the current page's key:
       {% include "widgets/_tabs.html" with active="resources" %}
 {% endcomment %}
-<div class="tabs is-boxed is-medium">
+<div class="tabs is-boxed is-medium" id="widget-tabs">
   <ul>
     <li {% if active == 'word_counter' %}class="is-active"{% endif %}>
       <a href="{% url 'widgets:word_counter' %}">Word Counter</a>
@@ -32,3 +32,17 @@
     {% endif %}
   </ul>
 </div>
+
+<script>
+  /* The tab bar scrolls horizontally when it does not fit (phones). Bring the
+     current tab into view so you can see where you are without swiping. */
+  (function () {
+    var bar = document.getElementById('widget-tabs');
+    if (!bar) return;
+    var active = bar.querySelector('li.is-active');
+    if (!active || bar.scrollWidth <= bar.clientWidth) return;
+    var barBox = bar.getBoundingClientRect();
+    var tabBox = active.getBoundingClientRect();
+    bar.scrollLeft += (tabBox.left - barBox.left) - (bar.clientWidth - tabBox.width) / 2;
+  })();
+</script>
