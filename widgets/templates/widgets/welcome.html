@@ -49,7 +49,7 @@
       justify-content: center;
       /* Asymmetric: a bigger bottom pad pulls the centred stack upward, so
          the gap above the hippo is smaller than the one below the quote. */
-      padding: clamp(0.5rem, 1.2vh, 1rem) clamp(1.25rem, 4vw, 3rem) clamp(1.5rem, 5vh, 3.5rem);
+      padding: clamp(0.5rem, 1.1vh, 0.9rem) clamp(1.25rem, 4vw, 3rem) clamp(1rem, 3vh, 2.2rem);
       color: var(--ink);
     }
 
@@ -62,10 +62,10 @@
     }
 
     .hero-hippo {
-      width: clamp(110px, 18vh, 235px);
+      width: clamp(120px, 26vh, 290px);
       height: auto;
       filter: drop-shadow(0 8px 16px rgba(42, 106, 98, 0.18));
-      margin: clamp(0.3rem, 1vh, 0.7rem) 0 0;
+      margin: clamp(0.2rem, 0.6vh, 0.45rem) 0 0;
     }
 
     h1 {
@@ -104,7 +104,7 @@
       font-style: italic;
       color: var(--muted);
       line-height: 1.5;
-      margin-top: clamp(0.4rem, 1.2vh, 0.85rem);
+      margin-top: clamp(0.3rem, 0.9vh, 0.6rem);
     }
 
     /* --- the six widgets ------------------------------------------------ */
@@ -114,7 +114,7 @@
       gap: clamp(0.6rem, 1.6vh, 1.2rem);
       width: 100%;
       max-width: 1260px;
-      margin: clamp(0.9rem, 2.3vh, 1.7rem) 0 clamp(0.5rem, 1.2vh, 0.9rem);
+      margin: clamp(0.7rem, 1.6vh, 1.2rem) 0 clamp(0.5rem, 1.2vh, 0.9rem);
     }
 
     .card {
@@ -123,7 +123,7 @@
       gap: 0.35rem;
       padding: clamp(0.8rem, 1.85vh, 1.5rem) clamp(0.85rem, 1.5vh, 1.15rem);
       background: rgba(255, 255, 255, 0.72);
-      border: 1px solid rgba(42, 157, 143, 0.16);
+      border: 1px solid rgba(107, 91, 149, 0.18);
       border-radius: 14px;
       text-decoration: none;
       color: inherit;
@@ -135,7 +135,7 @@
     .card:hover, .card:focus-visible {
       transform: translateY(-3px);
       background: #fff;
-      border-color: rgba(42, 157, 143, 0.45);
+      border-color: rgba(107, 91, 149, 0.45);
       box-shadow: 0 10px 24px rgba(42, 106, 98, 0.14);
       outline: none;
     }
@@ -228,6 +228,8 @@
     .beta-link:hover { color: #1f7f74; }
     .beta-card .key { color: var(--teal); }
 
+    /* Teal heading, teal pinline. */
+    .beta-card { border-color: rgba(42, 157, 143, 0.2); }
     .beta-card:hover, .beta-card:focus-visible {
       border-color: rgba(42, 157, 143, 0.45);
     }
