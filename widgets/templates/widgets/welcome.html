@@ -31,6 +31,7 @@
     :root {
       --mint-light: #e4f4f2;
       --teal: #2a9d8f;
+      --plum: #6b5b95;
       --ink: #4a4a4a;
       --muted: #5f6b6a;
     }
@@ -46,7 +47,9 @@
       /* Centre the stack as one unit. Pinning the footer to the bottom
          instead would dump all the slack into a single dead gap above it. */
       justify-content: center;
-      padding: clamp(1rem, 3vh, 2.2rem) 1.25rem;
+      /* Asymmetric: a bigger bottom pad pulls the centred stack upward, so
+         the gap above the hippo is smaller than the one below the quote. */
+      padding: clamp(0.5rem, 1.2vh, 1rem) 1.25rem clamp(1.5rem, 5vh, 3.5rem);
       color: var(--ink);
     }
 
@@ -59,14 +62,14 @@
     }
 
     .hero-hippo {
-      width: clamp(88px, 17vh, 215px);
+      width: clamp(88px, 14vh, 180px);
       height: auto;
       filter: drop-shadow(0 8px 16px rgba(42, 106, 98, 0.18));
       margin-bottom: 0.35rem;
     }
 
     h1 {
-      font-size: clamp(1.9rem, 6.6vh, 4rem);
+      font-size: clamp(1.9rem, 6vh, 3.5rem);
       font-weight: 700;
       color: var(--teal);
       letter-spacing: 0.08em;
@@ -87,7 +90,7 @@
       height: 2px;
       background: rgba(42, 157, 143, 0.35);
       border-radius: 2px;
-      margin: clamp(0.9rem, 2.6vh, 2rem) 0 0;
+      margin: clamp(0.8rem, 2.1vh, 1.6rem) 0 0;
     }
 
     /* --- the six widgets ------------------------------------------------ */
@@ -97,14 +100,14 @@
       gap: clamp(0.6rem, 1.6vh, 1.2rem);
       width: 100%;
       max-width: 1040px;
-      margin: clamp(1rem, 2.8vh, 2.1rem) 0 clamp(0.5rem, 1.3vh, 1rem);
+      margin: clamp(0.9rem, 2.3vh, 1.7rem) 0 clamp(0.5rem, 1.2vh, 0.9rem);
     }
 
     .card {
       display: flex;
       flex-direction: column;
       gap: 0.35rem;
-      padding: clamp(0.85rem, 2.1vh, 1.7rem) clamp(1rem, 2.1vh, 1.7rem);
+      padding: clamp(0.8rem, 1.85vh, 1.5rem) clamp(1rem, 2vh, 1.6rem);
       background: rgba(255, 255, 255, 0.72);
       border: 1px solid rgba(42, 157, 143, 0.16);
       border-radius: 14px;
@@ -174,36 +177,49 @@
     }
     footer a:hover { color: #1f7f74; }
 
-    /* The one door out of the widgets. Styled after the tracker's tagline:
-       serif italic, grey, with the initials picked out in teal. No border —
-       just a soft grey wash so it reads as an aside, not a seventh card. */
-    .beta-strip {
-      display: block;
+    /* The one door out of the widgets: a card like the six above it, but
+       full width and purple rather than teal, with a small grey "or" chip
+       beside it. */
+    .beta-row {
+      display: flex;
+      align-items: stretch;
+      gap: clamp(0.6rem, 1.6vh, 1.2rem);
       width: 100%;
       max-width: 1040px;
-      padding: clamp(0.7rem, 1.7vh, 1.2rem) clamp(1rem, 2vw, 1.6rem);
-      border-radius: 16px;
-      background: rgba(116, 130, 128, 0.08);
+    }
+
+    .beta-or {
+      flex: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 clamp(0.7rem, 1.6vh, 1.1rem);
+      border-radius: 14px;
+      background: rgba(116, 130, 128, 0.09);
       font-style: italic;
-      font-size: clamp(0.8rem, 1.8vh, 1.05rem);
-      line-height: 1.65;
-      text-align: center;
-      text-decoration: none;
+      font-size: clamp(0.85rem, 1.9vh, 1.1rem);
       color: #717c7b;
-      transition: background 0.16s ease;
     }
 
-    .beta-strip:hover, .beta-strip:focus-visible {
-      background: rgba(116, 130, 128, 0.15);
-      outline: none;
+    .beta-card { flex: 1; }
+    .beta-card .card-name { color: var(--plum); }
+    .beta-card .key { color: var(--plum); font-weight: 700; }
+
+    .beta-card:hover, .beta-card:focus-visible {
+      border-color: rgba(107, 91, 149, 0.45);
     }
 
-    /* The initials that spell HIPPOCAMPUS, same device as the tracker. */
-    .beta-strip .key { color: var(--teal); }
+    /* The hippo stands in for the line icons the other cards use. */
+    .beta-hippo {
+      width: clamp(28px, 3.6vh, 44px);
+      height: auto;
+      opacity: 0.9;
+    }
+    .beta-card:hover .beta-hippo { opacity: 1; }
 
     /* Divider between the grey aside and the quote below it. */
     .rule--footer {
-      margin: clamp(0.65rem, 1.6vh, 1.1rem) 0 0;
+      margin: clamp(0.55rem, 1.3vh, 0.9rem) 0 0;
     }
 
     /* Footer oscillation, same mechanism as the tracker's landing page.
@@ -284,14 +300,19 @@
     </a>
   </div>
 
-  <a class="beta-strip" href="{{ tracker_url }}" target="_blank" rel="noopener">
-    or try the beta version of the full
-    <span class="key">H</span>opefully <span class="key">I</span>ntuitive <span class="key">P</span>ersonal
-    <span class="key">P</span>latform for <span class="key">O</span>rganizing
-    <span class="key">C</span>ollege <span class="key">A</span>pplication <span class="key">M</span>aterials
-    to <span class="key">P</span>revent <span class="key">U</span>nnecessary <span class="key">S</span>uffering<br>
-    (but be warned that it has bugs and inadequacies that Jacob will not prioritize fixing!)
-  </a>
+  <div class="beta-row">
+    <span class="beta-or">or</span>
+    <a class="card beta-card" href="{{ tracker_url }}" target="_blank" rel="noopener">
+      <img class="beta-hippo" src="{% static 'img/potamus_proud.png' %}" alt="" aria-hidden="true">
+      <span class="card-name">Full App</span>
+      <span class="card-desc">Try the beta version of the full
+        <span class="key">H</span>opefully <span class="key">I</span>ntuitive <span class="key">P</span>ersonal
+        <span class="key">P</span>latform for <span class="key">O</span>rganizing
+        <span class="key">C</span>ollege <span class="key">A</span>pplication <span class="key">M</span>aterials
+        to <span class="key">P</span>revent <span class="key">U</span>nnecessary <span class="key">S</span>uffering
+        (but be warned that it has bugs and inadequacies that Jacob will not prioritize fixing!)</span>
+    </a>
+  </div>
 
   <div class="rule rule--footer"></div>
 
