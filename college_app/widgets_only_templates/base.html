@@ -26,6 +26,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Open+Sans:wght@400;600;700&display=swap">
   <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <style>
+    /* Purple ground for the standalone widgets site. Overridden here rather
+       than in app.css, which the tracker shares and which stays teal. */
+    html { background: radial-gradient(ellipse at 60% 10%, #d2c8e7 0%, #f0edf8 60%); }
+  </style>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   <script>
     /* Same one confetti implementation as the full app — the Pomodoro page
