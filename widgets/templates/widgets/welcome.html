@@ -43,7 +43,10 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: clamp(1rem, 3vh, 2.2rem) 1.25rem 0;
+      /* Centre the stack as one unit. Pinning the footer to the bottom
+         instead would dump all the slack into a single dead gap above it. */
+      justify-content: center;
+      padding: clamp(1rem, 3vh, 2.2rem) 1.25rem;
       color: var(--ink);
     }
 
@@ -145,8 +148,8 @@
 
     /* --- footer ---------------------------------------------------------- */
     footer {
-      margin-top: auto;
-      padding: clamp(0.5rem, 1.5vh, 1.1rem) 1rem clamp(0.9rem, 2vh, 1.5rem);
+      margin-top: clamp(0.4rem, 1.5vh, 1.1rem);
+      padding: 0 1rem;
       text-align: center;
       font-size: clamp(0.75rem, 1.7vh, 0.85rem);
       font-style: italic;
@@ -208,7 +211,7 @@
         <path d="M4 20h4L18 10a2.83 2.83 0 0 0-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/>
       </svg>
       <span class="card-name">Focus Write</span>
-      <span class="card-desc">A blank page and nothing else.</span>
+      <span class="card-desc">No distractions.</span>
     </a>
 
     <a class="card" href="{% url 'widgets:timer' %}">
