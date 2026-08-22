@@ -49,7 +49,7 @@
       justify-content: center;
       /* Asymmetric: a bigger bottom pad pulls the centred stack upward, so
          the gap above the hippo is smaller than the one below the quote. */
-      padding: clamp(0.5rem, 1.2vh, 1rem) 1.25rem clamp(1.5rem, 5vh, 3.5rem);
+      padding: clamp(0.5rem, 1.2vh, 1rem) clamp(1.25rem, 4vw, 3rem) clamp(1.5rem, 5vh, 3.5rem);
       color: var(--ink);
     }
 
@@ -62,7 +62,7 @@
     }
 
     .hero-hippo {
-      width: clamp(88px, 14vh, 180px);
+      width: clamp(110px, 18vh, 235px);
       height: auto;
       filter: drop-shadow(0 8px 16px rgba(42, 106, 98, 0.18));
       margin: clamp(0.3rem, 1vh, 0.7rem) 0 0;
@@ -113,7 +113,7 @@
       grid-template-columns: repeat(3, 1fr);
       gap: clamp(0.6rem, 1.6vh, 1.2rem);
       width: 100%;
-      max-width: 1320px;
+      max-width: 1260px;
       margin: clamp(0.9rem, 2.3vh, 1.7rem) 0 clamp(0.5rem, 1.2vh, 0.9rem);
     }
 
@@ -121,7 +121,7 @@
       display: flex;
       flex-direction: column;
       gap: 0.35rem;
-      padding: clamp(0.8rem, 1.85vh, 1.5rem) clamp(0.9rem, 1.7vh, 1.35rem);
+      padding: clamp(0.8rem, 1.85vh, 1.5rem) clamp(0.85rem, 1.5vh, 1.15rem);
       background: rgba(255, 255, 255, 0.72);
       border: 1px solid rgba(42, 157, 143, 0.16);
       border-radius: 14px;
@@ -146,9 +146,13 @@
       color: var(--plum);
     }
 
+    /* Balance the six card blurbs so a two-line one splits evenly instead of
+       orphaning a single word on line two. */
+    .grid .card-desc { text-wrap: balance; }
+
     .card-desc {
       font-family: 'Open Sans', system-ui, sans-serif;
-      font-size: clamp(0.85rem, 2vh, 1.1rem);
+      font-size: clamp(0.82rem, 1.8vh, 1rem);
       line-height: 1.5;
       color: #5c6665;
     }
@@ -161,7 +165,7 @@
 
     /* --- footer ---------------------------------------------------------- */
     footer {
-      margin-top: clamp(0.35rem, 1.1vh, 0.75rem);
+      margin-top: clamp(1.1rem, 3.2vh, 2.4rem);
       padding: 0 1rem;
       text-align: center;
       font-size: clamp(0.75rem, 1.8vh, 1rem);
@@ -195,7 +199,7 @@
       align-items: stretch;
       gap: clamp(0.6rem, 1.6vh, 1.2rem);
       width: 100%;
-      max-width: 1320px;
+      max-width: 1260px;
     }
 
     .beta-or {
@@ -256,8 +260,7 @@
   <div class="grid">
     <a class="card" href="{% url 'widgets:word_counter' %}">
       <span class="card-name">Word Counter</span>
-      <span class="card-desc">Counts the way the Common App does<br>
-        <span class="card-aside">(which is subtly different from Google Docs!)</span></span>
+      <span class="card-desc">Counts like Common App (<em>different</em> from Google Docs).</span>
     </a>
 
     <a class="card" href="{% url 'widgets:focus_write' %}">
@@ -289,14 +292,14 @@
   <div class="beta-row">
     <span class="beta-or">or</span>
     <div class="card beta-card">
-      <a class="card-name beta-title" href="{{ tracker_url }}" target="_blank" rel="noopener">Full App</a>
+      <a class="card-name beta-title" href="{{ tracker_url }}" target="_blank" rel="noopener">Full App Beta</a>
       <span class="card-desc">Try the beta version of the
         <span class="key">H</span>opefully <span class="key">I</span>ntuitive <span class="key">P</span>ersonal
         <span class="key">P</span>latform for <span class="key">O</span>rganizing
         <span class="key">C</span>ollege <span class="key">A</span>pplication <span class="key">M</span>aterials
         to <span class="key">P</span>revent <span class="key">U</span>nnecessary <span class="key">S</span>uffering&hellip;<br>
         but be warned that it has bugs and inadequacies that Jacob
-        <a class="beta-link" href="https://stanfordaialignment.org" target="_blank" rel="noopener">does not have the bandwidth</a>
+        <a class="beta-link" href="https://stanfordaialignment.org/people" target="_blank" rel="noopener">does not have the bandwidth</a>
         to prioritize fixing!</span>
     </div>
   </div>
