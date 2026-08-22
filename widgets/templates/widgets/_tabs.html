@@ -23,9 +23,9 @@
       <a href="{% url 'widgets:resources' %}">Resources</a>
     </li>
     {% if widgets_only %}
-    {# The one door out of the standalone build. Pushed to the far right and
+    {% comment %}The one door out of the standalone build. Pushed to the far right and
        greyed so it reads as "elsewhere", not as a seventh widget. Opens in a
-       new tab so a running Pomodoro survives the click. #}
+       new tab so a running Pomodoro survives the click.{% endcomment %}
     <li class="widgets-exit">
       <a href="{{ tracker_url }}" target="_blank" rel="noopener">Full App Beta</a>
     </li>
