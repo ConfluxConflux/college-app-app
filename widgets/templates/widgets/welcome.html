@@ -65,7 +65,7 @@
       width: clamp(120px, 26vh, 290px);
       height: auto;
       filter: drop-shadow(0 8px 16px rgba(42, 106, 98, 0.18));
-      margin: clamp(0.2rem, 0.6vh, 0.45rem) 0 0;
+      margin: 0 0 clamp(0.5rem, 1.5vh, 1.2rem);
     }
 
     h1 {
@@ -114,7 +114,7 @@
       gap: clamp(0.6rem, 1.6vh, 1.2rem);
       width: 100%;
       max-width: 1260px;
-      margin: clamp(0.7rem, 1.6vh, 1.2rem) 0 clamp(0.5rem, 1.2vh, 0.9rem);
+      margin: clamp(0.7rem, 1.6vh, 1.2rem) 0 clamp(0.6rem, 1.6vh, 1.2rem);
     }
 
     .card {
@@ -262,7 +262,7 @@
   <div class="grid">
     <a class="card" href="{% url 'widgets:word_counter' %}">
       <span class="card-name">Word Counter</span>
-      <span class="card-desc">Counts like Common App (<em>different</em> from Google Docs).</span>
+      <span class="card-desc">Counts like Common App, unlike Google Docs.</span>
     </a>
 
     <a class="card" href="{% url 'widgets:focus_write' %}">
