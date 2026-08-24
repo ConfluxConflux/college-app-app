@@ -532,6 +532,48 @@ body {
   padding: 0.15rem 0.5rem;
   border-radius: 4px;
   font-weight: 600;
+  cursor: pointer;
+}
+.essay-limit-chip:hover {
+  color: #666;
+  background: #e4e4e4;
+}
+/* No limit stated yet: still clickable, but it shouldn't read as data. */
+.essay-limit-chip.is-unset {
+  background: transparent;
+  border: 1px dashed #d5d5d5;
+  color: #bbb;
+  font-weight: 500;
+}
+.essay-limit-chip.is-unset:hover {
+  border-color: #2a9d8f;
+  color: #2a9d8f;
+  background: transparent;
+}
+
+/* The chip in edit mode — min / max / unit, no buttons. */
+.essay-limit-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.essay-limit-edit .input {
+  width: 4.2rem;
+  height: auto;
+  font-size: 0.72rem;
+  padding: 0.15rem 0.3rem;
+}
+.essay-limit-edit select {
+  font-size: 0.72rem;
+  padding: 0.15rem 0.25rem;
+  border: 1px solid #dbdbdb;
+  border-radius: 4px;
+  background: #fff;
+  color: #666;
+}
+.essay-limit-dash {
+  color: #bbb;
+  font-size: 0.72rem;
 }
 .essay-card-actions {
   display: flex;

@@ -270,6 +270,36 @@ function celebrateStage(from, to) {
            limitType: '{{ essay.limit_type }}',
            limitVal: {{ essay.limit_val }},
            limitMin: {{ essay.limit_min|default:0 }},
+           editLimit: false,
+           limitSaving: false,
+           dType: '{{ essay.limit_type }}',
+           dMin: '',
+           dMax: '',
+           get limitLabel() {
+             const u = this.limitType === 'char' ? 'ch' : 'w';
+             if (this.limitVal > 0 && this.limitMin > 0) return this.limitMin + '\u2013' + this.limitVal + u;
+             if (this.limitVal > 0) return this.limitVal + u;
+             if (this.limitMin > 0) return this.limitMin + '+' + u;
+             return '+ limit';
+           },
+           openLimit() {
+             this.dType = this.limitType;
+             this.dMin = this.limitMin > 0 ? String(this.limitMin) : '';
+             this.dMax = this.limitVal > 0 ? String(this.limitVal) : '';
+             this.editLimit = true;
+             this.$nextTick(() => this.$refs.lmax.focus());
+           },
+           saveLimit() {
+             this.limitSaving = true;
+             htmx.trigger(this.$refs.limitbox, 'save-limit');
+           },
+           commitLimit(xhr) {
+             const d = JSON.parse(xhr.responseText);
+             this.limitType = d.limit_type;
+             this.limitVal = d.limit_val;
+             this.limitMin = d.limit_min;
+             this.editLimit = false;
+           },
            get wc() { return this.text.trim() ? this.text.trim().split(/\s+/).length : 0; },
            get cc() { return this.text.length; },
            get count() { return this.limitType === 'char' ? this.cc : this.wc; },
@@ -301,9 +331,44 @@ function celebrateStage(from, to) {
             </option>
             {% endfor %}
           </select>
-          {% if essay.limit_display %}
-          <span class="essay-limit-chip">{{ essay.limit_display }}</span>
-          {% endif %}
+          {% comment %}
+            The limit is often unknown when the essay is created — the prompt
+            goes up before the word count does — so the chip is the editor.
+            Click it, type, and blur or Enter saves; Escape backs out. The
+            counter below reads the same Alpine state, so it re-scales the
+            moment the limit changes without reloading the page.
+          {% endcomment %}
+          <span class="essay-limit-chip"
+                :class="{'is-unset': limitVal === 0 && limitMin === 0}"
+                x-show="!editLimit"
+                @click="openLimit()"
+                x-text="limitLabel"
+                title="Click to set this essay's length limit">{{ essay.limit_display|default:"+ limit" }}</span>
+
+          <span class="essay-limit-edit" x-show="editLimit" x-cloak
+                x-ref="limitbox"
+                hx-post="{% url 'supplements:essay_limit' essay.pk %}"
+                hx-trigger="save-limit"
+                hx-include=".limit-field-{{ essay.pk }}"
+                hx-swap="none"
+                @htmx:after-request="limitSaving = false; if ($event.detail.successful) commitLimit($event.detail.xhr)"
+                @focusout="if (editLimit && !limitSaving && !$el.contains($event.relatedTarget)) saveLimit()"
+                @keydown.escape.prevent.stop="editLimit = false">
+            <input class="input is-small limit-field-{{ essay.pk }}" type="number"
+                   name="limit_min" min="1" step="1" placeholder="min" x-model="dMin"
+                   aria-label="Minimum length — leave blank if there is no minimum"
+                   @keydown.enter.prevent="saveLimit()">
+            <span class="essay-limit-dash">&ndash;</span>
+            <input class="input is-small limit-field-{{ essay.pk }}" type="number"
+                   name="limit" min="1" step="1" placeholder="max" x-model="dMax"
+                   x-ref="lmax" aria-label="Maximum length"
+                   @keydown.enter.prevent="saveLimit()">
+            <select class="limit-field-{{ essay.pk }}" name="limit_type" x-model="dType"
+                    aria-label="Limit counted in">
+              <option value="word">words</option>
+              <option value="char">characters</option>
+            </select>
+          </span>
         </div>
         <div class="essay-card-actions">
           {# Status pill select #}

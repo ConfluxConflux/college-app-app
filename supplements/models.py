@@ -50,6 +50,10 @@ DEFAULT_ESSAY_TAGS = [
     'Community / Diversity',
     'Why Us',
     'Personal Challenge',
+    # Common enough to be its own row rather than living in Catchall: "a time
+    # you disagreed", "engage with a view unlike your own", "a conversation
+    # that changed your mind" are the same essay at a dozen schools.
+    'Disagreement / Dialogue',
     'Inspiration / Joy / Philosophical',
     'Future / Global Challenge',
     'Quirky / Misc',

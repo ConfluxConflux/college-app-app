@@ -58,6 +58,36 @@ def _augment_essays(essays):
                 e.count_display = f'{count}/{e.limit_min}'
 
 
+def _parse_limits(post):
+    """Read the limit boxes off a POST into the four model fields.
+
+    Shared by add-essay and the limit chip on a card. A prompt can state a
+    ceiling ("max 500"), a range ("5-500 words"), a floor ("at least 250") or
+    nothing at all, so every combination is allowed and blanks mean "not
+    stated" rather than zero.
+    """
+    def _int(name):
+        try:
+            v = int(post.get(name) or 0)
+        except ValueError:
+            return None
+        return v if v > 0 else None
+
+    limit_min, limit_max = _int('limit_min'), _int('limit')
+    # A backwards range is a typo, not an intent. Swap rather than reject: the
+    # numbers are right, the boxes were mixed up.
+    if limit_min and limit_max and limit_min > limit_max:
+        limit_min, limit_max = limit_max, limit_min
+
+    is_word = post.get('limit_type', 'word') != 'char'
+    return {
+        'word_limit': limit_max if is_word else None,
+        'char_limit': None if is_word else limit_max,
+        'word_limit_min': limit_min if is_word else None,
+        'char_limit_min': None if is_word else limit_min,
+    }
+
+
 def supplements_home(request):
     applicant = request.user.applicant
     ensure_default_tags(applicant)
@@ -199,6 +229,30 @@ def essay_category_edit(request, pk):
 
 
 @require_POST
+def essay_limit_edit(request, pk):
+    """Change an essay's length limit after the fact.
+
+    The limit is routinely unknown when the essay is created — the prompt is
+    on the portal before the word count is, or the college restates it — so it
+    stays editable on the card. Returns the stored numbers rather than 204 so
+    the card can show what was actually saved, including a swapped range.
+    """
+    essay = get_object_or_404(SupplementEssay, pk=pk, applicant=request.user.applicant)
+    for field, value in _parse_limits(request.POST).items():
+        setattr(essay, field, value)
+    essay.save(update_fields=[
+        'word_limit', 'char_limit', 'word_limit_min', 'char_limit_min',
+    ])
+    _augment_essays([essay])
+    return JsonResponse({
+        'limit_type': essay.limit_type,
+        'limit_val': essay.limit_val,
+        'limit_min': essay.limit_min,
+        'limit_display': essay.limit_display,
+    })
+
+
+@require_POST
 def essay_create(request):
     """Add an essay to one of the applicant's colleges.
 
@@ -221,25 +275,7 @@ def essay_create(request):
 
     # "max 500" gives a ceiling; "5-500 words" gives both. Either can stand
     # alone — "at least 250 words" is a real prompt too.
-    limit_type = request.POST.get('limit_type', 'word')
-    def _int(name):
-        try:
-            v = int(request.POST.get(name) or 0)
-        except ValueError:
-            return None
-        return v if v > 0 else None
-
-    limit_min, limit_max = _int('limit_min'), _int('limit')
-    # A backwards range is a typo, not an intent. Swap rather than reject: the
-    # numbers are right, the boxes were mixed up.
-    if limit_min and limit_max and limit_min > limit_max:
-        limit_min, limit_max = limit_max, limit_min
-
-    is_word = limit_type == 'word'
-    word_limit = limit_max if is_word else None
-    char_limit = limit_max if not is_word else None
-    word_limit_min = limit_min if is_word else None
-    char_limit_min = limit_min if not is_word else None
+    limits = _parse_limits(request.POST)
 
     category = None
     cat_pk = request.POST.get('category') or ''
@@ -258,11 +294,8 @@ def essay_create(request):
             college=college,
             category=category,
             prompt=prompt_texts[0],
-            word_limit=word_limit,
-            char_limit=char_limit,
-            word_limit_min=word_limit_min,
-            char_limit_min=char_limit_min,
             status=status,
+            **limits,
             sort_order=(last.sort_order + 1) if last else 0,
         )
         prompts = [
