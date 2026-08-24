@@ -53,10 +53,14 @@ DEFAULT_ESSAY_TAGS = [
     # Common enough to be its own row rather than living in Catchall: "a time
     # you disagreed", "engage with a view unlike your own", "a conversation
     # that changed your mind" are the same essay at a dozen schools.
-    'Disagreement / Dialogue',
+    'Disagreement / Respectful Dialogue',
     'Inspiration / Joy / Philosophical',
     'Future / Global Challenge',
     'Quirky / Misc',
+    # The 25-to-50-word questions the Ivies stack up — favourite word, what you
+    # do for fun, a book you'd bring. They group by length, not topic: the work
+    # of writing one is nothing like a 650-word essay.
+    'Short Take',
     'Hypothetical',
     'Catchall',
     'Other',
