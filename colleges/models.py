@@ -182,7 +182,6 @@ class UserCollege(models.Model):
     apply_status = models.CharField(max_length=20, choices=APPLY_STATUS_CHOICES, default='not_applying')
     difficulty = models.CharField(max_length=10, choices=DIFFICULTY_CHOICES, blank=True)
     tier = models.CharField(max_length=10, blank=True)
-    collegevine_chance = models.CharField(max_length=10, blank=True)
     location = models.CharField(max_length=200, blank=True)  # narrative description
     requirements_style = models.CharField(max_length=50, blank=True)
     intended_major = models.CharField(max_length=100, blank=True)

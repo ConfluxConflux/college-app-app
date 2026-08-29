@@ -67,11 +67,6 @@ def word_counter(request):
 def resources(request):
     links = [
         {
-            'title': "CollegeVine (good for building a list & estimating your chances, but take with salt)",
-            'url': 'http://collegevine.com/',
-            'source': 'collegevine.com',
-        },
-        {
             'title': "MIT Admissions Blog (pretty fun I think!)",
             'url': 'https://mitadmissions.org/blogs/',
             'source': 'mitadmissions.org',

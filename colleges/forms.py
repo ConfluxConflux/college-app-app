@@ -6,7 +6,7 @@ class CollegeForm(forms.ModelForm):
     class Meta:
         model = UserCollege
         fields = [
-            'display_name', 'apply_status', 'tier', 'acceptance_rate_override', 'collegevine_chance',
+            'display_name', 'apply_status', 'tier', 'acceptance_rate_override',
             'location', 'app_platform_override', 'academic_calendar_override',
             'cost_of_attendance_override', 'estimated_financial_aid', 'estimated_net_cost',
             'financial_aid_deadline_override', 'fafsa_required_override', 'css_profile_required_override',
@@ -23,7 +23,6 @@ class CollegeForm(forms.ModelForm):
             'apply_status': forms.Select(attrs={'class': 'select'}),
             'tier': forms.TextInput(attrs={'class': 'input is-small', 'size': 4}),
             'acceptance_rate_override': forms.TextInput(attrs={'class': 'input is-small', 'size': 6}),
-            'collegevine_chance': forms.TextInput(attrs={'class': 'input is-small', 'size': 6}),
             'location': forms.TextInput(attrs={'class': 'input'}),
             'app_platform_override': forms.TextInput(attrs={'class': 'input is-small'}),
             'academic_calendar_override': forms.TextInput(attrs={'class': 'input is-small'}),
