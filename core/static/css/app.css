@@ -650,46 +650,6 @@ body {
 .essay-saved-indicator.is-saving { color: #aaa; }
 .essay-saved-indicator.is-unsaved { color: #e0a020; }
 
-/* Design decision callout boxes */
-/* Collapsed by default: these are Jacob thinking out loud about the design,
-   which is worth keeping but isn't what the page is for. */
-.design-decision {
-  background: #fffbea;
-  border: 1.5px solid #f0c030;
-  border-radius: 6px;
-  padding: 0.75rem 1rem;
-  font-size: 0.8rem;
-  color: #7a6000;
-  line-height: 1.55;
-}
-.design-decision > summary {
-  cursor: pointer;
-  color: #5a4000;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  list-style: none;
-}
-.design-decision > summary::-webkit-details-marker { display: none; }
-.design-decision > summary::before { content: '▸ '; }
-.design-decision[open] > summary::before { content: '▾ '; }
-.design-decision[open] > summary { margin-bottom: 0.4rem; }
-/* Collapsed, it should read as a quiet footnote, not a warning banner. */
-.design-decision:not([open]) {
-  background: transparent;
-  border-color: transparent;
-  padding: 0.15rem 0;
-}
-.design-decision:not([open]) > summary { color: #b9a06a; font-weight: 600; }
-.design-decision strong {
-  color: #5a4000;
-  display: block;
-  margin-bottom: 0.2rem;
-  letter-spacing: 0.04em;
-}
-.design-decision em { font-style: normal; font-weight: 600; }
-
 
 /* ── Focus mode ────────────────────────────────────────────────── */
 

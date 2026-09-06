@@ -89,15 +89,6 @@ function celebrateStage(from, to) {
     Double-click any cell to enter focus mode.
   </p>
 
-  {# Design decision: single-click behavior on cells #}
-  <details class="design-decision">
-    <summary>Design decision &mdash; Click behavior in the matrix</summary>
-    <em>Current choice:</em> Single-click on a cell switches to By College view for that school
-    (so any click on a row navigates away from the matrix). Double-click goes to focus mode.<br>
-    <em>Alternative:</em> Single-click on a cell does nothing (or highlights it); only clicking
-    the column header navigates to By College. Double-click still → focus. This keeps the matrix
-    stable and browsable without accidentally leaving it.
-  </details>
 
   <div class="table-container" style="margin-top:1rem;">
     <table class="table is-bordered matrix-table">
@@ -187,15 +178,6 @@ function celebrateStage(from, to) {
     {% include "supplements/_tag_manager.html" %}
   </details>
 
-  {# Design decision: empty cell behavior #}
-  <details class="design-decision" style="margin-top:1.25rem;">
-    <summary>Design decision &mdash; Clicking an empty matrix cell</summary>
-    <em>Current choice:</em> Empty cells are not clickable — you'd need to go to "By College"
-    and create a new essay manually. This keeps data creation intentional.<br>
-    <em>Alternative:</em> Clicking an empty cell auto-creates a blank essay for that
-    college + category combination and immediately opens it in focus mode. Much faster
-    workflow, but might create accidental essays that are hard to delete.
-  </details>
 
 </div>{# end by_topic #}
 
@@ -214,26 +196,6 @@ function celebrateStage(from, to) {
       {{ item.college.name }}
     </button>
     {% endfor %}
-  </div>
-
-  <div style="display:flex; gap:1rem; flex-wrap:wrap; margin-top:0.75rem; margin-bottom:1.25rem;">
-    {# Design decision: always-visible textarea #}
-    <details class="design-decision" style="flex:1; min-width:260px;">
-    <summary>Design decision &mdash; Textarea visibility</summary>
-    <em>Current choice:</em> Textareas are always visible and immediately editable —
-      no clicking needed to start writing.<br>
-      <em>Alternative:</em> Show only the prompt + a word count chip by default; click anywhere
-      on the card to expand the textarea. Cleaner when just reviewing, but adds friction for editing.
-  </details>
-
-    {# Design decision: topic tagging UI #}
-    <details class="design-decision" style="flex:1; min-width:260px;">
-    <summary>Design decision &mdash; Topic tagging interface</summary>
-    <em>Current choice:</em> A compact dropdown on each card lets you assign any existing
-      category (topic). Changes immediately update the matrix.<br>
-      <em>Alternative:</em> A drag-and-drop or type-ahead tag picker — more discoverable
-      and faster when there are many categories, but much more complex to build.
-  </details>
   </div>
 
   {# Per-college essay cards #}
@@ -484,16 +446,6 @@ function celebrateStage(from, to) {
   </div>{# end per-college div #}
   {% endfor %}
 
-  {# Design decision: personal essay inclusion #}
-  <details class="design-decision" style="margin-top:1.5rem;">
-    <summary>Design decision &mdash; Personal Essay in the Essays tab</summary>
-    <em>Current choice:</em> The Common App personal statement appears as a row in the matrix
-    and as an essay card in By College view, just like any other essay. This keeps it all in
-    one place.<br>
-    <em>Alternative:</em> Give the personal essay its own pinned section at the top (above the
-    tab switcher), since it's the same essay submitted to every school and is a fundamentally
-    different kind of writing task.
-  </details>
 
 </div>{# end by_college #}
 
